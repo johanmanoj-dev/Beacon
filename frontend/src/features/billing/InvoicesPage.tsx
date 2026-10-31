@@ -6,10 +6,14 @@ import {
   Eye,
   XCircle,
   RefreshCw,
+  CreditCard,
+  TrendingUp,
+  Clock,
+  AlertTriangle,
 } from 'lucide-react';
 import api from '../../services/api';
 import type { Invoice, InvoiceStatus } from '../../types';
-import { Button, Badge, DataTable, type Column } from '../../components/ui';
+import { Button, Badge, DataTable, StatCard, type Column } from '../../components/ui';
 import { formatCurrency, formatDate } from '../../lib/utils';
 import { RecordPaymentModal } from './RecordPaymentModal';
 import { SimulatedGatewayModal } from './SimulatedGatewayModal';
@@ -333,27 +337,42 @@ export const InvoicesPage: React.FC = () => {
       )}
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        <div className="p-3.5 rounded-xl bg-white border border-[#E5DFD3] shadow-2xs">
-          <p className="text-[11px] font-semibold text-[#7189A0] uppercase tracking-wider">Total Invoices</p>
-          <p className="text-xl font-bold text-[#101E2B] mt-1">{kpis.totalInvoices}</p>
-        </div>
-        <div className="p-3.5 rounded-xl bg-white border border-[#E5DFD3] shadow-2xs">
-          <p className="text-[11px] font-semibold text-[#7189A0] uppercase tracking-wider">Total Billed</p>
-          <p className="text-xl font-bold text-[#101E2B] mt-1">{formatCurrency(kpis.totalBilled)}</p>
-        </div>
-        <div className="p-3.5 rounded-xl bg-white border border-[#E5DFD3] shadow-2xs">
-          <p className="text-[11px] font-semibold text-[#7189A0] uppercase tracking-wider">Total Collected</p>
-          <p className="text-xl font-bold text-[#1E5638] mt-1">{formatCurrency(kpis.totalPaid)}</p>
-        </div>
-        <div className="p-3.5 rounded-xl bg-white border border-[#E5DFD3] shadow-2xs">
-          <p className="text-[11px] font-semibold text-[#7189A0] uppercase tracking-wider">Outstanding Due</p>
-          <p className="text-xl font-extrabold text-[#8C4800] mt-1">{formatCurrency(kpis.totalOutstanding)}</p>
-        </div>
-        <div className="p-3.5 rounded-xl bg-white border border-[#E5DFD3] shadow-2xs">
-          <p className="text-[11px] font-semibold text-[#7189A0] uppercase tracking-wider">Overdue Invoices</p>
-          <p className="text-xl font-bold text-[#93152A] mt-1">{kpis.overdueCount}</p>
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+        <StatCard
+          label="Total Invoices"
+          value={kpis.totalInvoices}
+          sub="All billing records"
+          icon={Receipt}
+          iconColor="text-[#2B4257] bg-[#E9EFF5]"
+        />
+        <StatCard
+          label="Total Billed"
+          value={formatCurrency(kpis.totalBilled)}
+          sub="Gross invoiced amount"
+          icon={CreditCard}
+          iconColor="text-[#2B4257] bg-[#F5F0E6]"
+        />
+        <StatCard
+          label="Total Collected"
+          value={formatCurrency(kpis.totalPaid)}
+          sub="Verified settled payments"
+          icon={TrendingUp}
+          iconColor="text-[#1E5638] bg-[#EBF5EE]"
+        />
+        <StatCard
+          label="Outstanding Due"
+          value={formatCurrency(kpis.totalOutstanding)}
+          sub="Pending settlement"
+          icon={Clock}
+          iconColor="text-[#8C4800] bg-[#FEF7EA]"
+        />
+        <StatCard
+          label="Overdue Invoices"
+          value={kpis.overdueCount}
+          sub="Exceeded Net 15 grace"
+          icon={AlertTriangle}
+          iconColor="text-[#93152A] bg-[#FDECEE]"
+        />
       </div>
 
       {/* Filters and Search Bar */}

@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import api from '../../services/api';
 import type { Payment, PaymentMethod, Invoice } from '../../types';
-import { Button, Badge, DataTable, type Column } from '../../components/ui';
+import { Button, Badge, DataTable, StatCard, type Column } from '../../components/ui';
 import { formatCurrency, formatDate } from '../../lib/utils';
 import { RecordPaymentModal } from './RecordPaymentModal';
 
@@ -254,27 +254,35 @@ export const PaymentsPage: React.FC = () => {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="p-3.5 rounded-xl bg-white border border-[#E5DFD3] shadow-2xs">
-          <p className="text-[11px] font-semibold text-[#5A6D80] uppercase tracking-wider">Total Collected</p>
-          <p className="text-2xl font-black text-emerald-600 mt-1">{formatCurrency(metrics.totalCollected)}</p>
-          <p className="text-[11px] text-[#889AA9] mt-0.5">{metrics.totalCount} transactions settled</p>
-        </div>
-        <div className="p-3.5 rounded-xl bg-white border border-[#E5DFD3] shadow-2xs">
-          <p className="text-[11px] font-semibold text-[#5A6D80] uppercase tracking-wider">UPI / QR Settle</p>
-          <p className="text-xl font-bold text-purple-700 mt-1">{formatCurrency(metrics.upiTotal)}</p>
-          <p className="text-[11px] text-[#889AA9] mt-0.5">Instant mobile settlement</p>
-        </div>
-        <div className="p-3.5 rounded-xl bg-white border border-[#E5DFD3] shadow-2xs">
-          <p className="text-[11px] font-semibold text-[#5A6D80] uppercase tracking-wider">Card & Gateway</p>
-          <p className="text-xl font-bold text-[#2B4257] mt-1">{formatCurrency(metrics.cardTotal)}</p>
-          <p className="text-[11px] text-[#889AA9] mt-0.5">Simulated / Online checkout</p>
-        </div>
-        <div className="p-3.5 rounded-xl bg-white border border-[#E5DFD3] shadow-2xs">
-          <p className="text-[11px] font-semibold text-[#5A6D80] uppercase tracking-wider">Bank Transfer</p>
-          <p className="text-xl font-bold text-[#101E2B] mt-1">{formatCurrency(metrics.bankTotal)}</p>
-          <p className="text-[11px] text-[#889AA9] mt-0.5">Direct NEFT/RTGS</p>
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        <StatCard
+          label="Total Collected"
+          value={formatCurrency(metrics.totalCollected)}
+          sub={`${metrics.totalCount} transactions settled`}
+          icon={DollarSign}
+          iconColor="text-[#1E5638] bg-[#EBF5EE]"
+        />
+        <StatCard
+          label="UPI / QR Settle"
+          value={formatCurrency(metrics.upiTotal)}
+          sub="Instant mobile settlement"
+          icon={QrCode}
+          iconColor="text-[#2B4257] bg-[#E9EFF5]"
+        />
+        <StatCard
+          label="Card & Gateway"
+          value={formatCurrency(metrics.cardTotal)}
+          sub="Simulated / Online checkout"
+          icon={CreditCard}
+          iconColor="text-[#8C4800] bg-[#FEF7EA]"
+        />
+        <StatCard
+          label="Bank Transfer"
+          value={formatCurrency(metrics.bankTotal)}
+          sub="Direct NEFT/RTGS"
+          icon={Building}
+          iconColor="text-[#101E2B] bg-[#F5F0E6]"
+        />
       </div>
 
       {/* Filter and Search Bar */}

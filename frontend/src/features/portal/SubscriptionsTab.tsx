@@ -176,7 +176,7 @@ export const SubscriptionsTab: React.FC<SubscriptionsTabProps> = ({ customerEmai
             return (
               <div
                 key={sub.id}
-                className="bg-white rounded-xl border border-[#E5DFD3] shadow-2xs hover:shadow-md hover:border-[#2B4257] transition-all duration-200 flex flex-col justify-between overflow-hidden"
+                className="bg-white rounded-2xl border border-[#E5DFD3] shadow-2xs hover:shadow-md hover:border-[#CBD7E2] hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between overflow-hidden"
               >
                 {/* Card Header */}
                 <div className="p-6 border-b border-[#E5DFD3] bg-gradient-to-r from-[#FAF7F0] to-white">

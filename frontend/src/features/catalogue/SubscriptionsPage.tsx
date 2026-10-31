@@ -4,6 +4,7 @@ import {
   XCircle, RotateCw, ChevronDown, ChevronRight, Search, Clock
 } from 'lucide-react';
 import api from '../../services/api';
+import { StatCard } from '../../components/ui';
 import type { Subscription, SubscriptionStatus, Customer, Plan } from '../../types';
 
 export function SubscriptionsPage() {
@@ -189,32 +190,35 @@ export function SubscriptionsPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-4 bg-white border border-[#E5DFD3] rounded-xl shadow-2xs">
-          <div className="text-xs font-semibold text-[#5A6D80] uppercase tracking-wider">Total Subscriptions</div>
-          <div className="text-2xl font-bold text-[#101E2B] mt-1">{totalCount}</div>
-          <div className="text-[11px] text-[#889AA9] mt-0.5">All customer contracts ({closedCount} closed)</div>
-        </div>
-
-        <div className="p-4 bg-white border border-[#E5DFD3] rounded-xl shadow-2xs">
-          <div className="text-xs font-semibold text-emerald-600 uppercase tracking-wider">Active Contracts</div>
-          <div className="text-2xl font-bold text-emerald-700 mt-1">{activeCount}</div>
-          <div className="text-[11px] text-[#889AA9] mt-0.5">Invoicing on recurring schedule</div>
-        </div>
-
-        <div className="p-4 bg-white border border-[#E5DFD3] rounded-xl shadow-2xs">
-          <div className="text-xs font-semibold text-amber-600 uppercase tracking-wider">Paused Contracts</div>
-          <div className="text-2xl font-bold text-amber-700 mt-1">{pausedCount}</div>
-          <div className="text-[11px] text-[#889AA9] mt-0.5">Billing temporarily suspended</div>
-        </div>
-
-        <div className="p-4 bg-white border border-[#E5DFD3] rounded-xl shadow-2xs">
-          <div className="text-xs font-semibold text-[#2B4257] uppercase tracking-wider">Active Contract Value</div>
-          <div className="text-2xl font-bold text-[#101E2B] mt-1">
-            ${totalValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-          </div>
-          <div className="text-[11px] text-[#889AA9] mt-0.5">Gross recurring revenue</div>
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        <StatCard
+          label="Total Subscriptions"
+          value={totalCount}
+          sub={`All contracts (${closedCount} closed)`}
+          icon={Layers}
+          iconColor="text-[#2B4257] bg-[#E9EFF5]"
+        />
+        <StatCard
+          label="Active Contracts"
+          value={activeCount}
+          sub="Invoicing on recurring schedule"
+          icon={CheckCircle2}
+          iconColor="text-[#1E5638] bg-[#EBF5EE]"
+        />
+        <StatCard
+          label="Paused Contracts"
+          value={pausedCount}
+          sub="Billing temporarily suspended"
+          icon={Pause}
+          iconColor="text-[#8C4800] bg-[#FEF7EA]"
+        />
+        <StatCard
+          label="Active Contract Value"
+          value={`$${totalValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`}
+          sub="Gross recurring revenue"
+          icon={Clock}
+          iconColor="text-[#2B4257] bg-[#F5F0E6]"
+        />
       </div>
 
       {/* Alerts */}

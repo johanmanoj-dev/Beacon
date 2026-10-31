@@ -3,6 +3,7 @@ export * from './Input';
 export * from './Badge';
 export * from './Select';
 export * from './Card';
+export * from './StatCard';
 export * from './Modal';
 export * from './DataTable';
 export * from './EmptyState';

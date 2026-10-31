@@ -12,7 +12,7 @@ import {
   Mail,
 } from 'lucide-react';
 import { useAuth } from '../../context';
-import { Card } from '../../components/ui';
+import { Card, StatCard } from '../../components/ui';
 import { SubscriptionsTab } from './SubscriptionsTab';
 import { InvoicesTab } from './InvoicesTab';
 import { formatCurrency, formatDate } from '../../lib/utils';
@@ -137,7 +137,7 @@ export const CustomerPortalPage: React.FC = () => {
       </div>
 
       {/* Quick Portal KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         {[
           {
             label: 'Active Subscriptions',
@@ -167,23 +167,16 @@ export const CustomerPortalPage: React.FC = () => {
             icon: Lock,
             color: 'text-[#2B4257] bg-[#F5F0E6]',
           },
-        ].map((card, i) => {
-          const Icon = card.icon;
-          return (
-            <Card key={i} className="p-4" hoverable>
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#5A6D80] uppercase tracking-wider">
-                  {card.label}
-                </span>
-                <div className={`p-2 rounded-lg ${card.color}`}>
-                  <Icon className="h-4 w-4" />
-                </div>
-              </div>
-              <div className="text-xl font-black text-[#101E2B] mt-2">{card.value}</div>
-              <span className="text-xs text-[#5A6D80] mt-0.5 block">{card.sub}</span>
-            </Card>
-          );
-        })}
+        ].map((card, i) => (
+          <StatCard
+            key={i}
+            label={card.label}
+            value={card.value}
+            icon={card.icon}
+            iconColor={card.color}
+            sub={card.sub}
+          />
+        ))}
       </div>
 
       {/* Tabs Navigation Bar */}

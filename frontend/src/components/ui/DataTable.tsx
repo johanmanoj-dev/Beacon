@@ -111,7 +111,7 @@ export function DataTable<T extends Record<string, any>>({
       )}
 
       {/* Table Container */}
-      <div className="rounded-xl border border-[#E5DFD3] bg-white overflow-hidden shadow-2xs">
+      <div className="rounded-2xl border border-[#E5DFD3] bg-white overflow-hidden shadow-2xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm border-collapse">
             <thead>

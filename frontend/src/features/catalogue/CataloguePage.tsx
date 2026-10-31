@@ -469,9 +469,9 @@ export function CataloguePage() {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {plans.map((plan) => (
-                <div key={plan.id} className="bg-white rounded-xl border border-[#E5DFD3] p-6 shadow-xs flex flex-col justify-between hover:border-[#2B4257] transition-colors">
+                <div key={plan.id} className="bg-white rounded-2xl border border-[#E5DFD3] p-6 shadow-2xs hover:shadow-md hover:border-[#CBD7E2] hover:-translate-y-0.5 transition-all duration-200 flex flex-col justify-between min-w-0">
                   <div className="space-y-4">
                     <div className="flex justify-between items-start">
                       <div>

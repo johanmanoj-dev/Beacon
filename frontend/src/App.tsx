@@ -18,6 +18,7 @@ import {
   Button,
   Badge,
   Card,
+  StatCard,
   DataTable,
   ToastProvider,
   type Column,
@@ -198,7 +199,7 @@ function DashboardOverview({
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         {[
           {
             label: 'Active Subscriptions',
@@ -208,7 +209,7 @@ function DashboardOverview({
             color: 'text-[#2B4257] bg-[#E9EFF5]',
           },
           {
-            label: 'Monthly Recurring Rev',
+            label: 'Monthly Recurring Revenue',
             value: formatCurrency(kpis.totalRevenue),
             icon: TrendingUp,
             sub: '+8.4% vs last period',
@@ -228,27 +229,16 @@ function DashboardOverview({
             sub: 'Action required (Net 15)',
             color: 'text-[#93152A] bg-[#FDECEE]',
           },
-        ].map((kpi, idx) => {
-          const Icon = kpi.icon;
-          return (
-            <Card key={idx} hoverable className="p-5">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#7189A0] uppercase tracking-wider">
-                  {kpi.label}
-                </span>
-                <div className={`p-2 rounded-lg ${kpi.color}`}>
-                  <Icon className="h-4 w-4" />
-                </div>
-              </div>
-              <div className="text-2xl font-black text-[#101E2B] mt-3 font-mono">
-                {kpi.value}
-              </div>
-              <span className="text-xs text-[#5A6D80] font-medium mt-1 block">
-                {kpi.sub}
-              </span>
-            </Card>
-          );
-        })}
+        ].map((kpi, idx) => (
+          <StatCard
+            key={idx}
+            label={kpi.label}
+            value={kpi.value}
+            icon={kpi.icon}
+            iconColor={kpi.color}
+            sub={kpi.sub}
+          />
+        ))}
       </div>
 
       {/* System Audit Activity Stream */}

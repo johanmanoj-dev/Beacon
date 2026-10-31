@@ -23,7 +23,7 @@ import {
   Legend,
 } from 'recharts';
 import api from '../../services/api';
-import { Button, Card, EmptyState, useToast } from '../../components/ui';
+import { Button, Card, StatCard, EmptyState, useToast } from '../../components/ui';
 import { formatCurrency, formatDate } from '../../lib/utils';
 import { PrintableInvoiceModal } from './PrintableInvoiceModal';
 import type { Invoice, InvoiceStatus } from '../../types';
@@ -328,7 +328,7 @@ export const FinanceDashboardPage: React.FC = () => {
       </Card>
 
       {/* 4 Top KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         {[
           {
             label: 'Active Subscriptions',
@@ -362,28 +362,17 @@ export const FinanceDashboardPage: React.FC = () => {
             color: 'text-rose-600 bg-rose-50',
             badge: 'Immediate Action',
           },
-        ].map((kpi, idx) => {
-          const Icon = kpi.icon;
-          return (
-            <Card key={idx} hoverable className="p-5 border-[#E5DFD3]">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#5A6D80] uppercase tracking-wider">
-                  {kpi.label}
-                </span>
-                <div className={`p-2 rounded-lg ${kpi.color}`}>
-                  <Icon className="h-4 w-4" />
-                </div>
-              </div>
-              <div className="text-2xl font-black text-[#101E2B] mt-3 font-mono">
-                {kpi.value}
-              </div>
-              <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#E5DFD3] text-xs text-[#5A6D80]">
-                <span>{kpi.sub}</span>
-                <span className="font-semibold text-[#101E2B]">{kpi.badge}</span>
-              </div>
-            </Card>
-          );
-        })}
+        ].map((kpi, idx) => (
+          <StatCard
+            key={idx}
+            label={kpi.label}
+            value={kpi.value}
+            icon={kpi.icon}
+            iconColor={kpi.color}
+            sub={kpi.sub}
+            badge={kpi.badge}
+          />
+        ))}
       </div>
 
       {/* Visual Charts Section */}
