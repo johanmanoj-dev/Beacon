@@ -20,6 +20,8 @@ public class PlanRequest {
     @NotBlank(message = "Plan name is required")
     private String name;
 
+    private Long productId;
+
     @NotNull(message = "Billing interval is required")
     private BillingInterval billingInterval;
 

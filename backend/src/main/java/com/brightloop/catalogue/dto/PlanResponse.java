@@ -16,6 +16,8 @@ import java.time.LocalDateTime;
 public class PlanResponse {
     private Long id;
     private String name;
+    private Long productId;
+    private String productName;
     private BillingInterval billingInterval;
     private BigDecimal basePrice;
     private Integer minQuantity;
@@ -29,6 +31,8 @@ public class PlanResponse {
         return PlanResponse.builder()
                 .id(plan.getId())
                 .name(plan.getName())
+                .productId(plan.getProduct() != null ? plan.getProduct().getId() : null)
+                .productName(plan.getProduct() != null ? plan.getProduct().getName() : null)
                 .billingInterval(plan.getBillingInterval())
                 .basePrice(plan.getBasePrice())
                 .minQuantity(plan.getMinQuantity())

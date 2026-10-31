@@ -67,6 +67,7 @@ CREATE TABLE product_variants (
 CREATE TABLE plans (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
+    product_id BIGINT,
     billing_interval ENUM('DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY') NOT NULL,
     base_price DECIMAL(12,2) NOT NULL,
     min_quantity INT DEFAULT 1,
@@ -74,7 +75,8 @@ CREATE TABLE plans (
     end_date DATE,
     auto_close_on_end BOOLEAN DEFAULT FALSE,
     can_pause BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_plan_product FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 5. Taxes & Discounts

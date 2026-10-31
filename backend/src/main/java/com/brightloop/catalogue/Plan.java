@@ -23,6 +23,10 @@ public class Plan {
     @Column(nullable = false, length = 100)
     private String name;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "product_id")
+    private Product product;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "billing_interval", nullable = false)
     private BillingInterval billingInterval;

@@ -90,4 +90,40 @@ public class ProductController {
             return ResponseEntity.badRequest().body(err);
         }
     }
+    @PostMapping("/{productId}/variants")
+    public ResponseEntity<?> addVariant(@PathVariable Long productId, @Valid @RequestBody com.brightloop.catalogue.dto.ProductVariantDto dto) {
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body(productService.addVariant(productId, dto));
+        } catch (IllegalArgumentException e) {
+            Map<String, String> err = new HashMap<>();
+            err.put("error", "Bad Request");
+            err.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(err);
+        }
+    }
+
+    @PutMapping("/{productId}/variants/{variantId}")
+    public ResponseEntity<?> updateVariant(@PathVariable Long productId, @PathVariable Long variantId, @Valid @RequestBody com.brightloop.catalogue.dto.ProductVariantDto dto) {
+        try {
+            return ResponseEntity.ok(productService.updateVariant(productId, variantId, dto));
+        } catch (IllegalArgumentException e) {
+            Map<String, String> err = new HashMap<>();
+            err.put("error", "Bad Request");
+            err.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(err);
+        }
+    }
+
+    @DeleteMapping("/{productId}/variants/{variantId}")
+    public ResponseEntity<?> deleteVariant(@PathVariable Long productId, @PathVariable Long variantId) {
+        try {
+            productService.deleteVariant(productId, variantId);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            Map<String, String> err = new HashMap<>();
+            err.put("error", "Bad Request");
+            err.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(err);
+        }
+    }
 }

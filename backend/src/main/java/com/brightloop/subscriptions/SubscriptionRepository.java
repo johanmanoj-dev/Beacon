@@ -14,6 +14,7 @@ public interface SubscriptionRepository extends JpaRepository<Subscription, Long
     List<Subscription> findByStatus(SubscriptionStatus status);
     List<Subscription> findByNextBillingDateLessThanEqualAndStatus(LocalDate date, SubscriptionStatus status);
     Optional<Subscription> findBySubscriptionNumber(String subscriptionNumber);
+    boolean existsByPlanId(Long planId);
     long countByStatus(SubscriptionStatus status);
     long count();
 }

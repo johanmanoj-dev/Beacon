@@ -8,4 +8,5 @@ import java.util.List;
 @Repository
 public interface QuotationTemplateRepository extends JpaRepository<QuotationTemplate, Long> {
     List<QuotationTemplate> findAllByOrderByNameAsc();
+    boolean existsByPlanId(Long planId);
 }

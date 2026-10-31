@@ -75,11 +75,11 @@ public class DataSeeder implements CommandLineRunner {
 
             // 5. Plans
             jdbcTemplate.update(
-                "INSERT INTO plans (id, name, billing_interval, base_price, min_quantity, start_date, can_pause) VALUES " +
-                "(1, 'Monthly Business Plan', 'MONTHLY', 1500.00, 1, '2026-01-01', true), " +
-                "(2, 'Yearly Enterprise Plan', 'YEARLY', 14400.00, 5, '2026-01-01', true), " +
-                "(3, '90-Day Seasonal Pilot', 'MONTHLY', 1200.00, 1, '2026-01-01', true) " +
-                "ON DUPLICATE KEY UPDATE base_price = VALUES(base_price)"
+                "INSERT INTO plans (id, name, product_id, billing_interval, base_price, min_quantity, start_date, can_pause) VALUES " +
+                "(1, 'Monthly Business Plan', 1, 'MONTHLY', 1500.00, 1, '2026-01-01', true), " +
+                "(2, 'Yearly Enterprise Plan', 1, 'YEARLY', 14400.00, 5, '2026-01-01', true), " +
+                "(3, '90-Day Seasonal Pilot', 2, 'MONTHLY', 1200.00, 1, '2026-01-01', true) " +
+                "ON DUPLICATE KEY UPDATE base_price = VALUES(base_price), product_id = VALUES(product_id)"
             );
 
             // 6. Tax Rates

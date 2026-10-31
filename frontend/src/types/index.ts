@@ -46,6 +46,8 @@ export type BillingInterval = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
 export interface Plan {
   id: number;
   name: string;
+  productId?: number;
+  productName?: string;
   billingInterval: BillingInterval;
   basePrice: number;
   minQuantity: number;

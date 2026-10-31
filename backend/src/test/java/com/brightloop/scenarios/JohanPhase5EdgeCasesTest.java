@@ -152,4 +152,68 @@ public class JohanPhase5EdgeCasesTest {
         );
         assertTrue(resumeEx.getMessage().contains("Cannot resume a closed subscription"));
     }
+
+    @Test
+    @DisplayName("Edge Case 6: Plan Creation with Linked Inventory Product")
+    void testPlanCreatedWithLinkedProduct() {
+        ProductResponse prod = productService.createProduct(ProductRequest.builder()
+                .name("Cloud Hosting Tier A")
+                .productType(ProductType.SERVICE)
+                .salesPrice(new BigDecimal("299.00"))
+                .costPrice(new BigDecimal("150.00"))
+                .build());
+
+        PlanResponse plan = planService.createPlan(PlanRequest.builder()
+                .name("Cloud Hosting Monthly")
+                .productId(prod.getId())
+                .billingInterval(BillingInterval.MONTHLY)
+                .basePrice(prod.getSalesPrice())
+                .build());
+
+        assertNotNull(plan.getId());
+        assertEquals(prod.getId(), plan.getProductId());
+        assertEquals("Cloud Hosting Tier A", plan.getProductName());
+    }
+
+    @Test
+    @DisplayName("Edge Case 7: Plan Deletion Rejection when Linked to Active Subscription")
+    void testPlanDeleteBlockedWhenLinkedToSubscription() {
+        CustomerDto cust = customerService.createCustomer(CustomerDto.builder()
+                .companyName("Active Sub Co")
+                .contactEmail("active.sub@co.com")
+                .build());
+
+        PlanResponse plan = planService.createPlan(PlanRequest.builder()
+                .name("Protected Plan")
+                .billingInterval(BillingInterval.MONTHLY)
+                .basePrice(new BigDecimal("300.00"))
+                .build());
+
+        QuotationResponse quote = quotationService.createQuotation(QuotationRequest.builder()
+                .customerId(cust.getId())
+                .planId(plan.getId())
+                .build());
+
+        quotationService.convertToSubscription(quote.getId());
+
+        // Deleting this plan must fail with IllegalStateException
+        IllegalStateException ex = assertThrows(IllegalStateException.class, () ->
+                planService.deletePlan(plan.getId())
+        );
+        assertTrue(ex.getMessage().contains("Cannot delete plan") && ex.getMessage().contains("active subscriptions"));
+    }
+
+    @Test
+    @DisplayName("Edge Case 8: Plan Deletion Allowed when Unlinked")
+    void testPlanDeleteAllowedWhenNotLinked() {
+        PlanResponse plan = planService.createPlan(PlanRequest.builder()
+                .name("Temporary Plan")
+                .billingInterval(BillingInterval.DAILY)
+                .basePrice(new BigDecimal("10.00"))
+                .build());
+
+        assertDoesNotThrow(() -> planService.deletePlan(plan.getId()));
+
+        assertThrows(IllegalArgumentException.class, () -> planService.getPlanById(plan.getId()));
+    }
 }

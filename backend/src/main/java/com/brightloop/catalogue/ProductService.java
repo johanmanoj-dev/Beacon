@@ -84,16 +84,41 @@ public class ProductService {
         product.setCostPrice(request.getCostPrice());
         product.setNotes(request.getNotes());
 
-        // Update variants
-        product.getVariants().clear();
+        // Update variants in-place, add new, remove dropped
         if (request.getVariants() != null) {
+            java.util.Map<Long, ProductVariantDto> incomingById = request.getVariants().stream()
+                    .filter(v -> v.getId() != null)
+                    .collect(Collectors.toMap(ProductVariantDto::getId, v -> v, (a, b) -> a));
+
+            List<Long> incomingIds = new ArrayList<>(incomingById.keySet());
+
+            // Remove dropped variants
+            product.getVariants().removeIf(v -> v.getId() != null && !incomingIds.contains(v.getId()));
+
+            // Update existing variants
+            for (ProductVariant existing : product.getVariants()) {
+                if (existing.getId() != null && incomingById.containsKey(existing.getId())) {
+                    ProductVariantDto vDto = incomingById.get(existing.getId());
+                    existing.setVariantName(vDto.getVariantName().trim());
+                    existing.setPriceAdjustment(vDto.getPriceAdjustment() != null ? vDto.getPriceAdjustment() : BigDecimal.ZERO);
+                }
+            }
+
+            // Add new variants
+            List<Long> existingIds = product.getVariants().stream()
+                    .map(ProductVariant::getId)
+                    .filter(java.util.Objects::nonNull)
+                    .toList();
+
             for (ProductVariantDto vDto : request.getVariants()) {
-                ProductVariant variant = ProductVariant.builder()
-                        .product(product)
-                        .variantName(vDto.getVariantName().trim())
-                        .priceAdjustment(vDto.getPriceAdjustment() != null ? vDto.getPriceAdjustment() : BigDecimal.ZERO)
-                        .build();
-                product.getVariants().add(variant);
+                if (vDto.getId() == null || !existingIds.contains(vDto.getId())) {
+                    ProductVariant variant = ProductVariant.builder()
+                            .product(product)
+                            .variantName(vDto.getVariantName().trim())
+                            .priceAdjustment(vDto.getPriceAdjustment() != null ? vDto.getPriceAdjustment() : BigDecimal.ZERO)
+                            .build();
+                    product.getVariants().add(variant);
+                }
             }
         }
 
@@ -121,5 +146,46 @@ public class ProductService {
             price = price.add(variant.getPriceAdjustment());
         }
         return price;
+    }
+    @Transactional
+    public ProductVariantDto addVariant(Long productId, ProductVariantDto dto) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found with id: " + productId));
+
+        ProductVariant variant = ProductVariant.builder()
+                .product(product)
+                .variantName(dto.getVariantName().trim())
+                .priceAdjustment(dto.getPriceAdjustment() != null ? dto.getPriceAdjustment() : BigDecimal.ZERO)
+                .build();
+
+        ProductVariant saved = productVariantRepository.save(variant);
+        return ProductVariantDto.fromEntity(saved);
+    }
+
+    @Transactional
+    public ProductVariantDto updateVariant(Long productId, Long variantId, ProductVariantDto dto) {
+        ProductVariant variant = productVariantRepository.findById(variantId)
+                .orElseThrow(() -> new IllegalArgumentException("Variant not found with id: " + variantId));
+
+        if (!variant.getProduct().getId().equals(productId)) {
+            throw new IllegalArgumentException("Variant does not belong to product " + productId);
+        }
+
+        variant.setVariantName(dto.getVariantName().trim());
+        variant.setPriceAdjustment(dto.getPriceAdjustment() != null ? dto.getPriceAdjustment() : BigDecimal.ZERO);
+        ProductVariant saved = productVariantRepository.save(variant);
+        return ProductVariantDto.fromEntity(saved);
+    }
+
+    @Transactional
+    public void deleteVariant(Long productId, Long variantId) {
+        ProductVariant variant = productVariantRepository.findById(variantId)
+                .orElseThrow(() -> new IllegalArgumentException("Variant not found with id: " + variantId));
+
+        if (!variant.getProduct().getId().equals(productId)) {
+            throw new IllegalArgumentException("Variant does not belong to product " + productId);
+        }
+
+        productVariantRepository.delete(variant);
     }
 }

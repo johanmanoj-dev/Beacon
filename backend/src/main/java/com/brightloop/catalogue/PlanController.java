@@ -70,6 +70,16 @@ public class PlanController {
             err.put("error", "Not Found");
             err.put("message", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(err);
+        } catch (IllegalStateException e) {
+            Map<String, String> err = new HashMap<>();
+            err.put("error", "Conflict");
+            err.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(err);
+        } catch (Exception e) {
+            Map<String, String> err = new HashMap<>();
+            err.put("error", "Internal Server Error");
+            err.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(err);
         }
     }
 }
