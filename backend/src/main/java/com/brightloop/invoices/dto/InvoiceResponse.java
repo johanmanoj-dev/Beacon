@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,7 +19,6 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @AllArgsConstructor
 public class InvoiceResponse {
-
     private Long id;
     private String invoiceNumber;
     private Long subscriptionId;
@@ -36,32 +36,33 @@ public class InvoiceResponse {
     private BigDecimal amountPaid;
     private BigDecimal balanceDue;
     private InvoiceStatus status;
+    private List<InvoiceItemDto> items;
     private LocalDateTime createdAt;
-    private List<InvoiceItemResponse> items;
 
-    public static InvoiceResponse fromEntity(Invoice invoice) {
+    public static InvoiceResponse fromEntity(Invoice entity) {
+        if (entity == null) return null;
         return InvoiceResponse.builder()
-                .id(invoice.getId())
-                .invoiceNumber(invoice.getInvoiceNumber())
-                .subscriptionId(invoice.getSubscription() != null ? invoice.getSubscription().getId() : null)
-                .subscriptionNumber(invoice.getSubscription() != null ? invoice.getSubscription().getSubscriptionNumber() : null)
-                .customerId(invoice.getCustomer() != null ? invoice.getCustomer().getId() : null)
-                .customerName(invoice.getCustomer() != null ? invoice.getCustomer().getCompanyName() : null)
-                .billingPeriodStart(invoice.getBillingPeriodStart())
-                .billingPeriodEnd(invoice.getBillingPeriodEnd())
-                .issueDate(invoice.getIssueDate())
-                .dueDate(invoice.getDueDate())
-                .subtotal(invoice.getSubtotal())
-                .taxAmount(invoice.getTaxAmount())
-                .discountAmount(invoice.getDiscountAmount())
-                .totalAmount(invoice.getTotalAmount())
-                .amountPaid(invoice.getAmountPaid())
-                .balanceDue(invoice.getBalanceDue())
-                .status(invoice.getStatus())
-                .createdAt(invoice.getCreatedAt())
-                .items(invoice.getItems() != null ?
-                        invoice.getItems().stream().map(InvoiceItemResponse::fromEntity).collect(Collectors.toList()) :
-                        List.of())
+                .id(entity.getId())
+                .invoiceNumber(entity.getInvoiceNumber())
+                .subscriptionId(entity.getSubscription() != null ? entity.getSubscription().getId() : null)
+                .subscriptionNumber(entity.getSubscription() != null ? entity.getSubscription().getSubscriptionNumber() : null)
+                .customerId(entity.getCustomer() != null ? entity.getCustomer().getId() : null)
+                .customerName(entity.getCustomer() != null ? entity.getCustomer().getCompanyName() : null)
+                .billingPeriodStart(entity.getBillingPeriodStart())
+                .billingPeriodEnd(entity.getBillingPeriodEnd())
+                .issueDate(entity.getIssueDate())
+                .dueDate(entity.getDueDate())
+                .subtotal(entity.getSubtotal())
+                .taxAmount(entity.getTaxAmount())
+                .discountAmount(entity.getDiscountAmount())
+                .totalAmount(entity.getTotalAmount())
+                .amountPaid(entity.getAmountPaid())
+                .balanceDue(entity.getBalanceDue())
+                .status(entity.getStatus())
+                .items(entity.getItems() != null
+                        ? entity.getItems().stream().map(InvoiceItemDto::fromEntity).collect(Collectors.toList())
+                        : new ArrayList<>())
+                .createdAt(entity.getCreatedAt())
                 .build();
     }
 }

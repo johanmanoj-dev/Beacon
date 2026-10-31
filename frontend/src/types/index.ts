@@ -200,6 +200,7 @@ export interface Payment {
   id: number;
   invoiceId: number;
   invoiceNumber?: string;
+  customerName?: string;
   amount: number;
   paymentMethod: PaymentMethod;
   referenceNumber?: string;
