@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import { LogOut, Menu } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { useAuth } from '../context';
 import { Badge } from '../components/ui';
 import type { Role } from '../types';
@@ -11,7 +11,7 @@ export interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ onToggleMobileMenu }) => {
   const location = useLocation();
-  const { user, role, logout } = useAuth();
+  const { user, role } = useAuth();
 
   const getPageTitle = () => {
     const path = location.pathname;
