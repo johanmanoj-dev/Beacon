@@ -14,7 +14,7 @@ import { LoginPage, RegisterPage, ForgotPasswordPage } from './features/auth';
 import { AppShell, ProtectedRoute } from './layout';
 import { CataloguePage, CustomerListPage, QuotationsPage, SubscriptionsPage } from './features/catalogue';
 import { CustomerPortalPage } from './features/portal';
-import { FinanceDashboardPage } from './features/analytics';
+import { FinanceDashboardPage, DemoScenarioModal } from './features/analytics';
 import {
   Button,
   Input,
@@ -34,6 +34,7 @@ function DashboardOverview({
   backendStatus: { connected: boolean; message: string };
 }) {
   const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
+  const [isScenarioModalOpen, setIsScenarioModalOpen] = useState(false);
   const [kpis, setKpis] = useState({
     activeSubscriptionsCount: 142,
     totalRevenue: 28450,
@@ -201,6 +202,14 @@ function DashboardOverview({
           <Button
             variant="outline"
             size="sm"
+            onClick={() => setIsScenarioModalOpen(true)}
+            leftIcon={<Sparkles className="h-3.5 w-3.5 text-amber-500" />}
+          >
+            Demo Guide & Seed DB
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => setIsDemoModalOpen(true)}
             leftIcon={<Sparkles className="h-3.5 w-3.5 text-blue-600" />}
           >
@@ -252,7 +261,7 @@ function DashboardOverview({
                   <Icon className="h-4 w-4" />
                 </div>
               </div>
-              <div className="text-2xl font-black text-slate-900 mt-3">
+              <div className="text-2xl font-black text-slate-900 mt-3 font-mono">
                 {kpi.value}
               </div>
               <span className="text-xs text-slate-500 font-medium mt-1 block">
@@ -275,7 +284,7 @@ function DashboardOverview({
             </p>
           </div>
           <Badge variant="purple" size="sm">
-            Phase 1 Active
+            Phase 4: Integration & Seeding Active
           </Badge>
         </div>
 
@@ -283,17 +292,17 @@ function DashboardOverview({
           <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/70 space-y-2">
             <div className="flex items-center justify-between">
               <span className="font-bold text-slate-800">Track 1: Johan</span>
-              <Badge variant="success" size="sm">Phase 1 Complete</Badge>
+              <Badge variant="success" size="sm">Phase 3 Complete</Badge>
             </div>
             <p className="text-xs text-slate-500 leading-relaxed">
-              Auth backend, Products, Variants (+$560 Odoo bump), Plans, and Customers Directory fully functional.
+              Auth backend, Products, Variants (+$560 Odoo bump), Plans, Quotes, Subscriptions lifecycle, and Customers.
             </p>
             <div className="pt-1 flex items-center gap-3">
               <Link to="/catalogue" className="text-xs font-semibold text-blue-600 hover:underline">
                 Open Catalogue →
               </Link>
-              <Link to="/customers" className="text-xs font-semibold text-blue-600 hover:underline">
-                Open Customers →
+              <Link to="/subscriptions" className="text-xs font-semibold text-blue-600 hover:underline">
+                Subscriptions →
               </Link>
             </div>
           </div>
@@ -316,10 +325,10 @@ function DashboardOverview({
           <div className="p-4 rounded-xl bg-blue-50/60 border border-blue-200 space-y-2">
             <div className="flex items-center justify-between">
               <span className="font-bold text-blue-950">Track 3: Goutham</span>
-              <Badge variant="success" size="sm">Phase 3 Complete</Badge>
+              <Badge variant="success" size="sm">Phase 4 Complete</Badge>
             </div>
             <p className="text-xs text-blue-900/80 leading-relaxed">
-              Design System UI, Auth & Layout, Customer Portal, Finance Lead Analytics, and Printable PDF Invoice Engine.
+              Design System UI, Auth & Layout, Customer Portal, Finance Analytics, PDF Engine, and Database Seeding.
             </p>
             <div className="pt-1 flex items-center gap-3">
               <Link to="/analytics" className="text-xs font-semibold text-blue-700 hover:underline">
@@ -397,6 +406,12 @@ function DashboardOverview({
           />
         </div>
       </Modal>
+
+      {/* Demo Scenarios & Seeder Modal */}
+      <DemoScenarioModal
+        isOpen={isScenarioModalOpen}
+        onClose={() => setIsScenarioModalOpen(false)}
+      />
     </div>
   );
 }
@@ -508,7 +523,7 @@ export default function App() {
             }
           />
 
-          {/* Johan's Phase 1 Features: Catalogue & Customers */}
+          {/* Johan's Features: Catalogue, Customers, Quotes & Subscriptions */}
           <Route
             path="/catalogue"
             element={
@@ -553,6 +568,7 @@ export default function App() {
             }
           />
 
+          {/* Elsa's Features: Invoices, Payments & Rules */}
           <Route
             path="/invoices"
             element={
@@ -604,6 +620,7 @@ export default function App() {
             }
           />
 
+          {/* Goutham's Customer Portal */}
           <Route
             path="/portal"
             element={
