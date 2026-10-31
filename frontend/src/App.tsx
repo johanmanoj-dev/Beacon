@@ -15,6 +15,7 @@ import {
   UserCheck
 } from 'lucide-react';
 import api from './services/api';
+import { CataloguePage, CustomerListPage } from './features/catalogue';
 
 // Navigation Item Definition
 interface NavItem {
@@ -276,17 +277,8 @@ export default function App() {
       <AppLayout currentRole={role} onRoleChange={setRole} backendStatus={backendStatus}>
         <Routes>
           <Route path="/" element={<DashboardOverview backendStatus={backendStatus} />} />
-          <Route
-            path="/catalogue"
-            element={
-              <GenericModuleView
-                title="Products, Variants & Plans Catalogue"
-                description="Manage products, custom price variant adjustments, and billing frequency intervals."
-                track="Track 1"
-                assignedTo="Johan"
-              />
-            }
-          />
+          <Route path="/catalogue" element={<CataloguePage />} />
+          <Route path="/customers" element={<CustomerListPage />} />
           <Route
             path="/quotations"
             element={
@@ -339,17 +331,6 @@ export default function App() {
                 description="Admin-configured tax rates and volume/percentage discount rules."
                 track="Track 2"
                 assignedTo="Elsa"
-              />
-            }
-          />
-          <Route
-            path="/customers"
-            element={
-              <GenericModuleView
-                title="Customer Accounts"
-                description="Customer directory and portal account linking."
-                track="Track 1"
-                assignedTo="Johan"
               />
             }
           />
