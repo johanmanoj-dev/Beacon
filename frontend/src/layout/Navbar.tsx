@@ -1,6 +1,6 @@
 import React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { UserCheck, LogOut, Menu } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
+import { LogOut, Menu } from 'lucide-react';
 import { useAuth } from '../context';
 import { Badge } from '../components/ui';
 import type { Role } from '../types';
@@ -11,17 +11,7 @@ export interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ onToggleMobileMenu }) => {
   const location = useLocation();
-  const navigate = useNavigate();
-  const { user, role, switchRole, logout } = useAuth();
-
-  const handleRoleSwitch = (newRole: Role) => {
-    switchRole(newRole);
-    if (newRole === 'CUSTOMER') {
-      navigate('/portal');
-    } else if (location.pathname === '/portal') {
-      navigate('/');
-    }
-  };
+  const { user, role, logout } = useAuth();
 
   const getPageTitle = () => {
     const path = location.pathname;
@@ -71,30 +61,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleMobileMenu }) => {
 
       {/* Right Controls */}
       <div className="flex items-center gap-4">
-        {/* Fast Role Switcher */}
-        <div className="flex items-center gap-1 bg-[#F5F0E6] p-1 rounded-lg text-xs font-medium border border-[#E5DFD3]">
-          <span className="text-[#5A6D80] px-2 hidden md:flex items-center gap-1 font-semibold text-[11px] uppercase tracking-wider">
-            <UserCheck className="h-3.5 w-3.5 text-[#2B4257]" />
-            Switch View:
-          </span>
-          {(['ADMIN', 'STAFF', 'CUSTOMER'] as const).map((r) => (
-            <button
-              key={r}
-              type="button"
-              onClick={() => handleRoleSwitch(r)}
-              className={`px-2.5 py-1 rounded text-xs transition-all font-medium cursor-pointer ${
-                role === r
-                  ? 'bg-[#2B4257] text-[#FAF7F0] shadow-xs font-bold'
-                  : 'text-[#5A6D80] hover:text-[#101E2B] hover:bg-[#EAE3D6]'
-              }`}
-            >
-              {r}
-            </button>
-          ))}
-        </div>
-
         {/* User Info & Logout Button */}
-        <div className="flex items-center gap-3 pl-2 border-l border-[#E5DFD3]">
+        <div className="flex items-center gap-3">
           <div className="hidden sm:block text-right">
             <span className="text-xs font-bold text-[#101E2B] block leading-tight">
               {user?.fullName || 'User'}
