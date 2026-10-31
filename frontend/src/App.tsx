@@ -1,371 +1,600 @@
-import React, { useEffect, useState } from 'react';
-import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom';
 import {
-  LayoutDashboard,
-  Layers,
-  Users,
-  Package,
-  FileText,
-  Receipt,
+  Sparkles,
+  TrendingUp,
   CreditCard,
-  Percent,
-  CheckCircle2,
-  AlertCircle,
-  Shield,
-  UserCheck
+  Layers,
+  AlertTriangle,
+  Package,
 } from 'lucide-react';
 import api from './services/api';
+import { AuthProvider } from './context';
+import { LoginPage, RegisterPage, ForgotPasswordPage } from './features/auth';
+import { AppShell, ProtectedRoute } from './layout';
+import {
+  Button,
+  Input,
+  Badge,
+  Select,
+  Card,
+  Modal,
+  DataTable,
+  type Column,
+} from './components/ui';
 
-// Navigation Item Definition
-interface NavItem {
-  name: string;
-  path: string;
-  icon: React.ComponentType<{ className?: string }>;
-  badge?: string;
-  role: ('ADMIN' | 'STAFF' | 'CUSTOMER')[];
-}
-
-const navItems: NavItem[] = [
-  { name: 'Dashboard', path: '/', icon: LayoutDashboard, role: ['ADMIN', 'STAFF'] },
-  { name: 'Subscriptions', path: '/subscriptions', icon: Layers, role: ['ADMIN', 'STAFF'] },
-  { name: 'Customers', path: '/customers', icon: Users, role: ['ADMIN', 'STAFF'] },
-  { name: 'Products & Plans', path: '/catalogue', icon: Package, role: ['ADMIN'] },
-  { name: 'Quotations', path: '/quotations', icon: FileText, role: ['ADMIN', 'STAFF'] },
-  { name: 'Invoices', path: '/invoices', icon: Receipt, role: ['ADMIN', 'STAFF'] },
-  { name: 'Payments', path: '/payments', icon: CreditCard, role: ['ADMIN', 'STAFF'] },
-  { name: 'Taxes & Discounts', path: '/rules', icon: Percent, role: ['ADMIN'] },
-  { name: 'Customer Portal', path: '/portal', icon: Shield, badge: 'Self-Service', role: ['CUSTOMER', 'ADMIN'] },
-];
-
-function AppLayout({ children, currentRole, onRoleChange, backendStatus }: {
-  children: React.ReactNode;
-  currentRole: 'ADMIN' | 'STAFF' | 'CUSTOMER';
-  onRoleChange: (role: 'ADMIN' | 'STAFF' | 'CUSTOMER') => void;
+// Executive Dashboard Overview for Admin & Staff
+function DashboardOverview({
+  backendStatus,
+}: {
   backendStatus: { connected: boolean; message: string };
 }) {
-  const location = useLocation();
+  const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
 
-  return (
-    <div className="flex h-screen bg-[#F8FAFC] text-[#0F172A] font-sans antialiased overflow-hidden">
-      {/* Sidebar */}
-      <aside className="w-64 bg-[#0F172A] text-slate-300 flex flex-col border-r border-slate-800 shrink-0">
-        <div className="h-16 flex items-center px-6 border-b border-slate-800">
-          <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white shadow-md">
-              B
-            </div>
-            <div>
-              <span className="font-bold text-white text-base tracking-tight">Brightloop</span>
-              <span className="block text-[10px] uppercase font-semibold tracking-wider text-slate-400">Subscription Engine</span>
-            </div>
-          </div>
-        </div>
+  // Sample data to test DataTable component
+  interface AuditItem {
+    id: number;
+    module: string;
+    action: string;
+    status: 'ACTIVE' | 'PENDING' | 'OVERDUE' | 'CONFIRMED';
+    owner: string;
+    time: string;
+  }
 
-        {/* Navigation list */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          {navItems
-            .filter((item) => item.role.includes(currentRole))
-            .map((item) => {
-              const Icon = item.icon;
-              const isActive = location.pathname === item.path;
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'bg-blue-600 text-white shadow-sm'
-                      : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <Icon className="h-4 w-4" />
-                    <span>{item.name}</span>
-                  </div>
-                  {item.badge && (
-                    <span className="text-[10px] bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded font-medium">
-                      {item.badge}
-                    </span>
-                  )}
-                </Link>
-              );
-            })}
-        </nav>
+  const sampleAuditItems: AuditItem[] = [
+    {
+      id: 1,
+      module: 'Catalogue',
+      action: 'Odoo Variant (+$560) base price configured',
+      status: 'CONFIRMED',
+      owner: 'Johan (Admin)',
+      time: '10 mins ago',
+    },
+    {
+      id: 2,
+      module: 'Billing',
+      action: '18% GST Tax Rule registered',
+      status: 'CONFIRMED',
+      owner: 'Elsa (Billing Lead)',
+      time: '25 mins ago',
+    },
+    {
+      id: 3,
+      module: 'Subscriptions',
+      action: 'SUB-2026-0001 Monthly Pro billing interval set',
+      status: 'ACTIVE',
+      owner: 'Johan',
+      time: '1 hour ago',
+    },
+    {
+      id: 4,
+      module: 'Invoices',
+      action: 'INV-2026-0001 generated with price snapshot',
+      status: 'PENDING',
+      owner: 'Elsa',
+      time: '2 hours ago',
+    },
+    {
+      id: 5,
+      module: 'Security',
+      action: 'Live password policy compliance validator armed',
+      status: 'CONFIRMED',
+      owner: 'Goutham (UI Lead)',
+      time: 'Just now',
+    },
+    {
+      id: 6,
+      module: 'Receivables',
+      action: 'RetailCorp account invoice balance due',
+      status: 'OVERDUE',
+      owner: 'Finance System',
+      time: '1 day ago',
+    },
+  ];
 
-        {/* System Health Status in Sidebar Footer */}
-        <div className="p-4 border-t border-slate-800 text-xs">
-          <div className="flex items-center gap-2">
-            {backendStatus.connected ? (
-              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
-            ) : (
-              <AlertCircle className="h-3.5 w-3.5 text-amber-400" />
-            )}
-            <span className={backendStatus.connected ? 'text-emerald-300' : 'text-amber-300'}>
-              {backendStatus.connected ? 'Backend: MySQL Connected' : 'Backend: Standby'}
-            </span>
-          </div>
-          <span className="text-[11px] text-slate-500 mt-1 block truncate">
-            {backendStatus.message}
-          </span>
-        </div>
-      </aside>
+  const auditColumns: Column<AuditItem>[] = [
+    {
+      header: 'Module',
+      accessorKey: 'module',
+      cell: (row) => (
+        <span className="font-semibold text-slate-800">{row.module}</span>
+      ),
+    },
+    {
+      header: 'Event Description',
+      accessorKey: 'action',
+      cell: (row) => (
+        <span className="text-slate-600 text-xs sm:text-sm">{row.action}</span>
+      ),
+    },
+    {
+      header: 'Status',
+      accessorKey: 'status',
+      align: 'center',
+      cell: (row) => {
+        const variantMap = {
+          ACTIVE: 'success',
+          CONFIRMED: 'info',
+          PENDING: 'warning',
+          OVERDUE: 'danger',
+        } as const;
+        return (
+          <Badge variant={variantMap[row.status]} size="sm" withDot>
+            {row.status}
+          </Badge>
+        );
+      },
+    },
+    {
+      header: 'Operator',
+      accessorKey: 'owner',
+      cell: (row) => (
+        <span className="text-xs text-slate-500 font-medium">{row.owner}</span>
+      ),
+    },
+    {
+      header: 'Time',
+      accessorKey: 'time',
+      align: 'right',
+      cell: (row) => (
+        <span className="text-xs text-slate-400 font-mono">{row.time}</span>
+      ),
+    },
+  ];
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {/* Top Navbar */}
-        <header className="h-16 bg-white border-b border-slate-200 px-8 flex items-center justify-between shrink-0 shadow-xs">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-slate-500">Brightloop Platform</span>
-            <span className="text-slate-300">/</span>
-            <span className="text-sm font-semibold text-slate-800 capitalize">
-              {location.pathname.replace('/', '') || 'Overview'}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-4">
-            {/* Quick Role Switcher for Hackathon Demonstrations */}
-            <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-lg text-xs font-medium">
-              <span className="text-slate-500 px-2 flex items-center gap-1">
-                <UserCheck className="h-3.5 w-3.5" />
-                Active View:
-              </span>
-              {(['ADMIN', 'STAFF', 'CUSTOMER'] as const).map((role) => (
-                <button
-                  key={role}
-                  type="button"
-                  onClick={() => onRoleChange(role)}
-                  className={`px-2.5 py-1 rounded transition-colors ${
-                    currentRole === role
-                      ? 'bg-white text-blue-700 shadow-xs font-semibold'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  {role}
-                </button>
-              ))}
-            </div>
-
-            <div className="h-8 w-8 rounded-full bg-slate-800 text-white flex items-center justify-center text-xs font-bold">
-              {currentRole[0]}
-            </div>
-          </div>
-        </header>
-
-        {/* Dynamic Route View Container */}
-        <main className="flex-1 overflow-y-auto p-8">
-          <div className="max-w-7xl mx-auto">
-            {children}
-          </div>
-        </main>
-      </div>
-    </div>
-  );
-}
-
-// Placeholder starter views for the 3 tracks
-function DashboardOverview({ backendStatus }: { backendStatus: { connected: boolean; message: string } }) {
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Brightloop Executive Overview</h1>
-          <p className="text-sm text-slate-500 mt-1">Real-time metrics, active subscriptions, and cash flow status.</p>
+          <h1 className="text-2xl font-black tracking-tight text-slate-900">
+            Brightloop Executive Overview
+          </h1>
+          <p className="text-sm text-slate-500 mt-0.5">
+            Real-time metrics, active subscriptions, and cash flow status.
+          </p>
         </div>
+
         <div className="flex items-center gap-2">
-          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
-            backendStatus.connected ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
-          }`}>
-            {backendStatus.connected ? 'MySQL Active' : 'Connecting...'}
-          </span>
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-            Phase 0 Initialized
-          </span>
+          <Badge
+            variant={backendStatus.connected ? 'success' : 'warning'}
+            size="md"
+            withDot
+          >
+            {backendStatus.connected ? 'MySQL Active' : 'Connecting DB...'}
+          </Badge>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsDemoModalOpen(true)}
+            leftIcon={<Sparkles className="h-3.5 w-3.5 text-blue-600" />}
+          >
+            UI Kit Dialog Demo
+          </Button>
         </div>
       </div>
 
-      {/* KPI Cards Placeholder */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Active Subscriptions', value: '142', change: '+12% this month' },
-          { label: 'Monthly Recurring Revenue', value: '$28,450', change: '+8.4%' },
-          { label: 'Pending Receivables', value: '$3,180', change: '5 invoices' },
-          { label: 'Overdue Invoices', value: '2', change: 'Action required' },
-        ].map((card, i) => (
-          <div key={i} className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{card.label}</span>
-            <div className="text-2xl font-bold text-slate-900 mt-2">{card.value}</div>
-            <span className="text-xs text-slate-500 mt-1 block">{card.change}</span>
-          </div>
-        ))}
+          {
+            label: 'Active Subscriptions',
+            value: '142',
+            icon: Layers,
+            sub: '+12% this month',
+            color: 'text-blue-600 bg-blue-50',
+          },
+          {
+            label: 'Monthly Recurring Rev',
+            value: '$28,450.00',
+            icon: TrendingUp,
+            sub: '+8.4% vs last period',
+            color: 'text-emerald-600 bg-emerald-50',
+          },
+          {
+            label: 'Pending Receivables',
+            value: '$3,180.00',
+            icon: CreditCard,
+            sub: '5 invoices awaiting payment',
+            color: 'text-amber-600 bg-amber-50',
+          },
+          {
+            label: 'Overdue Invoices',
+            value: '2',
+            icon: AlertTriangle,
+            sub: 'Action required (Net 15)',
+            color: 'text-rose-600 bg-rose-50',
+          },
+        ].map((kpi, idx) => {
+          const Icon = kpi.icon;
+          return (
+            <Card key={idx} hoverable className="p-5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  {kpi.label}
+                </span>
+                <div className={`p-2 rounded-lg ${kpi.color}`}>
+                  <Icon className="h-4 w-4" />
+                </div>
+              </div>
+              <div className="text-2xl font-black text-slate-900 mt-3">
+                {kpi.value}
+              </div>
+              <span className="text-xs text-slate-500 font-medium mt-1 block">
+                {kpi.sub}
+              </span>
+            </Card>
+          );
+        })}
       </div>
 
-      {/* Phase Status Banner */}
-      <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-xs space-y-4">
-        <h2 className="text-base font-semibold text-slate-900">System Readiness Checklist (Phase 0)</h2>
+      {/* Track & Phase Checklist Banner */}
+      <Card className="p-6">
+        <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+          <div>
+            <h2 className="text-base font-bold text-slate-900">
+              System Architecture & Workstream Status
+            </h2>
+            <p className="text-xs text-slate-500">
+              Strict compliance with rules.md (Local MySQL, zero cloud BaaS, modular segregation).
+            </p>
+          </div>
+          <Badge variant="purple" size="sm">
+            Phase 1 Active
+          </Badge>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-          <div className="p-4 rounded-lg bg-slate-50 border border-slate-100 space-y-1">
-            <span className="font-semibold text-slate-800">Track 1: Johan</span>
-            <p className="text-xs text-slate-500">Products, Variants (+560 bump), Plans, Quotes & Subscriptions.</p>
-            <span className="text-xs text-blue-600 font-medium">Ready in /catalogue</span>
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/70 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-slate-800">Track 1: Johan</span>
+              <Badge variant="neutral" size="sm">Core & Subs</Badge>
+            </div>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Auth backend, Product variants (+$560 price adjustment), Plans, Quotation to Subscription state machine.
+            </p>
+            <div className="pt-1">
+              <Link to="/catalogue" className="text-xs font-semibold text-blue-600 hover:underline">
+                View Catalogue Module →
+              </Link>
+            </div>
           </div>
-          <div className="p-4 rounded-lg bg-slate-50 border border-slate-100 space-y-1">
-            <span className="font-semibold text-slate-800">Track 2: Elsa</span>
-            <p className="text-xs text-slate-500">Taxes, Discounts, Recurring Billing, Invoices & Payments.</p>
-            <span className="text-xs text-blue-600 font-medium">Ready in /invoices</span>
+
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/70 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-slate-800">Track 2: Elsa</span>
+              <Badge variant="neutral" size="sm">Billing & Pay</Badge>
+            </div>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Taxes, Discount rules, Recurring billing engine with idempotency & snapshot tables, Dual payment processing.
+            </p>
+            <div className="pt-1">
+              <Link to="/invoices" className="text-xs font-semibold text-blue-600 hover:underline">
+                View Invoicing Module →
+              </Link>
+            </div>
           </div>
-          <div className="p-4 rounded-lg bg-slate-50 border border-slate-100 space-y-1">
-            <span className="font-semibold text-slate-800">Track 3: Goutham</span>
-            <p className="text-xs text-slate-500">UI Shell, Design System, Customer Portal & KPI Analytics.</p>
-            <span className="text-xs text-emerald-600 font-medium">Layout Active</span>
+
+          <div className="p-4 rounded-xl bg-blue-50/60 border border-blue-200 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-blue-950">Track 3: Goutham</span>
+              <Badge variant="success" size="sm">Phase 1 Complete</Badge>
+            </div>
+            <p className="text-xs text-blue-900/80 leading-relaxed">
+              Design System UI kit, Live password validation checklist, Global Auth & RBAC redirect, App Shell, Layout.
+            </p>
+            <div className="pt-1">
+              <Link to="/portal" className="text-xs font-semibold text-blue-700 hover:underline">
+                View Customer Portal Module →
+              </Link>
+            </div>
           </div>
         </div>
-      </div>
+      </Card>
+
+      {/* Reusable DataTable Component Showcase */}
+      <Card className="p-6 space-y-4">
+        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+          <div>
+            <h3 className="text-base font-bold text-slate-900">
+              System Audit Activity Stream
+            </h3>
+            <p className="text-xs text-slate-500">
+              Powered by Goutham's dynamic DataTable component with live search and pagination.
+            </p>
+          </div>
+        </div>
+
+        <DataTable
+          columns={auditColumns}
+          data={sampleAuditItems}
+          searchPlaceholder="Search audit events, operators, or modules..."
+          searchKeys={['module', 'action', 'owner', 'status']}
+          defaultPageSize={5}
+        />
+      </Card>
+
+      {/* Modal Dialog Demo */}
+      <Modal
+        isOpen={isDemoModalOpen}
+        onClose={() => setIsDemoModalOpen(false)}
+        title="Interactive UI Dialog Test"
+        description="Goutham's UI kit modal with backdrop, smooth transition, and form controls."
+        footer={
+          <>
+            <Button
+              variant="outline"
+              onClick={() => setIsDemoModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => setIsDemoModalOpen(false)}
+            >
+              Confirm Action
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-4 py-2">
+          <p className="text-sm text-slate-600">
+            This dialog demonstrates how modals in Brightloop are constructed with accessible keyboard escape handling, click-outside detection, and standardized action buttons.
+          </p>
+          <Input
+            label="Sample Input with Validation"
+            placeholder="Type anything here..."
+            helperText="Form elements integrate seamlessly into dialog overlays."
+          />
+          <Select
+            label="Sample Selection Field"
+            options={[
+              { label: 'Option A: High Priority', value: 'high' },
+              { label: 'Option B: Standard Priority', value: 'standard' },
+              { label: 'Option C: Low Priority', value: 'low' },
+            ]}
+          />
+        </div>
+      </Modal>
     </div>
   );
 }
 
-function GenericModuleView({ title, description, track, assignedTo }: {
+// Module View Placeholder for Johan and Elsa
+function GenericModuleView({
+  title,
+  description,
+  track,
+  assignedTo,
+  badgeText,
+}: {
   title: string;
   description: string;
   track: string;
   assignedTo: string;
+  badgeText?: string;
 }) {
   return (
-    <div className="bg-white p-8 rounded-xl border border-slate-200 shadow-xs space-y-4">
-      <div className="flex justify-between items-start">
+    <Card className="p-8 space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-4">
         <div>
-          <h2 className="text-xl font-bold text-slate-900">{title}</h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight">
+              {title}
+            </h2>
+            {badgeText && (
+              <Badge variant="info" size="sm">
+                {badgeText}
+              </Badge>
+            )}
+          </div>
           <p className="text-sm text-slate-500 mt-1">{description}</p>
         </div>
-        <span className="text-xs bg-slate-100 text-slate-700 px-3 py-1 rounded-full font-medium">
-          Assigned to: {assignedTo} ({track})
-        </span>
+        <div className="flex items-center gap-2">
+          <Badge variant="purple" size="md">
+            {track}
+          </Badge>
+          <Badge variant="neutral" size="md">
+            Owner: {assignedTo}
+          </Badge>
+        </div>
       </div>
-      <div className="border border-dashed border-slate-300 rounded-lg p-12 text-center text-slate-400">
-        Module scaffolded. Dynamic database-backed views will render here.
+
+      <div className="border border-dashed border-slate-300 rounded-xl p-12 text-center bg-slate-50/50 space-y-3">
+        <Package className="h-10 w-10 text-slate-400 mx-auto stroke-[1.5]" />
+        <h4 className="text-base font-bold text-slate-700">Module Workspace Ready</h4>
+        <p className="text-xs text-slate-500 max-w-md mx-auto">
+          This feature module is reserved for {assignedTo}. Goutham has initialized the layout, navigation routing, and design system components.
+        </p>
       </div>
-    </div>
+    </Card>
   );
 }
 
 export default function App() {
-  const [role, setRole] = useState<'ADMIN' | 'STAFF' | 'CUSTOMER'>('ADMIN');
   const [backendStatus, setBackendStatus] = useState({
     connected: false,
     message: 'Checking local backend...',
   });
 
   useEffect(() => {
-    api.get('/health')
+    api
+      .get('/health')
       .then((res) => {
         setBackendStatus({
           connected: true,
-          message: `${res.data.database || 'OK'} (${res.data.users_count ?? 0} users)`,
+          message: `${res.data.database || 'MySQL Active'} (${res.data.users_count ?? 0} users)`,
         });
       })
       .catch((err) => {
         setBackendStatus({
           connected: false,
-          message: err.message || 'Cannot connect to http://localhost:8080/api/v1',
+          message: err.message || 'Cannot reach http://localhost:8080/api/v1',
         });
       });
   }, []);
 
   return (
     <BrowserRouter>
-      <AppLayout currentRole={role} onRoleChange={setRole} backendStatus={backendStatus}>
+      <AuthProvider>
         <Routes>
-          <Route path="/" element={<DashboardOverview backendStatus={backendStatus} />} />
+          {/* Public Auth Routes */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+
+          {/* Protected Application Routes with AppShell */}
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute allowedRoles={['ADMIN', 'STAFF']}>
+                <AppShell backendStatus={backendStatus}>
+                  <DashboardOverview backendStatus={backendStatus} />
+                </AppShell>
+              </ProtectedRoute>
+            }
+          />
+
           <Route
             path="/catalogue"
             element={
-              <GenericModuleView
-                title="Products, Variants & Plans Catalogue"
-                description="Manage products, custom price variant adjustments, and billing frequency intervals."
-                track="Track 1"
-                assignedTo="Johan"
-              />
+              <ProtectedRoute allowedRoles={['ADMIN', 'STAFF']}>
+                <AppShell backendStatus={backendStatus}>
+                  <GenericModuleView
+                    title="Products, Variants & Plans Catalogue"
+                    description="Product definitions, custom price adjustments (+560 variant bump), and billing intervals."
+                    track="Track 1"
+                    assignedTo="Johan"
+                    badgeText="Johan Workspace"
+                  />
+                </AppShell>
+              </ProtectedRoute>
             }
           />
+
           <Route
             path="/quotations"
             element={
-              <GenericModuleView
-                title="Quotation Templates & Quotes"
-                description="Create quotation offers and convert confirmed quotes to active subscriptions."
-                track="Track 1"
-                assignedTo="Johan"
-              />
+              <ProtectedRoute allowedRoles={['ADMIN', 'STAFF']}>
+                <AppShell backendStatus={backendStatus}>
+                  <GenericModuleView
+                    title="Quotation Templates & Offers"
+                    description="Reusable quotation templates, line items with taxes, and one-click subscription conversion."
+                    track="Track 1"
+                    assignedTo="Johan"
+                    badgeText="Johan Workspace"
+                  />
+                </AppShell>
+              </ProtectedRoute>
             }
           />
+
           <Route
             path="/subscriptions"
             element={
-              <GenericModuleView
-                title="Subscriptions Management"
-                description="Subscription lifecycle state machine (Active, Paused, Closed, Renewed)."
-                track="Track 1"
-                assignedTo="Johan"
-              />
+              <ProtectedRoute allowedRoles={['ADMIN', 'STAFF']}>
+                <AppShell backendStatus={backendStatus}>
+                  <GenericModuleView
+                    title="Subscriptions Lifecycle Management"
+                    description="Subscription state machine (Draft, Active, Paused, Closed, Renewed)."
+                    track="Track 1"
+                    assignedTo="Johan"
+                    badgeText="Johan Workspace"
+                  />
+                </AppShell>
+              </ProtectedRoute>
             }
           />
-          <Route
-            path="/invoices"
-            element={
-              <GenericModuleView
-                title="Invoices & Recurring Billing"
-                description="Automated billing engine, idempotent runs, and historical price snapshots."
-                track="Track 2"
-                assignedTo="Elsa"
-              />
-            }
-          />
-          <Route
-            path="/payments"
-            element={
-              <GenericModuleView
-                title="Payments & Gateway Simulator"
-                description="Manual payment recording, partial payments, and simulated checkout flow."
-                track="Track 2"
-                assignedTo="Elsa"
-              />
-            }
-          />
-          <Route
-            path="/rules"
-            element={
-              <GenericModuleView
-                title="Taxes & Discount Rules"
-                description="Admin-configured tax rates and volume/percentage discount rules."
-                track="Track 2"
-                assignedTo="Elsa"
-              />
-            }
-          />
+
           <Route
             path="/customers"
             element={
-              <GenericModuleView
-                title="Customer Accounts"
-                description="Customer directory and portal account linking."
-                track="Track 1"
-                assignedTo="Johan"
-              />
+              <ProtectedRoute allowedRoles={['ADMIN', 'STAFF']}>
+                <AppShell backendStatus={backendStatus}>
+                  <GenericModuleView
+                    title="Customer Accounts & Portal Access"
+                    description="Manage customer organization records and associate with portal login credentials."
+                    track="Track 1"
+                    assignedTo="Johan"
+                    badgeText="Johan Workspace"
+                  />
+                </AppShell>
+              </ProtectedRoute>
             }
           />
+
+          <Route
+            path="/invoices"
+            element={
+              <ProtectedRoute allowedRoles={['ADMIN', 'STAFF']}>
+                <AppShell backendStatus={backendStatus}>
+                  <GenericModuleView
+                    title="Invoices & Recurring Billing Engine"
+                    description="Automated billing runs, idempotent line snapshots, and invoice status transitions."
+                    track="Track 2"
+                    assignedTo="Elsa"
+                    badgeText="Elsa Workspace"
+                  />
+                </AppShell>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/payments"
+            element={
+              <ProtectedRoute allowedRoles={['ADMIN', 'STAFF']}>
+                <AppShell backendStatus={backendStatus}>
+                  <GenericModuleView
+                    title="Payments Engine & Gateway Simulator"
+                    description="Record manual staff payments, balance calculation, and simulated gateway checkout."
+                    track="Track 2"
+                    assignedTo="Elsa"
+                    badgeText="Elsa Workspace"
+                  />
+                </AppShell>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/rules"
+            element={
+              <ProtectedRoute allowedRoles={['ADMIN']}>
+                <AppShell backendStatus={backendStatus}>
+                  <GenericModuleView
+                    title="Taxes & Promotional Discount Rules"
+                    description="Configure tax rates (e.g. 18% GST) and tiered percentage or fixed-amount discount rules."
+                    track="Track 2"
+                    assignedTo="Elsa"
+                    badgeText="Elsa Workspace"
+                  />
+                </AppShell>
+              </ProtectedRoute>
+            }
+          />
+
           <Route
             path="/portal"
             element={
-              <GenericModuleView
-                title="Customer Self-Service Portal"
-                description="Customers view their own subscriptions, invoices, and pay online."
-                track="Track 3"
-                assignedTo="Goutham"
-              />
+              <ProtectedRoute allowedRoles={['CUSTOMER', 'ADMIN']}>
+                <AppShell backendStatus={backendStatus}>
+                  <GenericModuleView
+                    title="Customer Self-Service Portal"
+                    description="Tenant-isolated portal where customers view their own subscriptions, invoices, and pay online."
+                    track="Track 3"
+                    assignedTo="Goutham"
+                    badgeText="Phase 2 Ready"
+                  />
+                </AppShell>
+              </ProtectedRoute>
             }
           />
+
+          {/* Fallback route */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </AppLayout>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

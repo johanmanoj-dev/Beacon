@@ -1,0 +1,151 @@
+import React from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import {
+  LayoutDashboard,
+  Layers,
+  Users,
+  Package,
+  FileText,
+  Receipt,
+  CreditCard,
+  Percent,
+  Shield,
+  CheckCircle2,
+  AlertCircle,
+  LogOut,
+} from 'lucide-react';
+import { useAuth } from '../context';
+import type { Role } from '../types';
+
+interface NavItem {
+  name: string;
+  path: string;
+  icon: React.ComponentType<{ className?: string }>;
+  badge?: string;
+  role: Role[];
+}
+
+const navItems: NavItem[] = [
+  { name: 'Dashboard', path: '/', icon: LayoutDashboard, role: ['ADMIN', 'STAFF'] },
+  { name: 'Subscriptions', path: '/subscriptions', icon: Layers, role: ['ADMIN', 'STAFF'] },
+  { name: 'Customers', path: '/customers', icon: Users, role: ['ADMIN', 'STAFF'] },
+  { name: 'Products & Plans', path: '/catalogue', icon: Package, role: ['ADMIN'] },
+  { name: 'Quotations', path: '/quotations', icon: FileText, role: ['ADMIN', 'STAFF'] },
+  { name: 'Invoices', path: '/invoices', icon: Receipt, role: ['ADMIN', 'STAFF'] },
+  { name: 'Payments', path: '/payments', icon: CreditCard, role: ['ADMIN', 'STAFF'] },
+  { name: 'Taxes & Discounts', path: '/rules', icon: Percent, role: ['ADMIN'] },
+  { name: 'Customer Portal', path: '/portal', icon: Shield, badge: 'Self-Service', role: ['CUSTOMER', 'ADMIN'] },
+];
+
+export interface SidebarProps {
+  backendStatus: { connected: boolean; message: string };
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({ backendStatus }) => {
+  const location = useLocation();
+  const { user, role, logout } = useAuth();
+
+  const filteredNavItems = navItems.filter((item) => item.role.includes(role));
+
+  return (
+    <aside className="w-64 bg-[#0F172A] text-slate-300 flex flex-col border-r border-slate-800 shrink-0 select-none">
+      {/* Brand Header */}
+      <div className="h-16 flex items-center px-6 border-b border-slate-800/80">
+        <Link to={role === 'CUSTOMER' ? '/portal' : '/'} className="flex items-center gap-2.5">
+          <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-blue-700 to-blue-500 flex items-center justify-center font-black text-white shadow-md text-base">
+            B
+          </div>
+          <div>
+            <span className="font-bold text-white text-base tracking-tight block">
+              Brightloop
+            </span>
+            <span className="block text-[10px] uppercase font-semibold tracking-wider text-slate-400">
+              Subscription Engine
+            </span>
+          </div>
+        </Link>
+      </div>
+
+      {/* Navigation Links */}
+      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        <div className="px-3 pb-2 text-[11px] font-semibold tracking-wider uppercase text-slate-500">
+          Main Navigation
+        </div>
+        {filteredNavItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = location.pathname === item.path;
+
+          return (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
+                isActive
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <Icon className="h-4 w-4 shrink-0" />
+                <span>{item.name}</span>
+              </div>
+              {item.badge && (
+                <span className="text-[10px] bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded font-medium">
+                  {item.badge}
+                </span>
+              )}
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* User Info & Quick Logout */}
+      <div className="p-3 border-t border-slate-800/80 bg-slate-900/50">
+        <div className="flex items-center justify-between p-2 rounded-lg bg-slate-800/50">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="h-8 w-8 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30 flex items-center justify-center text-xs font-bold shrink-0">
+              {user?.fullName ? user.fullName[0].toUpperCase() : 'U'}
+            </div>
+            <div className="min-w-0">
+              <span className="text-xs font-semibold text-white block truncate">
+                {user?.fullName || 'User'}
+              </span>
+              <span className="text-[10px] text-slate-400 block truncate">
+                {user?.email}
+              </span>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={logout}
+            className="p-1.5 rounded text-slate-400 hover:text-rose-400 hover:bg-slate-700/50 transition-colors"
+            title="Log Out"
+          >
+            <LogOut className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* System Health Status in Sidebar Footer */}
+      <div className="p-3.5 border-t border-slate-800 text-xs bg-slate-950/40">
+        <div className="flex items-center gap-2">
+          {backendStatus.connected ? (
+            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+          ) : (
+            <AlertCircle className="h-3.5 w-3.5 text-amber-400 shrink-0" />
+          )}
+          <span
+            className={`font-medium ${
+              backendStatus.connected ? 'text-emerald-300' : 'text-amber-300'
+            }`}
+          >
+            {backendStatus.connected ? 'MySQL Local Connected' : 'Backend Standby'}
+          </span>
+        </div>
+        <span className="text-[11px] text-slate-500 mt-1 block truncate">
+          {backendStatus.message}
+        </span>
+      </div>
+    </aside>
+  );
+};
