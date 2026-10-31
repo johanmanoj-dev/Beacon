@@ -35,6 +35,13 @@ public class ProductService {
 
     @Transactional
     public ProductResponse createProduct(ProductRequest request) {
+        if (request.getSalesPrice() != null && request.getSalesPrice().compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Sales price cannot be negative");
+        }
+        if (request.getCostPrice() != null && request.getCostPrice().compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Cost price cannot be negative");
+        }
+
         Product product = Product.builder()
                 .name(request.getName().trim())
                 .productType(request.getProductType())
@@ -61,6 +68,13 @@ public class ProductService {
 
     @Transactional
     public ProductResponse updateProduct(Long id, ProductRequest request) {
+        if (request.getSalesPrice() != null && request.getSalesPrice().compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Sales price cannot be negative");
+        }
+        if (request.getCostPrice() != null && request.getCostPrice().compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Cost price cannot be negative");
+        }
+
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Product not found with id: " + id));
 
