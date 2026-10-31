@@ -120,9 +120,9 @@ export const FinanceDashboardPage: React.FC = () => {
         setStatusDistribution(statusRes.value.data);
       } else {
         setStatusDistribution([
-          { status: 'Active', count: 142, percentage: 81.6, color: '#10B981' },
-          { status: 'Paused', count: 18, percentage: 10.3, color: '#F59E0B' },
-          { status: 'Closed', count: 14, percentage: 8.1, color: '#64748B' },
+          { status: 'Active', count: 142, percentage: 81.6, color: '#2B4257' },
+          { status: 'Paused', count: 18, percentage: 10.3, color: '#D99B26' },
+          { status: 'Closed', count: 14, percentage: 8.1, color: '#889AA9' },
         ]);
       }
 
@@ -250,17 +250,17 @@ export const FinanceDashboardPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-[#E5DFD3]">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#F5F0E6] text-[#2B4257] border border-[#E5DFD3]">
               <ShieldCheck className="h-3 w-3" /> Finance Control Room
             </span>
           </div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900">
+          <h1 className="text-2xl font-black tracking-tight text-[#101E2B]">
             Finance & Revenue Analytics
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500">
+          <p className="text-xs sm:text-sm text-[#5A6D80]">
             Real-time MRR tracking, cash collection performance, and accounts receivable aging.
           </p>
         </div>
@@ -288,18 +288,18 @@ export const FinanceDashboardPage: React.FC = () => {
       </div>
 
       {/* Quick Filters Toolbar */}
-      <Card className="p-4 bg-slate-50/70 border-slate-200/80">
+      <Card className="p-4 bg-[#FAF7F0] border-[#E5DFD3]">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 w-full sm:w-auto">
-            <Filter className="h-4 w-4 text-slate-400 shrink-0" />
-            <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+            <Filter className="h-4 w-4 text-[#889AA9] shrink-0" />
+            <span className="text-xs font-bold text-[#101E2B] uppercase tracking-wider">
               Filters:
             </span>
             <div className="grid grid-cols-3 gap-2 w-full sm:w-auto">
               <select
                 value={dateRange}
                 onChange={(e) => setDateRange(e.target.value)}
-                className="bg-white border border-slate-300 rounded-lg text-xs font-medium px-3 py-1.5 text-slate-700 focus:outline-blue-600 shadow-2xs"
+                className="bg-white border border-[#E5DFD3] rounded-lg text-xs font-medium px-3 py-1.5 text-[#101E2B] focus:ring-2 focus:ring-[#2B4257] shadow-2xs"
               >
                 <option value="ALL">All Time</option>
                 <option value="THIS_MONTH">This Month</option>
@@ -310,7 +310,7 @@ export const FinanceDashboardPage: React.FC = () => {
               <select
                 value={customerFilter}
                 onChange={(e) => setCustomerFilter(e.target.value)}
-                className="bg-white border border-slate-300 rounded-lg text-xs font-medium px-3 py-1.5 text-slate-700 focus:outline-blue-600 shadow-2xs"
+                className="bg-white border border-[#E5DFD3] rounded-lg text-xs font-medium px-3 py-1.5 text-[#101E2B] focus:ring-2 focus:ring-[#2B4257] shadow-2xs"
               >
                 <option value="ALL">All Customers</option>
                 {customerList.map((c) => (
@@ -323,7 +323,7 @@ export const FinanceDashboardPage: React.FC = () => {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="bg-white border border-slate-300 rounded-lg text-xs font-medium px-3 py-1.5 text-slate-700 focus:outline-blue-600 shadow-2xs"
+                className="bg-white border border-[#E5DFD3] rounded-lg text-xs font-medium px-3 py-1.5 text-[#101E2B] focus:ring-2 focus:ring-[#2B4257] shadow-2xs"
               >
                 <option value="ALL">All Statuses</option>
                 <option value="OVERDUE_ONLY">Overdue Only</option>
@@ -331,7 +331,7 @@ export const FinanceDashboardPage: React.FC = () => {
             </div>
           </div>
 
-          <div className="text-xs text-slate-500 font-medium">
+          <div className="text-xs text-[#5A6D80] font-medium">
             Live database metrics
           </div>
         </div>
@@ -345,7 +345,7 @@ export const FinanceDashboardPage: React.FC = () => {
             value: String(kpis.activeSubscriptionsCount),
             sub: '+12.4% MoM Growth',
             icon: Layers,
-            color: 'text-blue-600 bg-blue-50',
+            color: 'text-[#2B4257] bg-[#E9EFF5]',
             badge: '81.6% Active Ratio',
           },
           {
@@ -353,7 +353,7 @@ export const FinanceDashboardPage: React.FC = () => {
             value: formatCurrency(kpis.totalRevenue),
             sub: 'Past 30 days verified',
             icon: TrendingUp,
-            color: 'text-emerald-600 bg-emerald-50',
+            color: 'text-emerald-700 bg-emerald-50',
             badge: '+8.4% Velocity',
           },
           {
@@ -361,7 +361,7 @@ export const FinanceDashboardPage: React.FC = () => {
             value: formatCurrency(kpis.totalOutstanding),
             sub: 'Unpaid invoice balance',
             icon: CreditCard,
-            color: 'text-amber-600 bg-amber-50',
+            color: 'text-[#101E2B] bg-[#F5F0E6]',
             badge: 'Net 15 Terms',
           },
           {
@@ -375,21 +375,21 @@ export const FinanceDashboardPage: React.FC = () => {
         ].map((kpi, idx) => {
           const Icon = kpi.icon;
           return (
-            <Card key={idx} hoverable className="p-5">
+            <Card key={idx} hoverable className="p-5 border-[#E5DFD3]">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <span className="text-xs font-bold text-[#5A6D80] uppercase tracking-wider">
                   {kpi.label}
                 </span>
                 <div className={`p-2 rounded-lg ${kpi.color}`}>
                   <Icon className="h-4 w-4" />
                 </div>
               </div>
-              <div className="text-2xl font-black text-slate-900 mt-3 font-mono">
+              <div className="text-2xl font-black text-[#101E2B] mt-3 font-mono">
                 {kpi.value}
               </div>
-              <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 text-xs text-slate-500">
+              <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#E5DFD3] text-xs text-[#5A6D80]">
                 <span>{kpi.sub}</span>
-                <span className="font-semibold text-slate-700">{kpi.badge}</span>
+                <span className="font-semibold text-[#101E2B]">{kpi.badge}</span>
               </div>
             </Card>
           );
@@ -399,13 +399,13 @@ export const FinanceDashboardPage: React.FC = () => {
       {/* Visual Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Monthly Revenue Bar Chart (2 cols) */}
-        <Card className="p-6 lg:col-span-2 space-y-4">
+        <Card className="p-6 lg:col-span-2 space-y-4 border-[#E5DFD3]">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-base font-bold text-slate-900">
+              <h3 className="text-base font-bold text-[#101E2B]">
                 Monthly Recurring Revenue Trajectory
               </h3>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-[#5A6D80]">
                 Dynamic monthly invoice settlement volume.
               </p>
             </div>
@@ -417,35 +417,35 @@ export const FinanceDashboardPage: React.FC = () => {
           <div className="h-72 w-full pt-4">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={revenueTrend} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#64748B' }} />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5DFD3" />
+                <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#5A6D80' }} />
                 <YAxis
-                  tick={{ fontSize: 11, fill: '#64748B' }}
+                  tick={{ fontSize: 11, fill: '#5A6D80' }}
                   tickFormatter={(val) => `$${val / 1000}k`}
                 />
                 <Tooltip
                   formatter={(value: any) => [formatCurrency(Number(value)), 'Revenue']}
                   contentStyle={{
-                    backgroundColor: '#0F172A',
-                    color: '#FFF',
+                    backgroundColor: '#182635',
+                    color: '#FAF7F0',
                     borderRadius: '8px',
                     fontSize: '12px',
-                    border: 'none',
+                    border: '1px solid #2B4257',
                   }}
                 />
-                <Bar dataKey="revenue" fill="#2563EB" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="revenue" fill="#2B4257" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </Card>
 
         {/* Subscription Status Donut Chart (1 col) */}
-        <Card className="p-6 space-y-4">
+        <Card className="p-6 space-y-4 border-[#E5DFD3]">
           <div>
-            <h3 className="text-base font-bold text-slate-900">
+            <h3 className="text-base font-bold text-[#101E2B]">
               Subscription Status Health
             </h3>
-            <p className="text-xs text-slate-500">Portfolio distribution across lifecycle states.</p>
+            <p className="text-xs text-[#5A6D80]">Portfolio distribution across lifecycle states.</p>
           </div>
 
           <div className="h-64 w-full">
@@ -468,11 +468,11 @@ export const FinanceDashboardPage: React.FC = () => {
                 <Tooltip
                   formatter={(value: any, name: any) => [`${value} Subscriptions`, name]}
                   contentStyle={{
-                    backgroundColor: '#0F172A',
-                    color: '#FFF',
+                    backgroundColor: '#182635',
+                    color: '#FAF7F0',
                     borderRadius: '8px',
                     fontSize: '12px',
-                    border: 'none',
+                    border: '1px solid #2B4257',
                   }}
                 />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
@@ -480,7 +480,7 @@ export const FinanceDashboardPage: React.FC = () => {
             </ResponsiveContainer>
           </div>
 
-          <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+          <div className="pt-2 border-t border-[#E5DFD3] flex items-center justify-between text-xs text-[#5A6D80]">
             <span>Total Base: 174 accounts</span>
             <span className="text-emerald-600 font-semibold">Low Churn (8.1%)</span>
           </div>
@@ -488,25 +488,25 @@ export const FinanceDashboardPage: React.FC = () => {
       </div>
 
       {/* Receivables & Aging Summary Table */}
-      <Card className="p-6 space-y-4">
+      <Card className="p-6 space-y-4 border-[#E5DFD3]">
         <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
           <div>
-            <h3 className="text-base font-bold text-slate-900">
+            <h3 className="text-base font-bold text-[#101E2B]">
               Accounts Receivable Aging Analysis
             </h3>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-[#5A6D80]">
               Outstanding balances, days past due, and immediate invoice drill-down.
             </p>
           </div>
 
-          <span className="text-xs text-slate-500 font-medium">
-            Showing <strong className="text-slate-800">{filteredReceivables.length}</strong> accounts with pending balances
+          <span className="text-xs text-[#5A6D80] font-medium">
+            Showing <strong className="text-[#101E2B]">{filteredReceivables.length}</strong> accounts with pending balances
           </span>
         </div>
 
-        <div className="rounded-xl border border-slate-200 overflow-hidden shadow-2xs">
+        <div className="rounded-xl border border-[#E5DFD3] overflow-hidden shadow-2xs">
           <table className="w-full text-left text-xs border-collapse">
-            <thead className="bg-slate-50 text-slate-700 font-semibold uppercase tracking-wider border-b border-slate-200">
+            <thead className="bg-[#F7F4EE] text-[#101E2B] font-semibold uppercase tracking-wider border-b border-[#E5DFD3]">
               <tr>
                 <th className="py-3 px-4">Invoice #</th>
                 <th className="py-3 px-4">Customer Account</th>
@@ -517,7 +517,7 @@ export const FinanceDashboardPage: React.FC = () => {
                 <th className="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-slate-700">
+            <tbody className="divide-y divide-[#E5DFD3] text-[#5A6D80]">
               {filteredReceivables.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="p-6">
@@ -536,16 +536,16 @@ export const FinanceDashboardPage: React.FC = () => {
                 </tr>
               ) : (
                 filteredReceivables.map((rec, i) => (
-                <tr key={i} className="hover:bg-slate-50/70 transition-colors">
-                  <td className="py-3 px-4 font-mono font-bold text-blue-700">
+                <tr key={i} className="hover:bg-[#FCFAF6] transition-colors">
+                  <td className="py-3 px-4 font-mono font-bold text-[#2B4257]">
                     {rec.invoiceNumber}
                   </td>
-                  <td className="py-3 px-4 font-medium text-slate-900">
+                  <td className="py-3 px-4 font-medium text-[#101E2B]">
                     <span className="block">{rec.customerName}</span>
-                    <span className="text-[11px] text-slate-400 font-normal">{rec.contactEmail}</span>
+                    <span className="text-[11px] text-[#889AA9] font-normal">{rec.contactEmail}</span>
                   </td>
-                  <td className="py-3 px-3 text-slate-600">{formatDate(rec.dueDate)}</td>
-                  <td className="py-3 px-3 text-right font-mono">{formatCurrency(rec.totalAmount)}</td>
+                  <td className="py-3 px-3 text-[#5A6D80]">{formatDate(rec.dueDate)}</td>
+                  <td className="py-3 px-3 text-right font-mono text-[#101E2B]">{formatCurrency(rec.totalAmount)}</td>
                   <td className="py-3 px-3 text-right font-mono font-bold text-amber-700">
                     {formatCurrency(rec.balanceDue)}
                   </td>
@@ -565,7 +565,7 @@ export const FinanceDashboardPage: React.FC = () => {
                       variant="outline"
                       size="sm"
                       onClick={() => handleOpenInvoicePreview(rec)}
-                      leftIcon={<Eye className="h-3.5 w-3.5 text-slate-500" />}
+                      leftIcon={<Eye className="h-3.5 w-3.5 text-[#5A6D80]" />}
                     >
                       Print View
                     </Button>
@@ -587,3 +587,4 @@ export const FinanceDashboardPage: React.FC = () => {
     </div>
   );
 };
+export default FinanceDashboardPage;

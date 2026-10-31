@@ -11,7 +11,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children, backendStatus }) =
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   return (
-    <div className="flex h-screen bg-[#F8FAFC] text-[#0F172A] font-sans antialiased overflow-hidden">
+    <div className="flex h-screen bg-[#FBF9F5] text-[#101E2B] font-sans antialiased overflow-hidden">
       {/* Sidebar (with responsive drawer support) */}
       <Sidebar
         backendStatus={backendStatus}

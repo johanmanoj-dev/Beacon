@@ -141,8 +141,8 @@ export const PaymentsPage: React.FC = () => {
       header: 'Txn / Receipt',
       cell: (p) => (
         <div>
-          <span className="font-mono font-bold text-slate-900 block">PAY-{p.id}</span>
-          <span className="text-[11px] text-slate-500 font-mono">
+          <span className="font-mono font-bold text-[#101E2B] block">PAY-{p.id}</span>
+          <span className="text-[11px] text-[#5A6D80] font-mono">
             {p.referenceNumber || 'No UTR Reference'}
           </span>
         </div>
@@ -154,10 +154,10 @@ export const PaymentsPage: React.FC = () => {
         const inv = invoiceMap.get(p.invoiceId);
         return (
           <div>
-            <span className="font-mono font-semibold text-blue-600 block">
+            <span className="font-mono font-semibold text-[#2B4257] block">
               {inv ? inv.invoiceNumber : `INV #${p.invoiceId}`}
             </span>
-            <span className="text-[11px] text-slate-500">
+            <span className="text-[11px] text-[#5A6D80]">
               {inv?.customerName || 'Customer'}
             </span>
           </div>
@@ -180,7 +180,7 @@ export const PaymentsPage: React.FC = () => {
     {
       header: 'Payment Date',
       cell: (p) => (
-        <span className="text-xs text-slate-700 font-medium">
+        <span className="text-xs text-[#101E2B] font-medium">
           {formatDate(p.paymentDate)}
         </span>
       ),
@@ -188,7 +188,7 @@ export const PaymentsPage: React.FC = () => {
     {
       header: 'Notes & Verification',
       cell: (p) => (
-        <span className="text-xs text-slate-500 italic truncate max-w-xs block">
+        <span className="text-xs text-[#5A6D80] italic truncate max-w-xs block">
           {p.notes || '—'}
         </span>
       ),
@@ -197,7 +197,7 @@ export const PaymentsPage: React.FC = () => {
 
   // Eligible invoices for staff payment recording
   const payableInvoices = useMemo(() => {
-    return invoices.filter((i) => i.balanceDue > 0 && i.status !== 'CANCELLED');
+    return invoices.filter((i) => (i.balanceDue ?? 0) > 0 && i.status !== 'CANCELLED');
   }, [invoices]);
 
   const handleLaunchPaymentModal = () => {
@@ -212,18 +212,18 @@ export const PaymentsPage: React.FC = () => {
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E5DFD3] pb-5">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-emerald-600 text-white shadow-sm">
+          <div className="p-2.5 rounded-xl bg-[#2B4257] text-[#FAF7F0] shadow-sm">
             <CreditCard className="h-6 w-6" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+              <h1 className="text-2xl font-black text-[#101E2B] tracking-tight">
                 Payments Engine & Ledger
               </h1>
             </div>
-            <p className="text-sm text-slate-500 mt-0.5">
+            <p className="text-sm text-[#5A6D80] mt-0.5">
               Unified payment journal across manual staff collections and simulated online checkout gateway.
             </p>
           </div>
@@ -244,7 +244,7 @@ export const PaymentsPage: React.FC = () => {
             <Button
               variant="primary"
               onClick={handleLaunchPaymentModal}
-              className="text-xs bg-emerald-600 hover:bg-emerald-700 shadow-sm"
+              className="text-xs shadow-sm"
             >
               <Plus className="h-3.5 w-3.5 mr-1" />
               Record Staff Payment
@@ -255,30 +255,30 @@ export const PaymentsPage: React.FC = () => {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-2xs">
-          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Total Collected</p>
+        <div className="p-3.5 rounded-xl bg-white border border-[#E5DFD3] shadow-2xs">
+          <p className="text-[11px] font-semibold text-[#5A6D80] uppercase tracking-wider">Total Collected</p>
           <p className="text-2xl font-black text-emerald-600 mt-1">{formatCurrency(metrics.totalCollected)}</p>
-          <p className="text-[11px] text-slate-400 mt-0.5">{metrics.totalCount} transactions settled</p>
+          <p className="text-[11px] text-[#889AA9] mt-0.5">{metrics.totalCount} transactions settled</p>
         </div>
-        <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-2xs">
-          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">UPI / QR Settle</p>
+        <div className="p-3.5 rounded-xl bg-white border border-[#E5DFD3] shadow-2xs">
+          <p className="text-[11px] font-semibold text-[#5A6D80] uppercase tracking-wider">UPI / QR Settle</p>
           <p className="text-xl font-bold text-purple-700 mt-1">{formatCurrency(metrics.upiTotal)}</p>
-          <p className="text-[11px] text-slate-400 mt-0.5">Instant mobile settlement</p>
+          <p className="text-[11px] text-[#889AA9] mt-0.5">Instant mobile settlement</p>
         </div>
-        <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-2xs">
-          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Card & Gateway</p>
-          <p className="text-xl font-bold text-blue-700 mt-1">{formatCurrency(metrics.cardTotal)}</p>
-          <p className="text-[11px] text-slate-400 mt-0.5">Simulated / Online checkout</p>
+        <div className="p-3.5 rounded-xl bg-white border border-[#E5DFD3] shadow-2xs">
+          <p className="text-[11px] font-semibold text-[#5A6D80] uppercase tracking-wider">Card & Gateway</p>
+          <p className="text-xl font-bold text-[#2B4257] mt-1">{formatCurrency(metrics.cardTotal)}</p>
+          <p className="text-[11px] text-[#889AA9] mt-0.5">Simulated / Online checkout</p>
         </div>
-        <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-2xs">
-          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Bank Transfer</p>
-          <p className="text-xl font-bold text-slate-800 mt-1">{formatCurrency(metrics.bankTotal)}</p>
-          <p className="text-[11px] text-slate-400 mt-0.5">Direct NEFT/RTGS</p>
+        <div className="p-3.5 rounded-xl bg-white border border-[#E5DFD3] shadow-2xs">
+          <p className="text-[11px] font-semibold text-[#5A6D80] uppercase tracking-wider">Bank Transfer</p>
+          <p className="text-xl font-bold text-[#101E2B] mt-1">{formatCurrency(metrics.bankTotal)}</p>
+          <p className="text-[11px] text-[#889AA9] mt-0.5">Direct NEFT/RTGS</p>
         </div>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3 rounded-xl border border-slate-200">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3 rounded-xl border border-[#E5DFD3]">
         <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0">
           {[
             { id: 'ALL', label: 'All Methods' },
@@ -294,8 +294,8 @@ export const PaymentsPage: React.FC = () => {
               onClick={() => setSelectedMethod(m.id)}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
                 selectedMethod === m.id
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'text-slate-600 hover:bg-slate-100'
+                  ? 'bg-[#2B4257] text-[#FAF7F0] shadow-xs'
+                  : 'text-[#5A6D80] hover:bg-[#F5F0E6] hover:text-[#101E2B]'
               }`}
             >
               {m.label}
@@ -304,13 +304,13 @@ export const PaymentsPage: React.FC = () => {
         </div>
 
         <div className="relative w-full sm:w-64">
-          <Search className="h-4 w-4 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <Search className="h-4 w-4 text-[#889AA9] absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search reference, invoice..."
-            className="w-full text-xs pl-8 pr-3 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50 focus:bg-white"
+            className="w-full text-xs pl-8 pr-3 py-1.5 border border-[#E5DFD3] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2B4257] bg-[#FBF9F5] focus:bg-white text-[#101E2B]"
           />
         </div>
       </div>

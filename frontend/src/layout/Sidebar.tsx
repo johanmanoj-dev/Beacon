@@ -60,7 +60,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ backendStatus, isMobileOpen = 
           role="button"
           tabIndex={0}
           aria-label="Close mobile navigation backdrop"
-          className="fixed inset-0 bg-slate-950/70 z-40 md:hidden backdrop-blur-xs transition-opacity"
+          className="fixed inset-0 bg-[#101E2B]/70 z-40 md:hidden backdrop-blur-xs transition-opacity"
           onClick={onCloseMobile}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
@@ -71,25 +71,25 @@ export const Sidebar: React.FC<SidebarProps> = ({ backendStatus, isMobileOpen = 
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#0F172A] text-slate-300 flex flex-col border-r border-slate-800 shrink-0 select-none transition-transform duration-200 md:static md:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#182635] text-[#C4D3E0] flex flex-col border-r border-[#223447] shrink-0 select-none transition-transform duration-200 md:static md:translate-x-0 ${
           isMobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
       >
         {/* Brand Header */}
-        <div className="h-16 flex items-center justify-between px-6 border-b border-slate-800/80">
+        <div className="h-16 flex items-center justify-between px-6 border-b border-[#223447]">
           <Link
             to={role === 'CUSTOMER' ? '/portal' : '/'}
             onClick={onCloseMobile}
             className="flex items-center gap-2.5"
           >
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-blue-700 to-blue-500 flex items-center justify-center font-black text-white shadow-md text-base">
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-[#2B4257] to-[#486581] border border-[#3E5A73] flex items-center justify-center font-black text-[#FAF7F0] shadow-md text-base">
               B
             </div>
             <div>
-              <span className="font-bold text-white text-base tracking-tight block">
+              <span className="font-bold text-[#FAF7F0] text-base tracking-tight block">
                 Brightloop
               </span>
-              <span className="block text-[10px] uppercase font-semibold tracking-wider text-slate-400">
+              <span className="block text-[10px] uppercase font-semibold tracking-wider text-[#97ABBD]">
                 Subscription Engine
               </span>
             </div>
@@ -98,7 +98,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ backendStatus, isMobileOpen = 
             <button
               type="button"
               onClick={onCloseMobile}
-              className="p-1 rounded-md text-slate-400 hover:text-white md:hidden"
+              className="p-1 rounded-md text-[#97ABBD] hover:text-[#FAF7F0] md:hidden cursor-pointer"
               title="Close menu"
             >
               <X className="h-5 w-5" />
@@ -106,88 +106,88 @@ export const Sidebar: React.FC<SidebarProps> = ({ backendStatus, isMobileOpen = 
           )}
         </div>
 
-      {/* Navigation Links */}
-      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-        <div className="px-3 pb-2 text-[11px] font-semibold tracking-wider uppercase text-slate-500">
-          Main Navigation
-        </div>
-        {filteredNavItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = location.pathname === item.path;
+        {/* Navigation Links */}
+        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+          <div className="px-3 pb-2 text-[11px] font-semibold tracking-wider uppercase text-[#7189A0]">
+            Main Navigation
+          </div>
+          {filteredNavItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.path;
 
-          return (
-            <Link
-              key={item.path}
-              to={item.path}
-              onClick={onCloseMobile}
-              className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
-                isActive
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={onCloseMobile}
+                className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
+                  isActive
+                    ? 'bg-[#2B4257] text-[#FAF7F0] border border-[#3E5A73]/60 shadow-sm'
+                    : 'text-[#C4D3E0] hover:bg-[#223447] hover:text-[#FAF7F0]'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <span>{item.name}</span>
+                </div>
+                {item.badge && (
+                  <span className="text-[10px] bg-[#FAF7F0]/15 text-[#FAF7F0] px-1.5 py-0.5 rounded font-medium">
+                    {item.badge}
+                  </span>
+                )}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* User Info & Quick Logout */}
+        <div className="p-3 border-t border-[#223447] bg-[#14202C]/60">
+          <div className="flex items-center justify-between p-2 rounded-lg bg-[#223447]/60">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="h-8 w-8 rounded-lg bg-[#2B4257] text-[#FAF7F0] border border-[#3E5A73] flex items-center justify-center text-xs font-bold shrink-0">
+                {user?.fullName ? user.fullName[0].toUpperCase() : 'U'}
+              </div>
+              <div className="min-w-0">
+                <span className="text-xs font-semibold text-[#FAF7F0] block truncate">
+                  {user?.fullName || 'User'}
+                </span>
+                <span className="text-[10px] text-[#97ABBD] block truncate">
+                  {user?.email}
+                </span>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={logout}
+              className="p-1.5 rounded text-[#97ABBD] hover:text-rose-400 hover:bg-[#182635] transition-colors cursor-pointer"
+              title="Log Out"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* System Health Status in Sidebar Footer */}
+        <div className="p-3.5 border-t border-[#223447] text-xs bg-[#14202C]/90">
+          <div className="flex items-center gap-2">
+            {backendStatus.connected ? (
+              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
+            ) : (
+              <AlertCircle className="h-3.5 w-3.5 text-amber-400 shrink-0" />
+            )}
+            <span
+              className={`font-medium ${
+                backendStatus.connected ? 'text-emerald-300' : 'text-amber-300'
               }`}
             >
-              <div className="flex items-center gap-3">
-                <Icon className="h-4 w-4 shrink-0" />
-                <span>{item.name}</span>
-              </div>
-              {item.badge && (
-                <span className="text-[10px] bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded font-medium">
-                  {item.badge}
-                </span>
-              )}
-            </Link>
-          );
-        })}
-      </nav>
-
-      {/* User Info & Quick Logout */}
-      <div className="p-3 border-t border-slate-800/80 bg-slate-900/50">
-        <div className="flex items-center justify-between p-2 rounded-lg bg-slate-800/50">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="h-8 w-8 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30 flex items-center justify-center text-xs font-bold shrink-0">
-              {user?.fullName ? user.fullName[0].toUpperCase() : 'U'}
-            </div>
-            <div className="min-w-0">
-              <span className="text-xs font-semibold text-white block truncate">
-                {user?.fullName || 'User'}
-              </span>
-              <span className="text-[10px] text-slate-400 block truncate">
-                {user?.email}
-              </span>
-            </div>
+              {backendStatus.connected ? 'MySQL Connected' : 'Backend Standby'}
+            </span>
           </div>
-          <button
-            type="button"
-            onClick={logout}
-            className="p-1.5 rounded text-slate-400 hover:text-rose-400 hover:bg-slate-700/50 transition-colors"
-            title="Log Out"
-          >
-            <LogOut className="h-4 w-4" />
-          </button>
-        </div>
-      </div>
-
-      {/* System Health Status in Sidebar Footer */}
-      <div className="p-3.5 border-t border-slate-800 text-xs bg-slate-950/40">
-        <div className="flex items-center gap-2">
-          {backendStatus.connected ? (
-            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
-          ) : (
-            <AlertCircle className="h-3.5 w-3.5 text-amber-400 shrink-0" />
-          )}
-          <span
-            className={`font-medium ${
-              backendStatus.connected ? 'text-emerald-300' : 'text-amber-300'
-            }`}
-          >
-            {backendStatus.connected ? 'MySQL Local Connected' : 'Backend Standby'}
+          <span className="text-[11px] text-[#7189A0] mt-1 block truncate">
+            {backendStatus.message}
           </span>
         </div>
-        <span className="text-[11px] text-slate-500 mt-1 block truncate">
-          {backendStatus.message}
-        </span>
-      </div>
-    </aside>
+      </aside>
     </>
   );
 };

@@ -52,8 +52,9 @@ export const DiscountsTab: React.FC = () => {
       ]);
       setDiscounts(discRes.data || []);
       setProducts(prodRes.data || []);
-    } catch (err: any) {
-      setErrorMessage(err.message || 'Failed to load discount rules');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to load discount rules';
+      setErrorMessage(msg);
     } finally {
       setIsLoading(false);
     }
@@ -123,10 +124,11 @@ export const DiscountsTab: React.FC = () => {
       await api.post('/discounts', payload);
       setIsModalOpen(false);
       await fetchDiscountsAndProducts();
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to create discount rule';
       setFormErrors((prev) => ({
         ...prev,
-        code: err.message || 'Failed to create discount rule',
+        code: msg,
       }));
     } finally {
       setIsSubmitting(false);
@@ -138,8 +140,9 @@ export const DiscountsTab: React.FC = () => {
     try {
       await api.delete(`/discounts/${id}`);
       await fetchDiscountsAndProducts();
-    } catch (err: any) {
-      alert(err.message || 'Failed to delete discount rule');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to delete discount rule';
+      alert(msg);
     }
   };
 
@@ -154,10 +157,11 @@ export const DiscountsTab: React.FC = () => {
         quantity: parseInt(simQty, 10) || 1,
       });
       setSimResult(res.data);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Validation request failed';
       setSimResult({
         valid: false,
-        message: err.message || 'Validation request failed',
+        message: msg,
         discountAmount: 0,
         finalAmount: parseFloat(simAmount) || 0,
       });
@@ -172,10 +176,10 @@ export const DiscountsTab: React.FC = () => {
       accessorKey: 'code',
       cell: (row: Discount) => (
         <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded-md bg-emerald-50 text-emerald-600">
+          <div className="p-1.5 rounded-md bg-[#F5F0E6] text-[#2B4257]">
             <Tag className="h-4 w-4" />
           </div>
-          <span className="font-mono font-bold text-slate-900 tracking-wider text-sm">
+          <span className="font-mono font-bold text-[#101E2B] tracking-wider text-sm">
             {row.code}
           </span>
         </div>
@@ -185,7 +189,7 @@ export const DiscountsTab: React.FC = () => {
       header: 'Benefit Value',
       accessorKey: 'value',
       cell: (row: Discount) => (
-        <span className="font-bold text-slate-900 text-sm">
+        <span className="font-bold text-[#101E2B] text-sm">
           {row.discountType === 'PERCENTAGE' ? `${row.value}% OFF` : `${formatCurrency(Number(row.value))} OFF`}
         </span>
       ),
@@ -199,7 +203,7 @@ export const DiscountsTab: React.FC = () => {
             {row.appliesTo === 'SUBSCRIPTION' ? 'Entire Subscription' : 'Specific Product'}
           </Badge>
           {row.appliesTo === 'PRODUCT' && row.productId && (
-            <span className="block mt-0.5 text-slate-500 font-medium truncate max-w-[140px]">
+            <span className="block mt-0.5 text-[#5A6D80] font-medium truncate max-w-[140px]">
               {products.find((p) => p.id === row.productId)?.name || `Prod #${row.productId}`}
             </span>
           )}
@@ -215,13 +219,13 @@ export const DiscountsTab: React.FC = () => {
         const percent = Math.min(100, Math.round((used / limit) * 100));
         return (
           <div className="w-28 space-y-1">
-            <div className="flex justify-between text-xs text-slate-600">
+            <div className="flex justify-between text-xs text-[#5A6D80]">
               <span>{used} used</span>
               <span>/ {limit}</span>
             </div>
-            <div className="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+            <div className="w-full bg-[#E5DFD3] h-1.5 rounded-full overflow-hidden">
               <div
-                className="bg-blue-600 h-full rounded-full transition-all"
+                className="bg-[#2B4257] h-full rounded-full transition-all"
                 style={{ width: `${percent}%` }}
               />
             </div>
@@ -233,8 +237,8 @@ export const DiscountsTab: React.FC = () => {
       header: 'Validity Period',
       accessorKey: 'startDate',
       cell: (row: Discount) => (
-        <div className="text-xs text-slate-600 flex items-center gap-1">
-          <Calendar className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+        <div className="text-xs text-[#5A6D80] flex items-center gap-1">
+          <Calendar className="h-3.5 w-3.5 text-[#889AA9] shrink-0" />
           <span>
             {row.startDate || 'Anytime'} → {row.endDate || 'No Expiry'}
           </span>
@@ -254,7 +258,7 @@ export const DiscountsTab: React.FC = () => {
               setSimAmount('1000');
             }}
             title="Load in Calculator"
-            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+            className="text-[#2B4257] hover:text-[#101E2B] hover:bg-[#F5F0E6]"
             leftIcon={<Calculator className="h-3.5 w-3.5" />}
           >
             Test
@@ -279,8 +283,8 @@ export const DiscountsTab: React.FC = () => {
       {/* Top Banner & Action */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h3 className="text-lg font-bold text-slate-900 tracking-tight">Promotional Discount Rules</h3>
-          <p className="text-sm text-slate-500">
+          <h3 className="text-lg font-bold text-[#101E2B] tracking-tight">Promotional Discount Rules</h3>
+          <p className="text-sm text-[#5A6D80]">
             Configure tiered percentage or fixed dollar discounts, usage limits, minimum quantities, and expiry dates.
           </p>
         </div>
@@ -308,7 +312,7 @@ export const DiscountsTab: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Table (3 cols) */}
         <div className="lg:col-span-3">
-          <Card className="overflow-hidden p-0 border-slate-200 shadow-xs">
+          <Card className="overflow-hidden p-0 border-[#E5DFD3] shadow-xs">
             <DataTable
               columns={columns}
               data={discounts}
@@ -320,14 +324,14 @@ export const DiscountsTab: React.FC = () => {
 
         {/* Live Simulator Widget (1 col) */}
         <div className="lg:col-span-1">
-          <Card className="p-5 border-blue-100 bg-gradient-to-b from-blue-50/50 to-white shadow-xs space-y-4">
+          <Card className="p-5 border-[#E5DFD3] bg-gradient-to-b from-[#FAF7F0] to-white shadow-xs space-y-4">
             <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-lg bg-blue-600 text-white">
+              <div className="p-1.5 rounded-lg bg-[#2B4257] text-[#FAF7F0]">
                 <Calculator className="h-4 w-4" />
               </div>
-              <h4 className="font-bold text-slate-900 text-sm">Discount Calculator</h4>
+              <h4 className="font-bold text-[#101E2B] text-sm">Discount Calculator</h4>
             </div>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-[#5A6D80]">
               Live server-side validation testing the same decimal calculation engine used during quotation & invoice generation.
             </p>
 
@@ -389,7 +393,7 @@ export const DiscountsTab: React.FC = () => {
                           -{formatCurrency(simResult.discountAmount)}
                         </span>
                       </div>
-                      <div className="flex justify-between text-slate-900 font-bold">
+                      <div className="flex justify-between text-[#101E2B] font-bold">
                         <span>Final Billable:</span>
                         <span>{formatCurrency(simResult.finalAmount)}</span>
                       </div>

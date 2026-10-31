@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Package, Plus, Trash2, Pencil, CheckCircle2, AlertCircle, Layers, Tag, Calendar, RefreshCw } from 'lucide-react';
 import api from '../../services/api';
 import type { Product, Plan, ProductType, BillingInterval } from '../../types';
@@ -46,7 +46,7 @@ export function CataloguePage() {
   const [planAutoClose, setPlanAutoClose] = useState(false);
   const [planCanPause, setPlanCanPause] = useState(true);
 
-  const fetchCatalogue = async () => {
+  const fetchCatalogue = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -56,16 +56,17 @@ export function CataloguePage() {
       ]);
       setProducts(prodRes.data);
       setPlans(planRes.data);
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch catalogue data');
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to fetch catalogue data';
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchCatalogue();
-  }, []);
+  }, [fetchCatalogue]);
 
   const handleAddVariant = () => {
     setVariants([...variants, { variantName: '', priceAdjustment: '0.00' }]);
@@ -111,8 +112,9 @@ export function CataloguePage() {
       setVariants([{ variantName: 'Brand: Odoo', priceAdjustment: '560.00' }]);
       fetchCatalogue();
       setTimeout(() => setSuccessMsg(null), 4000);
-    } catch (err: any) {
-      setError(err.message || 'Failed to create product');
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to create product';
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -180,8 +182,9 @@ export function CataloguePage() {
       setEditingProduct(null);
       fetchCatalogue();
       setTimeout(() => setSuccessMsg(null), 4000);
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Failed to update product');
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to update product';
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -215,8 +218,9 @@ export function CataloguePage() {
       setPlanProductId('');
       fetchCatalogue();
       setTimeout(() => setSuccessMsg(null), 4000);
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Failed to create plan');
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to create plan';
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -229,8 +233,8 @@ export function CataloguePage() {
       setProducts(products.filter(p => p.id !== id));
       setSuccessMsg('Product deleted successfully');
       setTimeout(() => setSuccessMsg(null), 3000);
-    } catch (err: any) {
-      const msg = err.response?.data?.message || err.message || 'Failed to delete product';
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to delete product';
       setError(msg);
     }
   };
@@ -242,8 +246,8 @@ export function CataloguePage() {
       setPlans(plans.filter(p => p.id !== id));
       setSuccessMsg('Plan deleted successfully');
       setTimeout(() => setSuccessMsg(null), 3000);
-    } catch (err: any) {
-      const msg = err.response?.data?.message || err.message || 'Failed to delete plan';
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to delete plan';
       setError(msg);
     }
   };
@@ -251,17 +255,17 @@ export function CataloguePage() {
   return (
     <div className="space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E5DFD3]">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Products & Billing Plans</h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <h1 className="text-2xl font-bold tracking-tight text-[#101E2B]">Products & Billing Plans</h1>
+          <p className="text-sm text-[#5A6D80] mt-1">
             Configure software products, variant pricing increments (e.g. Odoo brand +$560), and recurring plan intervals.
           </p>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={fetchCatalogue}
-            className="p-2 border border-slate-200 bg-white hover:bg-slate-50 rounded-lg text-slate-600 transition"
+            className="p-2 border border-[#E5DFD3] bg-white hover:bg-[#F5F0E6] rounded-lg text-[#101E2B] transition-colors cursor-pointer"
             title="Refresh"
           >
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
@@ -269,7 +273,7 @@ export function CataloguePage() {
           {activeTab === 'products' ? (
             <button
               onClick={() => setShowProductModal(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium shadow-xs transition"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[#2B4257] hover:bg-[#1D2D3D] text-[#FAF7F0] rounded-lg text-sm font-medium shadow-xs transition-colors cursor-pointer"
             >
               <Plus className="h-4 w-4" />
               Add Product
@@ -277,7 +281,7 @@ export function CataloguePage() {
           ) : (
             <button
               onClick={() => setShowPlanModal(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium shadow-xs transition"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[#2B4257] hover:bg-[#1D2D3D] text-[#FAF7F0] rounded-lg text-sm font-medium shadow-xs transition-colors cursor-pointer"
             >
               <Plus className="h-4 w-4" />
               Create Plan
@@ -302,13 +306,13 @@ export function CataloguePage() {
       )}
 
       {/* Tabs */}
-      <div className="flex border-b border-slate-200">
+      <div className="flex border-b border-[#E5DFD3]">
         <button
           onClick={() => setActiveTab('products')}
-          className={`flex items-center gap-2 px-6 py-3 border-b-2 font-medium text-sm transition ${
+          className={`flex items-center gap-2 px-6 py-3 border-b-2 font-medium text-sm transition-colors cursor-pointer ${
             activeTab === 'products'
-              ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
+              ? 'border-[#2B4257] text-[#2B4257]'
+              : 'border-transparent text-[#5A6D80] hover:text-[#101E2B]'
           }`}
         >
           <Package className="h-4 w-4" />
@@ -316,10 +320,10 @@ export function CataloguePage() {
         </button>
         <button
           onClick={() => setActiveTab('plans')}
-          className={`flex items-center gap-2 px-6 py-3 border-b-2 font-medium text-sm transition ${
+          className={`flex items-center gap-2 px-6 py-3 border-b-2 font-medium text-sm transition-colors cursor-pointer ${
             activeTab === 'plans'
-              ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
+              ? 'border-[#2B4257] text-[#2B4257]'
+              : 'border-transparent text-[#5A6D80] hover:text-[#101E2B]'
           }`}
         >
           <Layers className="h-4 w-4" />
@@ -331,25 +335,25 @@ export function CataloguePage() {
       {activeTab === 'products' && (
         <div className="space-y-4">
           {products.length === 0 && !loading ? (
-            <div className="bg-white border border-dashed border-slate-300 rounded-xl p-12 text-center space-y-3">
-              <Package className="h-10 w-10 text-slate-400 mx-auto" />
-              <h3 className="text-base font-semibold text-slate-800">No products configured yet</h3>
-              <p className="text-sm text-slate-500 max-w-sm mx-auto">
-                Create Brightloop's core software products and add-ons with custom variant price rules.
+            <div className="bg-white border border-dashed border-[#E5DFD3] rounded-xl p-12 text-center space-y-3">
+              <Package className="h-10 w-10 text-[#889AA9] mx-auto opacity-50" />
+              <h3 className="text-base font-semibold text-[#101E2B]">No products configured yet</h3>
+              <p className="text-sm text-[#5A6D80] max-w-sm mx-auto">
+                Create Brightloop&apos;s core software products and add-ons with custom variant price rules.
               </p>
               <button
                 onClick={() => setShowProductModal(true)}
-                className="mt-2 inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition"
+                className="mt-2 inline-flex items-center gap-2 px-4 py-2 bg-[#2B4257] hover:bg-[#1D2D3D] text-[#FAF7F0] rounded-lg text-sm font-medium shadow-xs transition-colors cursor-pointer"
               >
                 <Plus className="h-4 w-4" />
                 Add Your First Product
               </button>
             </div>
           ) : (
-            <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
+            <div className="bg-white rounded-xl border border-[#E5DFD3] shadow-xs overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm text-slate-600">
-                  <thead className="bg-slate-50 text-slate-700 font-semibold border-b border-slate-200 uppercase text-[11px] tracking-wider">
+                <table className="w-full text-left text-sm text-[#5A6D80]">
+                  <thead className="bg-[#F7F4EE] text-[#101E2B] font-semibold border-b border-[#E5DFD3] uppercase text-[11px] tracking-wider">
                     <tr>
                       <th className="py-3.5 px-6">Product Name</th>
                       <th className="py-3.5 px-4">Type</th>
@@ -359,27 +363,27 @@ export function CataloguePage() {
                       <th className="py-3.5 px-4 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-[#E5DFD3]">
                     {products.map((product) => (
-                      <tr key={product.id} className="hover:bg-slate-50/50 transition">
-                        <td className="py-4 px-6 font-medium text-slate-900">
+                      <tr key={product.id} className="hover:bg-[#FCFAF6] transition-colors">
+                        <td className="py-4 px-6 font-medium text-[#101E2B]">
                           {product.name}
                           {product.notes && (
-                            <p className="text-xs text-slate-400 font-normal mt-0.5">{product.notes}</p>
+                            <p className="text-xs text-[#889AA9] font-normal mt-0.5">{product.notes}</p>
                           )}
                         </td>
                         <td className="py-4 px-4">
                           <span className={`inline-flex px-2 py-0.5 rounded text-xs font-semibold ${
-                            product.productType === 'SOFTWARE' ? 'bg-indigo-50 text-indigo-700' :
-                            product.productType === 'ADDON' ? 'bg-amber-50 text-amber-700' : 'bg-slate-100 text-slate-700'
+                            product.productType === 'SOFTWARE' ? 'bg-[#F5F0E6] text-[#2B4257] border border-[#E5DFD3]' :
+                            product.productType === 'ADDON' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-[#FAF7F0] text-[#5A6D80] border border-[#E5DFD3]'
                           }`}>
                             {product.productType}
                           </span>
                         </td>
-                        <td className="py-4 px-4 font-semibold text-slate-900">
+                        <td className="py-4 px-4 font-semibold text-[#101E2B]">
                           ${Number(product.salesPrice).toFixed(2)}
                         </td>
-                        <td className="py-4 px-4 text-slate-500">
+                        <td className="py-4 px-4 text-[#5A6D80]">
                           ${Number(product.costPrice).toFixed(2)}
                         </td>
                         <td className="py-4 px-6">
@@ -387,26 +391,28 @@ export function CataloguePage() {
                             {product.variants && product.variants.length > 0 ? (
                               <div className="flex flex-wrap gap-1.5">
                                 {product.variants.map((v) => (
-                                  <span
+                                  <button
                                     key={v.id}
+                                    type="button"
                                     onClick={() => handleOpenEditProduct(product)}
-                                    className="cursor-pointer inline-flex items-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200/60 text-xs px-2 py-0.5 rounded transition"
+                                    className="cursor-pointer inline-flex items-center gap-1 bg-[#F5F0E6] hover:bg-[#EAE4D7] text-[#2B4257] border border-[#E5DFD3] text-xs px-2 py-0.5 rounded transition-colors"
                                     title="Click to edit variants"
                                   >
                                     <Tag className="h-3 w-3" />
                                     <span>{v.variantName}</span>
-                                    <strong className="text-blue-900">
+                                    <strong className="text-[#101E2B]">
                                       (+${Number(v.priceAdjustment).toFixed(2)})
                                     </strong>
-                                  </span>
+                                  </button>
                                 ))}
                               </div>
                             ) : (
-                              <span className="text-xs text-slate-400">Standard (No variants)</span>
+                              <span className="text-xs text-[#889AA9]">Standard (No variants)</span>
                             )}
                             <button
+                              type="button"
                               onClick={() => handleOpenEditProduct(product)}
-                              className="text-[11px] text-blue-600 hover:text-blue-800 font-semibold hover:underline shrink-0"
+                              className="text-[11px] text-[#2B4257] hover:text-[#101E2B] font-semibold hover:underline shrink-0 cursor-pointer"
                             >
                               + Manage
                             </button>
@@ -415,16 +421,18 @@ export function CataloguePage() {
                         <td className="py-4 px-4 text-right">
                           <div className="flex items-center justify-end gap-1.5">
                             <button
+                              type="button"
                               onClick={() => handleOpenEditProduct(product)}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-md transition"
+                              className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-[#2B4257] bg-[#F5F0E6] hover:bg-[#EAE4D7] border border-[#E5DFD3] rounded-md transition-colors cursor-pointer"
                               title="Edit product and its variants"
                             >
                               <Pencil className="h-3.5 w-3.5" />
                               Edit
                             </button>
                             <button
+                              type="button"
                               onClick={() => handleDeleteProduct(product.id)}
-                              className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition"
+                              className="p-1 text-[#889AA9] hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors cursor-pointer"
                               title="Delete"
                             >
                               <Trash2 className="h-4 w-4" />
@@ -445,15 +453,16 @@ export function CataloguePage() {
       {activeTab === 'plans' && (
         <div className="space-y-4">
           {plans.length === 0 && !loading ? (
-            <div className="bg-white border border-dashed border-slate-300 rounded-xl p-12 text-center space-y-3">
-              <Layers className="h-10 w-10 text-slate-400 mx-auto" />
-              <h3 className="text-base font-semibold text-slate-800">No subscription plans created</h3>
-              <p className="text-sm text-slate-500 max-w-sm mx-auto">
+            <div className="bg-white border border-dashed border-[#E5DFD3] rounded-xl p-12 text-center space-y-3">
+              <Layers className="h-10 w-10 text-[#889AA9] mx-auto opacity-50" />
+              <h3 className="text-base font-semibold text-[#101E2B]">No subscription plans created</h3>
+              <p className="text-sm text-[#5A6D80] max-w-sm mx-auto">
                 Set up recurring plans with billing intervals (Daily, Weekly, Monthly, Yearly) and lifecycle rules.
               </p>
               <button
+                type="button"
                 onClick={() => setShowPlanModal(true)}
-                className="mt-2 inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition"
+                className="mt-2 inline-flex items-center gap-2 px-4 py-2 bg-[#2B4257] hover:bg-[#1D2D3D] text-[#FAF7F0] rounded-lg text-sm font-medium shadow-xs transition-colors cursor-pointer"
               >
                 <Plus className="h-4 w-4" />
                 Create Plan
@@ -462,38 +471,38 @@ export function CataloguePage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {plans.map((plan) => (
-                <div key={plan.id} className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs flex flex-col justify-between hover:border-blue-300 transition">
+                <div key={plan.id} className="bg-white rounded-xl border border-[#E5DFD3] p-6 shadow-xs flex flex-col justify-between hover:border-[#2B4257] transition-colors">
                   <div className="space-y-4">
                     <div className="flex justify-between items-start">
                       <div>
-                        <span className="text-xs uppercase tracking-wider font-bold text-blue-600">
+                        <span className="text-xs uppercase tracking-wider font-bold text-[#2B4257]">
                           {plan.billingInterval} Plan
                         </span>
-                        <h3 className="text-lg font-bold text-slate-900 mt-0.5">{plan.name}</h3>
+                        <h3 className="text-lg font-bold text-[#101E2B] mt-0.5">{plan.name}</h3>
                         {plan.productName ? (
-                          <div className="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-slate-600 bg-slate-100 border border-slate-200/60 rounded px-2 py-0.5 w-fit">
-                            <Package className="h-3 w-3 text-blue-600" />
-                            <span>Product: <strong className="text-slate-800">{plan.productName}</strong></span>
+                          <div className="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-[#101E2B] bg-[#F5F0E6] border border-[#E5DFD3] rounded px-2 py-0.5 w-fit">
+                            <Package className="h-3 w-3 text-[#2B4257]" />
+                            <span>Product: <strong className="text-[#101E2B]">{plan.productName}</strong></span>
                           </div>
                         ) : (
-                          <div className="mt-1.5 flex items-center gap-1.5 text-xs text-slate-400 italic">
+                          <div className="mt-1.5 flex items-center gap-1.5 text-xs text-[#889AA9] italic">
                             <span>Standalone Service</span>
                           </div>
                         )}
                       </div>
-                      <span className="text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-medium">
+                      <span className="text-xs bg-[#FAF7F0] text-[#5A6D80] border border-[#E5DFD3] px-2 py-0.5 rounded font-medium">
                         Min Qty: {plan.minQuantity}
                       </span>
                     </div>
 
-                    <div className="border-t border-b border-slate-100 py-3">
+                    <div className="border-t border-b border-[#E5DFD3] py-3">
                       <div className="flex items-baseline gap-1">
-                        <span className="text-3xl font-extrabold text-slate-900">${Number(plan.basePrice).toFixed(2)}</span>
-                        <span className="text-xs text-slate-500 font-medium">/{plan.billingInterval.toLowerCase()}</span>
+                        <span className="text-3xl font-extrabold text-[#101E2B]">${Number(plan.basePrice).toFixed(2)}</span>
+                        <span className="text-xs text-[#5A6D80] font-medium">/{plan.billingInterval.toLowerCase()}</span>
                       </div>
                     </div>
 
-                    <div className="space-y-2 text-xs text-slate-600">
+                    <div className="space-y-2 text-xs text-[#5A6D80]">
                       <div className="flex items-center gap-2">
                         <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
                         <span>Can pause: <strong>{plan.canPause ? 'Yes' : 'No'}</strong></span>
@@ -503,18 +512,19 @@ export function CataloguePage() {
                         <span>Auto-close on end: <strong>{plan.autoCloseOnEnd ? 'Yes' : 'No'}</strong></span>
                       </div>
                       {plan.startDate && (
-                        <div className="flex items-center gap-2 text-slate-500">
-                          <Calendar className="h-3.5 w-3.5" />
+                        <div className="flex items-center gap-2 text-[#889AA9]">
+                          <Calendar className="h-3.5 w-3.5 text-[#2B4257]" />
                           <span>Valid from {plan.startDate} {plan.endDate ? `to ${plan.endDate}` : ''}</span>
                         </div>
                       )}
                     </div>
                   </div>
 
-                  <div className="mt-6 pt-4 border-t border-slate-100 flex justify-end">
+                  <div className="mt-6 pt-4 border-t border-[#E5DFD3] flex justify-end">
                     <button
+                      type="button"
                       onClick={() => handleDeletePlan(plan.id)}
-                      className="text-xs text-rose-600 hover:text-rose-700 font-medium flex items-center gap-1"
+                      className="text-xs text-rose-600 hover:text-rose-700 font-medium flex items-center gap-1 cursor-pointer"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                       Delete Plan
@@ -529,33 +539,33 @@ export function CataloguePage() {
 
       {/* Create Product Modal */}
       {showProductModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-lg w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center pb-2 border-b border-slate-100">
-              <h3 className="text-lg font-bold text-slate-900">Add New Product</h3>
-              <button onClick={() => setShowProductModal(false)} className="text-slate-400 hover:text-slate-600 text-lg">×</button>
+        <div className="fixed inset-0 z-50 bg-[#101E2B]/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl border border-[#E5DFD3] max-w-lg w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center pb-3 border-b border-[#E5DFD3]">
+              <h3 className="text-lg font-bold text-[#101E2B]">Add New Product</h3>
+              <button onClick={() => setShowProductModal(false)} className="text-[#889AA9] hover:text-[#101E2B] text-lg cursor-pointer">×</button>
             </div>
 
             <form onSubmit={handleCreateProduct} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Product Name *</label>
+                <label className="block text-xs font-semibold text-[#101E2B] mb-1">Product Name *</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Enterprise Cloud Suite"
                   value={prodName}
                   onChange={(e) => setProdName(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-blue-600"
+                  className="w-full px-3 py-2 border border-[#E5DFD3] rounded-lg text-sm bg-[#FBF9F5] text-[#101E2B] focus:outline-none focus:ring-2 focus:ring-[#2B4257]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Type *</label>
+                  <label className="block text-xs font-semibold text-[#101E2B] mb-1">Type *</label>
                   <select
                     value={prodType}
                     onChange={(e) => setProdType(e.target.value as ProductType)}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-blue-600"
+                    className="w-full px-3 py-2 border border-[#E5DFD3] rounded-lg text-sm bg-white text-[#101E2B] focus:outline-none focus:ring-2 focus:ring-[#2B4257]"
                   >
                     <option value="SOFTWARE">Software</option>
                     <option value="ADDON">Add-on</option>
@@ -563,76 +573,76 @@ export function CataloguePage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Sales Price ($) *</label>
+                  <label className="block text-xs font-semibold text-[#101E2B] mb-1">Sales Price ($) *</label>
                   <input
                     type="number"
                     step="0.01"
                     required
                     value={prodSalesPrice}
                     onChange={(e) => setProdSalesPrice(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-blue-600"
+                    className="w-full px-3 py-2 border border-[#E5DFD3] rounded-lg text-sm bg-[#FBF9F5] text-[#101E2B] focus:outline-none focus:ring-2 focus:ring-[#2B4257]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Cost Price ($)</label>
+                <label className="block text-xs font-semibold text-[#101E2B] mb-1">Cost Price ($)</label>
                 <input
                   type="number"
                   step="0.01"
                   value={prodCostPrice}
                   onChange={(e) => setProdCostPrice(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-blue-600"
+                  className="w-full px-3 py-2 border border-[#E5DFD3] rounded-lg text-sm bg-[#FBF9F5] text-[#101E2B] focus:outline-none focus:ring-2 focus:ring-[#2B4257]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Notes / Description</label>
+                <label className="block text-xs font-semibold text-[#101E2B] mb-1">Notes / Description</label>
                 <textarea
                   rows={2}
                   value={prodNotes}
                   onChange={(e) => setProdNotes(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-blue-600"
+                  className="w-full px-3 py-2 border border-[#E5DFD3] rounded-lg text-sm bg-[#FBF9F5] text-[#101E2B] focus:outline-none focus:ring-2 focus:ring-[#2B4257]"
                 />
               </div>
 
-              {/* Dynamic Variants Section (e.g. Odoo brand +$560) */}
-              <div className="space-y-2 pt-2 border-t border-slate-100">
+              {/* Dynamic Variants Section */}
+              <div className="space-y-2 pt-3 border-t border-[#E5DFD3]">
                 <div className="flex justify-between items-center">
-                  <label className="text-xs font-bold text-slate-800">Product Variants & Price Bumps</label>
+                  <label className="text-xs font-bold text-[#101E2B]">Product Variants & Price Bumps</label>
                   <button
                     type="button"
                     onClick={handleAddVariant}
-                    className="text-xs text-blue-600 hover:text-blue-700 font-semibold flex items-center gap-1"
+                    className="text-xs text-[#2B4257] hover:text-[#101E2B] font-semibold flex items-center gap-1 cursor-pointer"
                   >
                     <Plus className="h-3 w-3" /> Add Variant
                   </button>
                 </div>
 
                 {variants.map((v, i) => (
-                  <div key={i} className="flex gap-2 items-center bg-slate-50 p-2 rounded-lg border border-slate-200/80">
+                  <div key={i} className="flex gap-2 items-center bg-[#FAF7F0] p-2 rounded-lg border border-[#E5DFD3]">
                     <input
                       type="text"
                       placeholder="e.g. Brand: Odoo"
                       value={v.variantName}
                       onChange={(e) => handleVariantChange(i, 'variantName', e.target.value)}
-                      className="flex-1 px-2.5 py-1.5 bg-white border border-slate-200 rounded text-xs focus:outline-blue-600"
+                      className="flex-1 px-2.5 py-1.5 bg-white border border-[#E5DFD3] rounded text-xs text-[#101E2B] focus:outline-none focus:ring-2 focus:ring-[#2B4257]"
                     />
                     <div className="flex items-center gap-1 w-28">
-                      <span className="text-xs text-slate-400">+$</span>
+                      <span className="text-xs text-[#5A6D80]">+$</span>
                       <input
                         type="number"
                         step="0.01"
                         placeholder="560.00"
                         value={v.priceAdjustment}
                         onChange={(e) => handleVariantChange(i, 'priceAdjustment', e.target.value)}
-                        className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded text-xs focus:outline-blue-600"
+                        className="w-full px-2 py-1.5 bg-white border border-[#E5DFD3] rounded text-xs text-[#101E2B] focus:outline-none focus:ring-2 focus:ring-[#2B4257]"
                       />
                     </div>
                     <button
                       type="button"
                       onClick={() => handleRemoveVariant(i)}
-                      className="text-slate-400 hover:text-rose-600 p-1"
+                      className="text-[#889AA9] hover:text-rose-600 p-1 cursor-pointer"
                     >
                       ×
                     </button>
@@ -640,7 +650,7 @@ export function CataloguePage() {
                 ))}
 
                 {/* Price Preview */}
-                <div className="p-3 bg-blue-50/60 border border-blue-200/60 rounded-lg text-xs text-blue-900 flex justify-between items-center">
+                <div className="p-3 bg-[#F5F0E6] border border-[#E5DFD3] rounded-lg text-xs text-[#101E2B] flex justify-between items-center">
                   <span>Base Price: <strong>${parseFloat(prodSalesPrice) || 0}</strong></span>
                   {variants.length > 0 && variants[0].variantName && (
                     <span>With {variants[0].variantName}: <strong>${(parseFloat(prodSalesPrice) || 0) + (parseFloat(variants[0].priceAdjustment) || 0)}</strong></span>
@@ -648,18 +658,18 @@ export function CataloguePage() {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
+              <div className="flex justify-end gap-2 pt-4 border-t border-[#E5DFD3]">
                 <button
                   type="button"
                   onClick={() => setShowProductModal(false)}
-                  className="px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50"
+                  className="px-4 py-2 border border-[#E5DFD3] rounded-lg text-sm text-[#5A6D80] hover:bg-[#F5F0E6] cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium shadow-xs disabled:opacity-50"
+                  className="px-4 py-2 bg-[#2B4257] hover:bg-[#1D2D3D] text-[#FAF7F0] rounded-lg text-sm font-medium shadow-xs disabled:opacity-50 cursor-pointer"
                 >
                   {loading ? 'Saving...' : 'Save Product'}
                 </button>
@@ -671,16 +681,16 @@ export function CataloguePage() {
 
       {/* Create Plan Modal */}
       {showPlanModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 max-w-md w-full p-6 space-y-4">
-            <div className="flex justify-between items-center pb-2 border-b border-slate-100">
-              <h3 className="text-lg font-bold text-slate-900">Create Subscription Plan</h3>
-              <button onClick={() => setShowPlanModal(false)} className="text-slate-400 hover:text-slate-600 text-lg">×</button>
+        <div className="fixed inset-0 z-50 bg-[#101E2B]/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl border border-[#E5DFD3] max-w-md w-full p-6 space-y-4">
+            <div className="flex justify-between items-center pb-3 border-b border-[#E5DFD3]">
+              <h3 className="text-lg font-bold text-[#101E2B]">Create Subscription Plan</h3>
+              <button onClick={() => setShowPlanModal(false)} className="text-[#889AA9] hover:text-[#101E2B] text-lg cursor-pointer">×</button>
             </div>
 
             <form onSubmit={handleCreatePlan} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-semibold text-[#101E2B] mb-1">
                   Catalogue Product (Optional / Recommended)
                 </label>
                 <select
@@ -700,7 +710,7 @@ export function CataloguePage() {
                       }
                     }
                   }}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-blue-600 bg-white"
+                  className="w-full px-3 py-2 border border-[#E5DFD3] rounded-lg text-sm bg-white text-[#101E2B] focus:outline-none focus:ring-2 focus:ring-[#2B4257]"
                 >
                   <option value="">-- No linked product (Standalone / Generic) --</option>
                   {products.map(p => (
@@ -709,30 +719,30 @@ export function CataloguePage() {
                     </option>
                   ))}
                 </select>
-                <p className="text-[11px] text-slate-500 mt-1">
+                <p className="text-[11px] text-[#5A6D80] mt-1">
                   Link this billing schedule directly to an inventory product from your catalogue.
                 </p>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Plan Name *</label>
+                <label className="block text-xs font-semibold text-[#101E2B] mb-1">Plan Name *</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Monthly Standard Enterprise"
                   value={planName}
                   onChange={(e) => setPlanName(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-blue-600"
+                  className="w-full px-3 py-2 border border-[#E5DFD3] rounded-lg text-sm bg-[#FBF9F5] text-[#101E2B] focus:outline-none focus:ring-2 focus:ring-[#2B4257]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Billing Interval *</label>
+                  <label className="block text-xs font-semibold text-[#101E2B] mb-1">Billing Interval *</label>
                   <select
                     value={planInterval}
                     onChange={(e) => setPlanInterval(e.target.value as BillingInterval)}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-blue-600"
+                    className="w-full px-3 py-2 border border-[#E5DFD3] rounded-lg text-sm bg-white text-[#101E2B] focus:outline-none focus:ring-2 focus:ring-[#2B4257]"
                   >
                     <option value="DAILY">Daily</option>
                     <option value="WEEKLY">Weekly</option>
@@ -741,84 +751,84 @@ export function CataloguePage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Base Price ($) *</label>
+                  <label className="block text-xs font-semibold text-[#101E2B] mb-1">Base Price ($) *</label>
                   <input
                     type="number"
                     step="0.01"
                     required
                     value={planBasePrice}
                     onChange={(e) => setPlanBasePrice(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-blue-600"
+                    className="w-full px-3 py-2 border border-[#E5DFD3] rounded-lg text-sm bg-[#FBF9F5] text-[#101E2B] focus:outline-none focus:ring-2 focus:ring-[#2B4257]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Minimum Quantity *</label>
+                <label className="block text-xs font-semibold text-[#101E2B] mb-1">Minimum Quantity *</label>
                 <input
                   type="number"
                   min="1"
                   required
                   value={planMinQty}
                   onChange={(e) => setPlanMinQty(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-blue-600"
+                  className="w-full px-3 py-2 border border-[#E5DFD3] rounded-lg text-sm bg-[#FBF9F5] text-[#101E2B] focus:outline-none focus:ring-2 focus:ring-[#2B4257]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Start Date</label>
+                  <label className="block text-xs font-semibold text-[#101E2B] mb-1">Start Date</label>
                   <input
                     type="date"
                     value={planStartDate}
                     onChange={(e) => setPlanStartDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-blue-600"
+                    className="w-full px-3 py-2 border border-[#E5DFD3] rounded-lg text-sm bg-[#FBF9F5] text-[#101E2B] focus:outline-none focus:ring-2 focus:ring-[#2B4257]"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">End Date</label>
+                  <label className="block text-xs font-semibold text-[#101E2B] mb-1">End Date</label>
                   <input
                     type="date"
                     value={planEndDate}
                     onChange={(e) => setPlanEndDate(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-blue-600"
+                    className="w-full px-3 py-2 border border-[#E5DFD3] rounded-lg text-sm bg-[#FBF9F5] text-[#101E2B] focus:outline-none focus:ring-2 focus:ring-[#2B4257]"
                   />
                 </div>
               </div>
 
-              <div className="space-y-2 pt-2 border-t border-slate-100 text-xs">
-                <label className="flex items-center gap-2 text-slate-700 font-medium">
+              <div className="space-y-2 pt-2 border-t border-[#E5DFD3] text-xs">
+                <label className="flex items-center gap-2 text-[#101E2B] font-medium cursor-pointer">
                   <input
                     type="checkbox"
                     checked={planAutoClose}
                     onChange={(e) => setPlanAutoClose(e.target.checked)}
-                    className="rounded text-blue-600 focus:ring-blue-500"
+                    className="rounded text-[#2B4257] focus:ring-[#2B4257]"
                   />
                   Auto-close subscription when end date arrives
                 </label>
-                <label className="flex items-center gap-2 text-slate-700 font-medium">
+                <label className="flex items-center gap-2 text-[#101E2B] font-medium cursor-pointer">
                   <input
                     type="checkbox"
                     checked={planCanPause}
                     onChange={(e) => setPlanCanPause(e.target.checked)}
-                    className="rounded text-blue-600 focus:ring-blue-500"
+                    className="rounded text-[#2B4257] focus:ring-[#2B4257]"
                   />
                   Allow pausing and resuming subscription
                 </label>
               </div>
 
-              <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
+              <div className="flex justify-end gap-2 pt-4 border-t border-[#E5DFD3]">
                 <button
                   type="button"
                   onClick={() => setShowPlanModal(false)}
-                  className="px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50"
+                  className="px-4 py-2 border border-[#E5DFD3] rounded-lg text-sm text-[#5A6D80] hover:bg-[#F5F0E6] cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium shadow-xs disabled:opacity-50"
+                  className="px-4 py-2 bg-[#2B4257] hover:bg-[#1D2D3D] text-[#FAF7F0] rounded-lg text-sm font-medium shadow-xs disabled:opacity-50 cursor-pointer"
                 >
                   {loading ? 'Creating...' : 'Create Plan'}
                 </button>
@@ -830,21 +840,21 @@ export function CataloguePage() {
 
       {/* Edit Product & Variants Modal */}
       {showEditProductModal && editingProduct && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl shadow-xl max-w-lg w-full border border-slate-200 overflow-hidden max-h-[90vh] flex flex-col animate-in fade-in zoom-in-95 duration-150">
-            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+        <div className="fixed inset-0 bg-[#101E2B]/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl shadow-xl max-w-lg w-full border border-[#E5DFD3] overflow-hidden max-h-[90vh] flex flex-col animate-in fade-in zoom-in-95 duration-150">
+            <div className="px-6 py-4 border-b border-[#E5DFD3] flex justify-between items-center bg-[#FAF7F0]">
               <div className="flex items-center gap-2">
-                <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
+                <div className="p-2 bg-[#F5F0E6] rounded-lg text-[#2B4257]">
                   <Pencil className="h-4 w-4" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-900 text-sm">Edit Product & Variants</h3>
-                  <p className="text-xs text-slate-500">Update pricing, product details, and variant adjustments</p>
+                  <h3 className="font-bold text-[#101E2B] text-sm">Edit Product & Variants</h3>
+                  <p className="text-xs text-[#5A6D80]">Update pricing, product details, and variant adjustments</p>
                 </div>
               </div>
               <button
                 onClick={() => setShowEditProductModal(false)}
-                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg"
+                className="text-[#889AA9] hover:text-[#101E2B] p-1 rounded-lg cursor-pointer"
               >
                 ✕
               </button>
@@ -852,23 +862,23 @@ export function CataloguePage() {
 
             <form onSubmit={handleUpdateProduct} className="p-6 space-y-4 overflow-y-auto flex-1">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Product Name *</label>
+                <label className="block text-xs font-semibold text-[#101E2B] mb-1">Product Name *</label>
                 <input
                   type="text"
                   required
                   value={editProdName}
                   onChange={(e) => setEditProdName(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-blue-600"
+                  className="w-full px-3 py-2 border border-[#E5DFD3] rounded-lg text-sm bg-[#FBF9F5] text-[#101E2B] focus:outline-none focus:ring-2 focus:ring-[#2B4257]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Type *</label>
+                  <label className="block text-xs font-semibold text-[#101E2B] mb-1">Type *</label>
                   <select
                     value={editProdType}
                     onChange={(e) => setEditProdType(e.target.value as ProductType)}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-blue-600"
+                    className="w-full px-3 py-2 border border-[#E5DFD3] rounded-lg text-sm bg-white text-[#101E2B] focus:outline-none focus:ring-2 focus:ring-[#2B4257]"
                   >
                     <option value="SOFTWARE">Software</option>
                     <option value="ADDON">Add-on</option>
@@ -876,89 +886,89 @@ export function CataloguePage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Sales Price ($) *</label>
+                  <label className="block text-xs font-semibold text-[#101E2B] mb-1">Sales Price ($) *</label>
                   <input
                     type="number"
                     step="0.01"
                     required
                     value={editProdSalesPrice}
                     onChange={(e) => setEditProdSalesPrice(e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-blue-600"
+                    className="w-full px-3 py-2 border border-[#E5DFD3] rounded-lg text-sm bg-[#FBF9F5] text-[#101E2B] focus:outline-none focus:ring-2 focus:ring-[#2B4257]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Cost Price ($)</label>
+                <label className="block text-xs font-semibold text-[#101E2B] mb-1">Cost Price ($)</label>
                 <input
                   type="number"
                   step="0.01"
                   value={editProdCostPrice}
                   onChange={(e) => setEditProdCostPrice(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-blue-600"
+                  className="w-full px-3 py-2 border border-[#E5DFD3] rounded-lg text-sm bg-[#FBF9F5] text-[#101E2B] focus:outline-none focus:ring-2 focus:ring-[#2B4257]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Notes / Description</label>
+                <label className="block text-xs font-semibold text-[#101E2B] mb-1">Notes / Description</label>
                 <textarea
                   rows={2}
                   value={editProdNotes}
                   onChange={(e) => setEditProdNotes(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-blue-600"
+                  className="w-full px-3 py-2 border border-[#E5DFD3] rounded-lg text-sm bg-[#FBF9F5] text-[#101E2B] focus:outline-none focus:ring-2 focus:ring-[#2B4257]"
                 />
               </div>
 
               {/* Dynamic Variants Editor Section */}
-              <div className="space-y-2 pt-3 border-t border-slate-100">
+              <div className="space-y-2 pt-3 border-t border-[#E5DFD3]">
                 <div className="flex justify-between items-center">
                   <div>
-                    <label className="text-xs font-bold text-slate-800 block">Product Variants & Price Adjustments</label>
-                    <span className="text-[11px] text-slate-400">Edit variant names and additional charges</span>
+                    <label className="text-xs font-bold text-[#101E2B] block">Product Variants & Price Adjustments</label>
+                    <span className="text-[11px] text-[#5A6D80]">Edit variant names and additional charges</span>
                   </div>
                   <button
                     type="button"
                     onClick={handleAddEditVariant}
-                    className="text-xs text-blue-600 hover:text-blue-700 font-semibold flex items-center gap-1 px-2 py-1 rounded bg-blue-50 border border-blue-200/60"
+                    className="text-xs text-[#2B4257] hover:text-[#101E2B] font-semibold flex items-center gap-1 px-2.5 py-1 rounded bg-[#F5F0E6] border border-[#E5DFD3] cursor-pointer"
                   >
                     <Plus className="h-3 w-3" /> Add Variant
                   </button>
                 </div>
 
                 {editVariants.length === 0 ? (
-                  <p className="text-xs text-slate-400 italic py-2">No variants added yet. Click &quot;Add Variant&quot; above to create one.</p>
+                  <p className="text-xs text-[#889AA9] italic py-2">No variants added yet. Click &quot;Add Variant&quot; above to create one.</p>
                 ) : (
                   editVariants.map((v, i) => (
-                    <div key={i} className="flex gap-2 items-center bg-slate-50 p-2.5 rounded-lg border border-slate-200/80">
+                    <div key={i} className="flex gap-2 items-center bg-[#FAF7F0] p-2.5 rounded-lg border border-[#E5DFD3]">
                       <div className="flex-1">
                         <input
                           type="text"
                           placeholder="e.g. Brand: Odoo"
                           value={v.variantName}
                           onChange={(e) => handleEditVariantChange(i, 'variantName', e.target.value)}
-                          className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded text-xs focus:outline-blue-600"
+                          className="w-full px-2.5 py-1.5 bg-white border border-[#E5DFD3] rounded text-xs text-[#101E2B] focus:outline-none focus:ring-2 focus:ring-[#2B4257]"
                         />
                       </div>
                       <div className="flex items-center gap-1 w-32">
-                        <span className="text-xs text-slate-400">+$</span>
+                        <span className="text-xs text-[#5A6D80]">+$</span>
                         <input
                           type="number"
                           step="0.01"
                           placeholder="560.00"
                           value={v.priceAdjustment}
                           onChange={(e) => handleEditVariantChange(i, 'priceAdjustment', e.target.value)}
-                          className="w-full px-2 py-1.5 bg-white border border-slate-200 rounded text-xs focus:outline-blue-600"
+                          className="w-full px-2 py-1.5 bg-white border border-[#E5DFD3] rounded text-xs text-[#101E2B] focus:outline-none focus:ring-2 focus:ring-[#2B4257]"
                         />
                       </div>
                       <div className="text-right w-24">
-                        <span className="text-[11px] text-slate-500 font-medium block">
+                        <span className="text-[11px] text-[#101E2B] font-medium block">
                           ${((parseFloat(editProdSalesPrice) || 0) + (parseFloat(v.priceAdjustment) || 0)).toFixed(2)}
                         </span>
                       </div>
                       <button
                         type="button"
                         onClick={() => handleRemoveEditVariant(i)}
-                        className="text-slate-400 hover:text-rose-600 p-1 rounded hover:bg-slate-200/50"
+                        className="text-[#889AA9] hover:text-rose-600 p-1 rounded hover:bg-[#F5F0E6] cursor-pointer"
                         title="Remove Variant"
                       >
                         ✕
@@ -968,24 +978,24 @@ export function CataloguePage() {
                 )}
 
                 {/* Price Preview */}
-                <div className="p-3 bg-blue-50/60 border border-blue-200/60 rounded-lg text-xs text-blue-900 flex justify-between items-center">
+                <div className="p-3 bg-[#F5F0E6] border border-[#E5DFD3] rounded-lg text-xs text-[#101E2B] flex justify-between items-center">
                   <span>Base Sales Price: <strong>${parseFloat(editProdSalesPrice) || 0}</strong></span>
                   <span>Active Variants: <strong>{editVariants.length}</strong></span>
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
+              <div className="flex justify-end gap-2 pt-4 border-t border-[#E5DFD3]">
                 <button
                   type="button"
                   onClick={() => setShowEditProductModal(false)}
-                  className="px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50"
+                  className="px-4 py-2 border border-[#E5DFD3] rounded-lg text-sm text-[#5A6D80] hover:bg-[#F5F0E6] cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium shadow-xs disabled:opacity-50"
+                  className="px-4 py-2 bg-[#2B4257] hover:bg-[#1D2D3D] text-[#FAF7F0] rounded-lg text-sm font-medium shadow-xs disabled:opacity-50 cursor-pointer"
                 >
                   {loading ? 'Saving...' : 'Save Changes'}
                 </button>

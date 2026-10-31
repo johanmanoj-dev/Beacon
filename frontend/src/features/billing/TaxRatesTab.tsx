@@ -24,8 +24,9 @@ export const TaxRatesTab: React.FC = () => {
     try {
       const response = await api.get<TaxRate[]>('/taxes');
       setTaxRates(response.data || []);
-    } catch (err: any) {
-      setErrorMessage(err.message || 'Failed to load tax rates');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to load tax rates';
+      setErrorMessage(msg);
     } finally {
       setIsLoading(false);
     }
@@ -88,10 +89,11 @@ export const TaxRatesTab: React.FC = () => {
 
       setIsModalOpen(false);
       await fetchTaxRates();
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to save tax rate';
       setFormErrors((prev) => ({
         ...prev,
-        name: err.message || 'Failed to save tax rate',
+        name: msg,
       }));
     } finally {
       setIsSubmitting(false);
@@ -103,8 +105,9 @@ export const TaxRatesTab: React.FC = () => {
     try {
       await api.delete(`/taxes/${id}`);
       await fetchTaxRates();
-    } catch (err: any) {
-      alert(err.message || 'Failed to delete tax rate');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to delete tax rate';
+      alert(msg);
     }
   };
 
@@ -116,8 +119,9 @@ export const TaxRatesTab: React.FC = () => {
         isActive: !tax.isActive,
       });
       await fetchTaxRates();
-    } catch (err: any) {
-      alert(err.message || 'Failed to update status');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to update status';
+      alert(msg);
     }
   };
 
@@ -125,15 +129,15 @@ export const TaxRatesTab: React.FC = () => {
     {
       header: 'Tax Rule Name',
       accessorKey: 'name',
-      className: 'font-semibold text-slate-900',
+      className: 'font-semibold text-[#101E2B]',
       cell: (row: TaxRate) => (
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-lg bg-blue-50 text-blue-600">
+          <div className="p-2 rounded-lg bg-[#F5F0E6] text-[#2B4257]">
             <Percent className="h-4 w-4" />
           </div>
           <div>
-            <span className="font-semibold text-slate-900 block">{row.name}</span>
-            <span className="text-xs text-slate-400">Rule ID: #{row.id}</span>
+            <span className="font-semibold text-[#101E2B] block">{row.name}</span>
+            <span className="text-xs text-[#889AA9]">Rule ID: #{row.id}</span>
           </div>
         </div>
       ),
@@ -142,7 +146,7 @@ export const TaxRatesTab: React.FC = () => {
       header: 'Tax Rate (%)',
       accessorKey: 'ratePercent',
       cell: (row: TaxRate) => (
-        <span className="inline-flex items-center font-mono font-bold text-slate-800 text-sm">
+        <span className="inline-flex items-center font-mono font-bold text-[#101E2B] text-sm">
           {Number(row.ratePercent).toFixed(2)}%
         </span>
       ),
@@ -178,7 +182,7 @@ export const TaxRatesTab: React.FC = () => {
             variant="ghost"
             onClick={() => openEditModal(row)}
             title="Edit Tax Rate"
-            leftIcon={<Edit2 className="h-3.5 w-3.5 text-slate-600" />}
+            leftIcon={<Edit2 className="h-3.5 w-3.5 text-[#5A6D80]" />}
           >
             Edit
           </Button>
@@ -202,8 +206,8 @@ export const TaxRatesTab: React.FC = () => {
       {/* Top Banner & Action */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h3 className="text-lg font-bold text-slate-900 tracking-tight">Tax Configurations</h3>
-          <p className="text-sm text-slate-500">
+          <h3 className="text-lg font-bold text-[#101E2B] tracking-tight">Tax Configurations</h3>
+          <p className="text-sm text-[#5A6D80]">
             Define system-wide statutory taxes (e.g. 18% GST) applied to recurring subscriptions and invoices.
           </p>
         </div>
@@ -228,7 +232,7 @@ export const TaxRatesTab: React.FC = () => {
       )}
 
       {/* Tax Rates Table */}
-      <Card className="overflow-hidden p-0 border-slate-200">
+      <Card className="overflow-hidden p-0 border-[#E5DFD3]">
         <DataTable
           columns={columns}
           data={taxRates}
@@ -282,7 +286,7 @@ export const TaxRatesTab: React.FC = () => {
             onChange={(e) => setRatePercent(e.target.value)}
             error={formErrors.ratePercent}
             helperText="Percentage between 0.00% and 100.00% added to taxable lines"
-            leftIcon={<Percent className="h-4 w-4 text-slate-400" />}
+            leftIcon={<Percent className="h-4 w-4 text-[#889AA9]" />}
             required
           />
 
@@ -292,9 +296,9 @@ export const TaxRatesTab: React.FC = () => {
                 type="checkbox"
                 checked={isActive}
                 onChange={(e) => setIsActive(e.target.checked)}
-                className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                className="h-4 w-4 rounded border-[#E5DFD3] text-[#2B4257] focus:ring-[#2B4257]"
               />
-              <span className="text-sm font-medium text-slate-700">
+              <span className="text-sm font-medium text-[#101E2B]">
                 Rule is currently Active (auto-available on new quotes)
               </span>
             </label>
@@ -304,4 +308,3 @@ export const TaxRatesTab: React.FC = () => {
     </div>
   );
 };
-export default TaxRatesTab;

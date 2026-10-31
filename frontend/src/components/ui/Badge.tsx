@@ -16,21 +16,21 @@ export const Badge: React.FC<BadgeProps> = ({
   ...props
 }) => {
   const variants = {
-    success: 'bg-emerald-50 text-emerald-700 border-emerald-200/80',
-    warning: 'bg-amber-50 text-amber-800 border-amber-200/80',
-    danger: 'bg-rose-50 text-rose-700 border-rose-200/80',
-    info: 'bg-blue-50 text-blue-700 border-blue-200/80',
-    neutral: 'bg-slate-100 text-slate-700 border-slate-200',
-    purple: 'bg-purple-50 text-purple-700 border-purple-200/80',
+    success: 'bg-[#EBF5EE] text-[#1E5638] border-[#BDE3CA]',
+    warning: 'bg-[#FEF7EA] text-[#8C4800] border-[#FBDCA3]',
+    danger: 'bg-[#FDECEE] text-[#93152A] border-[#F8BFC7]',
+    info: 'bg-[#E9EFF5] text-[#2B4257] border-[#C8D7E5]',
+    neutral: 'bg-[#F5F0E6] text-[#4A5D6E] border-[#E5DFD3]',
+    purple: 'bg-[#F3EFF8] text-[#553C7B] border-[#D9CEE8]',
   };
 
   const dots = {
-    success: 'bg-emerald-500',
-    warning: 'bg-amber-500',
-    danger: 'bg-rose-500',
-    info: 'bg-blue-500',
-    neutral: 'bg-slate-400',
-    purple: 'bg-purple-500',
+    success: 'bg-[#2D6A4F]',
+    warning: 'bg-[#B45309]',
+    danger: 'bg-[#9F1239]',
+    info: 'bg-[#2B4257]',
+    neutral: 'bg-[#889AA9]',
+    purple: 'bg-[#6B4E8F]',
   };
 
   const sizes = {

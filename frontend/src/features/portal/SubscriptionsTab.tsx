@@ -139,8 +139,8 @@ export const SubscriptionsTab: React.FC<SubscriptionsTabProps> = ({ customerEmai
       {/* Header Toolbar */}
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-3">
         <div>
-          <h2 className="text-lg font-bold text-slate-900">Active Software Subscriptions</h2>
-          <p className="text-xs text-slate-500">
+          <h2 className="text-lg font-bold text-[#101E2B]">Active Software Subscriptions</h2>
+          <p className="text-xs text-[#5A6D80]">
             View your subscribed software products, assigned variants, and next renewal schedules.
           </p>
         </div>
@@ -176,28 +176,28 @@ export const SubscriptionsTab: React.FC<SubscriptionsTabProps> = ({ customerEmai
             return (
               <div
                 key={sub.id}
-                className="bg-white rounded-xl border border-slate-200/90 shadow-2xs hover:shadow-md hover:border-blue-300 transition-all duration-200 flex flex-col justify-between overflow-hidden"
+                className="bg-white rounded-xl border border-[#E5DFD3] shadow-2xs hover:shadow-md hover:border-[#2B4257] transition-all duration-200 flex flex-col justify-between overflow-hidden"
               >
                 {/* Card Header */}
-                <div className="p-6 border-b border-slate-100 bg-gradient-to-r from-slate-50/50 to-white">
+                <div className="p-6 border-b border-[#E5DFD3] bg-gradient-to-r from-[#FAF7F0] to-white">
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="font-mono text-xs font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200/60">
+                        <span className="font-mono text-xs font-bold text-[#2B4257] bg-[#F5F0E6] px-2 py-0.5 rounded border border-[#E5DFD3]">
                           {sub.subscriptionNumber}
                         </span>
                         <Badge variant="success" size="sm" withDot>
                           {sub.status}
                         </Badge>
                       </div>
-                      <h3 className="text-base font-bold text-slate-900 mt-1">
+                      <h3 className="text-base font-bold text-[#101E2B] mt-1">
                         {sub.planName || 'Enterprise Subscription Plan'}
                       </h3>
                     </div>
 
                     <div className="text-right">
-                      <span className="text-xs text-slate-400 block font-medium">Estimated Amount</span>
-                      <span className="text-lg font-black text-slate-900">
+                      <span className="text-xs text-[#889AA9] block font-medium">Estimated Amount</span>
+                      <span className="text-lg font-black text-[#101E2B]">
                         {formatCurrency(totalMonthly)}
                       </span>
                     </div>
@@ -207,18 +207,18 @@ export const SubscriptionsTab: React.FC<SubscriptionsTabProps> = ({ customerEmai
                 {/* Card Body */}
                 <div className="p-6 space-y-4 flex-1">
                   {/* Timeline metadata */}
-                  <div className="grid grid-cols-2 gap-3 p-3 bg-slate-50/80 rounded-lg text-xs border border-slate-100">
+                  <div className="grid grid-cols-2 gap-3 p-3 bg-[#FAF7F0] rounded-lg text-xs border border-[#E5DFD3]">
                     <div>
-                      <span className="text-slate-400 font-medium block">Started On</span>
-                      <span className="font-semibold text-slate-700 flex items-center gap-1.5 mt-0.5">
-                        <Calendar className="h-3.5 w-3.5 text-slate-400" />
+                      <span className="text-[#889AA9] font-medium block">Started On</span>
+                      <span className="font-semibold text-[#101E2B] flex items-center gap-1.5 mt-0.5">
+                        <Calendar className="h-3.5 w-3.5 text-[#889AA9]" />
                         {formatDate(sub.startDate)}
                       </span>
                     </div>
                     <div>
-                      <span className="text-slate-400 font-medium block">Next Renewal Date</span>
-                      <span className="font-bold text-blue-700 flex items-center gap-1.5 mt-0.5">
-                        <Calendar className="h-3.5 w-3.5 text-blue-500" />
+                      <span className="text-[#889AA9] font-medium block">Next Renewal Date</span>
+                      <span className="font-bold text-[#2B4257] flex items-center gap-1.5 mt-0.5">
+                        <Calendar className="h-3.5 w-3.5 text-[#2B4257]" />
                         {formatDate(sub.nextBillingDate)}
                       </span>
                     </div>
@@ -226,28 +226,28 @@ export const SubscriptionsTab: React.FC<SubscriptionsTabProps> = ({ customerEmai
 
                   {/* Subscribed items snippet */}
                   <div>
-                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-2">
+                    <span className="text-xs font-semibold text-[#5A6D80] uppercase tracking-wider block mb-2">
                       Included Line Items ({itemsList.length})
                     </span>
                     <div className="space-y-1.5">
                       {itemsList.map((item, idx) => (
                         <div
                           key={idx}
-                          className="flex items-center justify-between text-xs py-1.5 px-2.5 rounded bg-white border border-slate-100 hover:border-slate-200 transition-colors"
+                          className="flex items-center justify-between text-xs py-1.5 px-2.5 rounded bg-white border border-[#E5DFD3] hover:border-[#D5CDC0] transition-colors"
                         >
                           <div className="min-w-0 pr-2">
-                            <span className="font-medium text-slate-800 block truncate">
+                            <span className="font-medium text-[#101E2B] block truncate">
                               {item.productName}
                             </span>
                             {item.variantName && (
-                              <span className="text-[11px] text-blue-600 flex items-center gap-1 mt-0.5">
+                              <span className="text-[11px] text-[#2B4257] flex items-center gap-1 mt-0.5">
                                 <Tag className="h-3 w-3" />
                                 {item.variantName}
                               </span>
                             )}
                           </div>
                           <div className="text-right shrink-0">
-                            <span className="font-semibold text-slate-900">
+                            <span className="font-semibold text-[#101E2B]">
                               {item.quantity} × {formatCurrency(item.unitPrice)}
                             </span>
                           </div>
@@ -258,8 +258,8 @@ export const SubscriptionsTab: React.FC<SubscriptionsTabProps> = ({ customerEmai
                 </div>
 
                 {/* Card Footer */}
-                <div className="px-6 py-3.5 border-t border-slate-100 bg-slate-50/40 flex items-center justify-between">
-                  <span className="text-xs text-slate-500 flex items-center gap-1">
+                <div className="px-6 py-3.5 border-t border-[#E5DFD3] bg-[#FAF7F0] flex items-center justify-between">
+                  <span className="text-xs text-[#5A6D80] flex items-center gap-1">
                     <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
                     Auto-renews via {sub.paymentTerms}
                   </span>
@@ -268,7 +268,7 @@ export const SubscriptionsTab: React.FC<SubscriptionsTabProps> = ({ customerEmai
                     variant="outline"
                     size="sm"
                     onClick={() => setSelectedSub(sub)}
-                    leftIcon={<Eye className="h-3.5 w-3.5 text-slate-500" />}
+                    leftIcon={<Eye className="h-3.5 w-3.5 text-[#5A6D80]" />}
                   >
                     View Details
                   </Button>
@@ -294,30 +294,30 @@ export const SubscriptionsTab: React.FC<SubscriptionsTabProps> = ({ customerEmai
           }
         >
           <div className="space-y-5 py-2">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 bg-slate-50 rounded-xl text-xs border border-slate-200/80">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3.5 bg-[#FAF7F0] rounded-xl text-xs border border-[#E5DFD3]">
               <div>
-                <span className="text-slate-400 block font-medium">Status</span>
+                <span className="text-[#889AA9] block font-medium">Status</span>
                 <Badge variant="success" size="sm" withDot className="mt-1">
                   {selectedSub.status}
                 </Badge>
               </div>
               <div>
-                <span className="text-slate-400 block font-medium">Start Date</span>
-                <span className="font-semibold text-slate-800 mt-1 block">
+                <span className="text-[#889AA9] block font-medium">Start Date</span>
+                <span className="font-semibold text-[#101E2B] mt-1 block">
                   {formatDate(selectedSub.startDate)}
                 </span>
               </div>
               <div>
-                <span className="text-slate-400 block font-medium">Next Billing Date</span>
-                <span className="font-bold text-blue-700 mt-1 block">
+                <span className="text-[#889AA9] block font-medium">Next Billing Date</span>
+                <span className="font-bold text-[#2B4257] mt-1 block">
                   {formatDate(selectedSub.nextBillingDate)}
                 </span>
               </div>
             </div>
 
-            <div className="rounded-xl border border-slate-200 overflow-hidden">
+            <div className="rounded-xl border border-[#E5DFD3] overflow-hidden">
               <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50 border-b border-slate-200 uppercase font-semibold text-slate-600 tracking-wider">
+                <thead className="bg-[#F7F4EE] border-b border-[#E5DFD3] uppercase font-semibold text-[#101E2B] tracking-wider">
                   <tr>
                     <th className="py-2.5 px-4">Item & Variant</th>
                     <th className="py-2.5 px-3 text-center">Qty</th>
@@ -326,13 +326,13 @@ export const SubscriptionsTab: React.FC<SubscriptionsTabProps> = ({ customerEmai
                     <th className="py-2.5 px-4 text-right">Line Total</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 text-slate-700">
+                <tbody className="divide-y divide-[#E5DFD3] text-[#101E2B]">
                   {(selectedSub.items || []).map((it, idx) => (
-                    <tr key={idx} className="hover:bg-slate-50/50">
-                      <td className="py-3 px-4 font-medium text-slate-900">
+                    <tr key={idx} className="hover:bg-[#FCFAF6]">
+                      <td className="py-3 px-4 font-medium text-[#101E2B]">
                         {it.productName}
                         {it.variantName && (
-                          <span className="block text-[11px] text-blue-600 font-normal mt-0.5">
+                          <span className="block text-[11px] text-[#2B4257] font-normal mt-0.5">
                             {it.variantName}
                           </span>
                         )}
@@ -340,7 +340,7 @@ export const SubscriptionsTab: React.FC<SubscriptionsTabProps> = ({ customerEmai
                       <td className="py-3 px-3 text-center font-medium">{it.quantity}</td>
                       <td className="py-3 px-3 text-right">{formatCurrency(it.unitPrice)}</td>
                       <td className="py-3 px-3 text-right">{it.taxRatePercent}%</td>
-                      <td className="py-3 px-4 text-right font-bold text-slate-900">
+                      <td className="py-3 px-4 text-right font-bold text-[#101E2B]">
                         {formatCurrency(it.lineTotal)}
                       </td>
                     </tr>
@@ -349,13 +349,13 @@ export const SubscriptionsTab: React.FC<SubscriptionsTabProps> = ({ customerEmai
               </table>
             </div>
 
-            <div className="flex justify-between items-center p-3 rounded-lg bg-blue-50/70 border border-blue-200/60 text-xs text-blue-900">
+            <div className="flex justify-between items-center p-3 rounded-lg bg-[#F5F0E6] border border-[#E5DFD3] text-xs text-[#101E2B]">
               <span className="flex items-center gap-1.5 font-medium">
-                <Sparkles className="h-3.5 w-3.5 text-blue-600" />
+                <Sparkles className="h-3.5 w-3.5 text-[#2B4257]" />
                 Snapshot Pricing Guarantee: Unit costs locked at subscription issuance.
               </span>
               <span className="font-extrabold text-sm">
-                Total: {formatCurrency((selectedSub.items || []).reduce((a, b) => a + (Number(b.lineTotal) || 0), 0))}
+                Total: {formatCurrency((selectedSub.items || []).reduce((a, b) => a + (Number(b.lineTotal ?? 0) || 0), 0))}
               </span>
             </div>
           </div>
@@ -364,3 +364,4 @@ export const SubscriptionsTab: React.FC<SubscriptionsTabProps> = ({ customerEmai
     </div>
   );
 };
+export default SubscriptionsTab;

@@ -42,8 +42,8 @@ export const DemoScenarioModal: React.FC<DemoScenarioModalProps> = ({ isOpen, on
         message: msg,
       });
       showToast('MySQL database seeded with full 7-scene dataset!', 'success');
-    } catch (err: any) {
-      const errMsg = err?.message || 'Seeding failed. Verify MySQL connection on localhost:3306.';
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : 'Seeding failed. Verify MySQL connection on localhost:3306.';
       setSeedStatus({
         success: false,
         message: errMsg,
@@ -176,15 +176,15 @@ export const DemoScenarioModal: React.FC<DemoScenarioModalProps> = ({ isOpen, on
       onClose={onClose}
       title={
         <div className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-amber-500" />
-          <span>System Scenario Navigator & Guided Walkthrough</span>
+          <Sparkles className="h-5 w-5 text-[#2B4257]" />
+          <span className="text-[#101E2B] font-bold">System Scenario Navigator & Guided Walkthrough</span>
         </div>
       }
       description="Interactive scenario guide covering all system capabilities and workflows."
       size="xl"
       footer={
         <div className="flex flex-col sm:flex-row items-center justify-between w-full gap-3">
-          <div className="text-xs text-slate-500">
+          <div className="text-xs text-[#5A6D80]">
             Enterprise Scenario Overview
           </div>
           <div className="flex items-center gap-2">
@@ -193,7 +193,7 @@ export const DemoScenarioModal: React.FC<DemoScenarioModalProps> = ({ isOpen, on
               size="sm"
               onClick={handleSeedDatabase}
               isLoading={isSeeding}
-              leftIcon={<Database className="h-4 w-4 text-blue-600" />}
+              leftIcon={<Database className="h-4 w-4 text-[#2B4257]" />}
             >
               Seed Local MySQL DB
             </Button>
@@ -206,14 +206,14 @@ export const DemoScenarioModal: React.FC<DemoScenarioModalProps> = ({ isOpen, on
     >
       <div className="space-y-4 py-1">
         {/* Tab Switcher */}
-        <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
+        <div className="flex items-center gap-2 border-b border-[#E5DFD3] pb-2">
           <button
             type="button"
             onClick={() => setActiveTab('SCENARIOS')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'SCENARIOS'
-                ? 'bg-blue-600 text-white shadow-xs'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                ? 'bg-[#2B4257] text-[#FAF7F0] shadow-xs'
+                : 'text-[#5A6D80] hover:bg-[#F5F0E6] hover:text-[#101E2B]'
             }`}
           >
             <Database className="h-3.5 w-3.5" />
@@ -222,10 +222,10 @@ export const DemoScenarioModal: React.FC<DemoScenarioModalProps> = ({ isOpen, on
           <button
             type="button"
             onClick={() => setActiveTab('PITCH')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'PITCH'
-                ? 'bg-blue-600 text-white shadow-xs'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                ? 'bg-[#2B4257] text-[#FAF7F0] shadow-xs'
+                : 'text-[#5A6D80] hover:bg-[#F5F0E6] hover:text-[#101E2B]'
             }`}
           >
             <Clock className="h-3.5 w-3.5" />
@@ -254,13 +254,13 @@ export const DemoScenarioModal: React.FC<DemoScenarioModalProps> = ({ isOpen, on
         {activeTab === 'SCENARIOS' ? (
           <>
             {/* Introduction Banner */}
-            <div className="p-3.5 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/80 text-xs text-blue-950 space-y-1">
-              <span className="font-bold flex items-center gap-1.5 text-xs">
-                <Database className="h-3.5 w-3.5 text-blue-600" />
+            <div className="p-3.5 rounded-xl bg-[#F5F0E6] border border-[#E5DFD3] text-xs text-[#101E2B] space-y-1">
+              <span className="font-bold flex items-center gap-1.5 text-xs text-[#101E2B]">
+                <Database className="h-3.5 w-3.5 text-[#2B4257]" />
                 End-to-End Scenario Testing Environment
               </span>
-              <p className="text-blue-900/80 leading-relaxed text-[11px]">
-                Click <strong>"Seed Local MySQL DB"</strong> below to populate scenario data.
+              <p className="text-[#5A6D80] leading-relaxed text-[11px]">
+                Click <strong>&quot;Seed Local MySQL DB&quot;</strong> below to populate scenario data.
                 Use the shortcuts below to step through all platform capabilities.
               </p>
             </div>
@@ -272,15 +272,15 @@ export const DemoScenarioModal: React.FC<DemoScenarioModalProps> = ({ isOpen, on
                 return (
                   <div
                     key={sc.num}
-                    className="p-3 rounded-xl border border-slate-200 bg-white hover:border-blue-400 hover:shadow-xs transition-all flex flex-col justify-between space-y-2"
+                    className="p-3 rounded-xl border border-[#E5DFD3] bg-white hover:border-[#2B4257] hover:shadow-xs transition-all flex flex-col justify-between space-y-2"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2">
-                        <span className="h-5 w-5 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-[11px] shrink-0 font-mono">
+                        <span className="h-5 w-5 rounded-full bg-[#182635] text-white flex items-center justify-center font-bold text-[11px] shrink-0 font-mono">
                           {sc.num}
                         </span>
-                        <Icon className="h-4 w-4 text-blue-600 shrink-0" />
-                        <span className="font-bold text-xs text-slate-900 leading-snug">
+                        <Icon className="h-4 w-4 text-[#2B4257] shrink-0" />
+                        <span className="font-bold text-xs text-[#101E2B] leading-snug">
                           {sc.title}
                         </span>
                       </div>
@@ -289,18 +289,18 @@ export const DemoScenarioModal: React.FC<DemoScenarioModalProps> = ({ isOpen, on
                       </Badge>
                     </div>
 
-                    <p className="text-[11px] text-slate-500 leading-relaxed">
+                    <p className="text-[11px] text-[#5A6D80] leading-relaxed">
                       {sc.desc}
                     </p>
 
-                    <div className="pt-1 border-t border-slate-100 flex justify-end">
+                    <div className="pt-1 border-t border-[#E5DFD3] flex justify-end">
                       <button
                         type="button"
                         onClick={() => {
                           onClose();
                           navigate(sc.route);
                         }}
-                        className="text-xs font-semibold text-blue-600 hover:text-blue-700 inline-flex items-center gap-1 transition-colors"
+                        className="text-xs font-semibold text-[#2B4257] hover:text-[#101E2B] inline-flex items-center gap-1 transition-colors cursor-pointer"
                       >
                         Open View <ArrowRight className="h-3 w-3" />
                       </button>
@@ -313,8 +313,8 @@ export const DemoScenarioModal: React.FC<DemoScenarioModalProps> = ({ isOpen, on
         ) : (
           /* Pitch Rehearsal Script Tab */
           <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-1">
-            <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-950 flex items-center gap-2">
-              <Clock className="h-4 w-4 text-amber-600 shrink-0" />
+            <div className="p-3.5 rounded-xl bg-[#FAF7F0] border border-[#E5DFD3] text-xs text-[#101E2B] flex items-center gap-2">
+              <Clock className="h-4 w-4 text-[#2B4257] shrink-0" />
               <span>
                 <strong>System Overview:</strong> Highlighting core technical requirements, recurring billing engine, and dynamic local database processing.
               </span>
@@ -326,18 +326,18 @@ export const DemoScenarioModal: React.FC<DemoScenarioModalProps> = ({ isOpen, on
                 return (
                   <div
                     key={idx}
-                    className="p-3.5 rounded-xl border border-slate-200/90 bg-white shadow-2xs space-y-2"
+                    className="p-3.5 rounded-xl border border-[#E5DFD3] bg-white shadow-2xs space-y-2"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-bold text-xs text-slate-900 flex items-center gap-2">
-                        <SecIcon className="h-3.5 w-3.5 text-blue-600" />
+                      <span className="font-bold text-xs text-[#101E2B] flex items-center gap-2">
+                        <SecIcon className="h-3.5 w-3.5 text-[#2B4257]" />
                         {sec.title}
                       </span>
-                      <span className="text-[11px] font-mono font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded border border-slate-200">
+                      <span className="text-[11px] font-mono font-bold bg-[#F5F0E6] text-[#2B4257] px-2 py-0.5 rounded border border-[#E5DFD3]">
                         {sec.timing}
                       </span>
                     </div>
-                    <ul className="list-disc list-inside space-y-1 text-slate-600 text-[11px] leading-relaxed pl-1">
+                    <ul className="list-disc list-inside space-y-1 text-[#5A6D80] text-[11px] leading-relaxed pl-1">
                       {sec.talkingPoints.map((tp, pIdx) => (
                         <li key={pIdx}>{tp}</li>
                       ))}
@@ -352,3 +352,4 @@ export const DemoScenarioModal: React.FC<DemoScenarioModalProps> = ({ isOpen, on
     </Modal>
   );
 };
+export default DemoScenarioModal;

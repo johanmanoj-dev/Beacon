@@ -20,19 +20,19 @@ export const PasswordValidator: React.FC<PasswordValidatorProps> = ({
 
   const strengthLabels = ['Too weak', 'Weak', 'Fair', 'Good', 'Strong'];
   const strengthColors = [
-    'bg-slate-200',
+    'bg-[#E5DFD3]',
     'bg-rose-500',
     'bg-amber-500',
-    'bg-blue-500',
-    'bg-emerald-500',
+    'bg-[#2B4257]',
+    'bg-emerald-600',
   ];
 
   return (
-    <div className={cn('p-3.5 bg-slate-50 border border-slate-200 rounded-lg space-y-2.5', className)}>
+    <div className={cn('p-3.5 bg-[#FAF7F0] border border-[#E5DFD3] rounded-lg space-y-2.5', className)}>
       <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold text-slate-700">Password Requirements</span>
+        <span className="text-xs font-semibold text-[#101E2B]">Password Requirements</span>
         {password && (
-          <span className="text-[11px] font-semibold text-slate-600">
+          <span className="text-[11px] font-semibold text-[#5A6D80]">
             {strengthLabels[score]}
           </span>
         )}
@@ -45,7 +45,7 @@ export const PasswordValidator: React.FC<PasswordValidatorProps> = ({
             key={index}
             className={cn(
               'h-full rounded-full transition-colors duration-200',
-              score > index ? strengthColors[score] : 'bg-slate-200'
+              score > index ? strengthColors[score] : 'bg-[#E5DFD3]'
             )}
           />
         ))}
@@ -60,15 +60,15 @@ export const PasswordValidator: React.FC<PasswordValidatorProps> = ({
               key={rule.id}
               className={cn(
                 'flex items-center gap-2 transition-colors duration-150',
-                passed ? 'text-emerald-700 font-medium' : 'text-slate-500'
+                passed ? 'text-emerald-700 font-medium' : 'text-[#889AA9]'
               )}
             >
               <span
                 className={cn(
                   'h-4 w-4 rounded-full flex items-center justify-center shrink-0 text-[10px] transition-colors',
                   passed
-                    ? 'bg-emerald-100 text-emerald-600'
-                    : 'bg-slate-200 text-slate-400'
+                    ? 'bg-emerald-100 text-emerald-700'
+                    : 'bg-[#E5DFD3] text-[#889AA9]'
                 )}
               >
                 {passed ? <Check className="h-2.5 w-2.5 stroke-[3]" /> : <X className="h-2.5 w-2.5" />}

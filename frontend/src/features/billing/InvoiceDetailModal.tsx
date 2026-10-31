@@ -75,7 +75,7 @@ export const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({
       onClose={onClose}
       title={
         <div className="flex items-center gap-2">
-          <Receipt className="h-5 w-5 text-blue-600" />
+          <Receipt className="h-5 w-5 text-[#2B4257]" />
           <span>Invoice Details — {invoice.invoiceNumber}</span>
         </div>
       }
@@ -84,31 +84,31 @@ export const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({
     >
       <div className="space-y-6">
         {/* Top Info Header */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 rounded-xl bg-[#FAF7F0] border border-[#E5DFD3]">
           <div>
-            <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Customer</span>
-            <p className="text-sm font-bold text-slate-800">{invoice.customerName || `Customer #${invoice.customerId}`}</p>
+            <span className="text-[11px] font-semibold text-[#7189A0] uppercase tracking-wider block">Customer</span>
+            <p className="text-sm font-bold text-[#101E2B]">{invoice.customerName || `Customer #${invoice.customerId}`}</p>
           </div>
           <div>
-            <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Issue Date</span>
-            <p className="text-sm font-medium text-slate-700">{formatDate(invoice.issueDate)}</p>
+            <span className="text-[11px] font-semibold text-[#7189A0] uppercase tracking-wider block">Issue Date</span>
+            <p className="text-sm font-medium text-[#2B4257]">{formatDate(invoice.issueDate)}</p>
           </div>
           <div>
-            <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Due Date</span>
-            <p className="text-sm font-medium text-slate-700">{formatDate(invoice.dueDate)}</p>
+            <span className="text-[11px] font-semibold text-[#7189A0] uppercase tracking-wider block">Due Date</span>
+            <p className="text-sm font-medium text-[#2B4257]">{formatDate(invoice.dueDate)}</p>
           </div>
           <div>
-            <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">Status</span>
+            <span className="text-[11px] font-semibold text-[#7189A0] uppercase tracking-wider block">Status</span>
             <div className="mt-0.5">{getStatusBadge(invoice.status)}</div>
           </div>
         </div>
 
         {/* Snapshot Items Table */}
         <div>
-          <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Item Snapshot Lines</h4>
-          <div className="overflow-x-auto border border-slate-200 rounded-lg">
+          <h4 className="text-xs font-bold text-[#2B4257] uppercase tracking-wider mb-2">Item Snapshot Lines</h4>
+          <div className="overflow-x-auto border border-[#E5DFD3] rounded-lg">
             <table className="w-full text-xs text-left">
-              <thead className="bg-slate-100 text-slate-600 font-semibold border-b border-slate-200">
+              <thead className="bg-[#F7F4EE] text-[#4A5D6E] font-semibold border-b border-[#E5DFD3]">
                 <tr>
                   <th className="py-2.5 px-3">Description</th>
                   <th className="py-2.5 px-3 text-center">Qty</th>
@@ -118,21 +118,21 @@ export const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({
                   <th className="py-2.5 px-3 text-right">Total</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-[#F0EAE1]">
                 {invoice.items && invoice.items.length > 0 ? (
                   invoice.items.map((it, idx) => (
-                    <tr key={it.id || idx} className="hover:bg-slate-50/50">
-                      <td className="py-2.5 px-3 font-medium text-slate-900">{it.description}</td>
-                      <td className="py-2.5 px-3 text-center text-slate-700 font-mono">{it.quantity}</td>
-                      <td className="py-2.5 px-3 text-right text-slate-700 font-mono">{formatCurrency(it.unitPrice)}</td>
-                      <td className="py-2.5 px-3 text-right text-slate-700 font-mono">{it.taxRatePercent}%</td>
-                      <td className="py-2.5 px-3 text-right text-slate-700 font-mono">{formatCurrency(it.taxAmount)}</td>
-                      <td className="py-2.5 px-3 text-right font-bold text-slate-900 font-mono">{formatCurrency(it.lineTotal)}</td>
+                    <tr key={it.id || idx} className="hover:bg-[#FBF9F5]">
+                      <td className="py-2.5 px-3 font-medium text-[#101E2B]">{it.description}</td>
+                      <td className="py-2.5 px-3 text-center text-[#2B4257] font-mono">{it.quantity}</td>
+                      <td className="py-2.5 px-3 text-right text-[#2B4257] font-mono">{formatCurrency(it.unitPrice)}</td>
+                      <td className="py-2.5 px-3 text-right text-[#2B4257] font-mono">{it.taxRatePercent}%</td>
+                      <td className="py-2.5 px-3 text-right text-[#2B4257] font-mono">{formatCurrency(it.taxAmount)}</td>
+                      <td className="py-2.5 px-3 text-right font-bold text-[#101E2B] font-mono">{formatCurrency(it.lineTotal)}</td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={6} className="py-4 text-center text-slate-400 italic">No line item snapshots recorded.</td>
+                    <td colSpan={6} className="py-4 text-center text-[#889AA9] italic">No line item snapshots recorded.</td>
                   </tr>
                 )}
               </tbody>
@@ -142,35 +142,35 @@ export const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({
 
         {/* Totals & Balance Breakdown */}
         <div className="flex flex-col md:flex-row justify-between items-start gap-4">
-          <div className="flex-1 text-xs text-slate-500 space-y-1">
+          <div className="flex-1 text-xs text-[#5A6D80] space-y-1">
             <p><strong>Subscription:</strong> {invoice.subscriptionNumber || `SUB #${invoice.subscriptionId}`}</p>
             <p><strong>Idempotency Window:</strong> {invoice.billingPeriodStart} to {invoice.billingPeriodEnd}</p>
           </div>
 
-          <div className="w-full md:w-72 bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2 text-xs">
-            <div className="flex justify-between text-slate-600">
+          <div className="w-full md:w-72 bg-[#FAF7F0] border border-[#E5DFD3] rounded-xl p-3.5 space-y-2 text-xs">
+            <div className="flex justify-between text-[#5A6D80]">
               <span>Subtotal:</span>
               <span className="font-mono font-medium">{formatCurrency(invoice.subtotal)}</span>
             </div>
-            <div className="flex justify-between text-slate-600">
+            <div className="flex justify-between text-[#5A6D80]">
               <span>Taxes:</span>
               <span className="font-mono font-medium">{formatCurrency(invoice.taxAmount)}</span>
             </div>
             {invoice.discountAmount > 0 && (
-              <div className="flex justify-between text-emerald-700 font-medium">
+              <div className="flex justify-between text-[#1E5638] font-medium">
                 <span>Applied Discount:</span>
                 <span className="font-mono">-{formatCurrency(invoice.discountAmount)}</span>
               </div>
             )}
-            <div className="flex justify-between text-sm font-bold text-slate-900 pt-2 border-t border-slate-200">
+            <div className="flex justify-between text-sm font-bold text-[#101E2B] pt-2 border-t border-[#E5DFD3]">
               <span>Total Amount:</span>
               <span className="font-mono">{formatCurrency(invoice.totalAmount)}</span>
             </div>
-            <div className="flex justify-between text-xs text-emerald-600 font-semibold">
+            <div className="flex justify-between text-xs text-[#1E5638] font-semibold">
               <span>Amount Paid:</span>
               <span className="font-mono">{formatCurrency(invoice.amountPaid)}</span>
             </div>
-            <div className="flex justify-between text-sm font-extrabold text-amber-600 pt-1 border-t border-slate-200">
+            <div className="flex justify-between text-sm font-extrabold text-[#8C4800] pt-1 border-t border-[#E5DFD3]">
               <span>Balance Due:</span>
               <span className="font-mono">{formatCurrency(invoice.balanceDue)}</span>
             </div>
@@ -179,16 +179,16 @@ export const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({
 
         {/* Payment History for this Invoice */}
         <div>
-          <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Payment Receipts History</h4>
+          <h4 className="text-xs font-bold text-[#2B4257] uppercase tracking-wider mb-2">Payment Receipts History</h4>
           {isLoadingPayments ? (
-            <div className="flex items-center justify-center p-4 text-xs text-slate-500 gap-2">
-              <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+            <div className="flex items-center justify-center p-4 text-xs text-[#5A6D80] gap-2">
+              <Loader2 className="h-4 w-4 animate-spin text-[#2B4257]" />
               <span>Loading payment ledger...</span>
             </div>
           ) : payments.length > 0 ? (
-            <div className="overflow-x-auto border border-slate-200 rounded-lg">
+            <div className="overflow-x-auto border border-[#E5DFD3] rounded-lg">
               <table className="w-full text-xs text-left">
-                <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
+                <thead className="bg-[#F7F4EE] text-[#4A5D6E] font-semibold border-b border-[#E5DFD3]">
                   <tr>
                     <th className="py-2 px-3">Receipt / ID</th>
                     <th className="py-2 px-3">Method</th>
@@ -197,32 +197,32 @@ export const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({
                     <th className="py-2 px-3">Reference / Notes</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-[#F0EAE1]">
                   {payments.map((p) => (
                     <tr key={p.id}>
-                      <td className="py-2 px-3 font-mono font-semibold text-slate-900">PAY-{p.id}</td>
+                      <td className="py-2 px-3 font-mono font-semibold text-[#101E2B]">PAY-{p.id}</td>
                       <td className="py-2 px-3">
                         <Badge variant="neutral" size="sm">{p.paymentMethod}</Badge>
                       </td>
-                      <td className="py-2 px-3 text-right font-mono font-bold text-emerald-600">
+                      <td className="py-2 px-3 text-right font-mono font-bold text-[#1E5638]">
                         {formatCurrency(p.amount)}
                       </td>
-                      <td className="py-2 px-3 text-slate-600">{formatDate(p.paymentDate)}</td>
-                      <td className="py-2 px-3 text-slate-500 truncate max-w-xs">{p.referenceNumber || p.notes || '—'}</td>
+                      <td className="py-2 px-3 text-[#5A6D80]">{formatDate(p.paymentDate)}</td>
+                      <td className="py-2 px-3 text-[#7189A0] truncate max-w-xs">{p.referenceNumber || p.notes || '—'}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           ) : (
-            <div className="p-3 text-center text-xs text-slate-400 bg-slate-50 rounded-lg border border-slate-200">
+            <div className="p-3 text-center text-xs text-[#7189A0] bg-[#FAF7F0] rounded-lg border border-[#E5DFD3]">
               No payments recorded yet for this invoice.
             </div>
           )}
         </div>
 
         {/* Modal Footer Actions */}
-        <div className="flex justify-between items-center pt-4 border-t border-slate-200">
+        <div className="flex justify-between items-center pt-4 border-t border-[#E5DFD3]">
           <Button variant="ghost" onClick={handlePrint} className="text-xs">
             <Printer className="h-4 w-4 mr-1.5" />
             Print Receipt
@@ -249,7 +249,7 @@ export const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({
                   onClose();
                   onOpenGateway(invoice);
                 }}
-                className="text-xs bg-indigo-600 hover:bg-indigo-700"
+                className="text-xs"
               >
                 Simulate Pay Now
               </Button>

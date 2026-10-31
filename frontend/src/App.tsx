@@ -119,14 +119,14 @@ function DashboardOverview({
       header: 'Module',
       accessorKey: 'module',
       cell: (row) => (
-        <span className="font-semibold text-slate-800">{row.module}</span>
+        <span className="font-semibold text-[#101E2B]">{row.module}</span>
       ),
     },
     {
       header: 'Event Description',
       accessorKey: 'action',
       cell: (row) => (
-        <span className="text-slate-600 text-xs sm:text-sm">{row.action}</span>
+        <span className="text-[#5A6D80] text-xs sm:text-sm">{row.action}</span>
       ),
     },
     {
@@ -151,7 +151,7 @@ function DashboardOverview({
       header: 'Operator',
       accessorKey: 'owner',
       cell: (row) => (
-        <span className="text-xs text-slate-500 font-medium">{row.owner}</span>
+        <span className="text-xs text-[#7189A0] font-medium">{row.owner}</span>
       ),
     },
     {
@@ -159,7 +159,7 @@ function DashboardOverview({
       accessorKey: 'time',
       align: 'right',
       cell: (row) => (
-        <span className="text-xs text-slate-400 font-mono">{row.time}</span>
+        <span className="text-xs text-[#889AA9] font-mono">{row.time}</span>
       ),
     },
   ];
@@ -169,10 +169,10 @@ function DashboardOverview({
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900">
+          <h1 className="text-2xl font-black tracking-tight text-[#101E2B]">
             Brightloop Executive Overview
           </h1>
-          <p className="text-sm text-slate-500 mt-0.5">
+          <p className="text-sm text-[#5A6D80] mt-0.5">
             Real-time metrics, active subscriptions, and cash flow status.
           </p>
         </div>
@@ -205,45 +205,45 @@ function DashboardOverview({
             value: String(kpis.activeSubscriptionsCount),
             icon: Layers,
             sub: '+12% this month',
-            color: 'text-blue-600 bg-blue-50',
+            color: 'text-[#2B4257] bg-[#E9EFF5]',
           },
           {
             label: 'Monthly Recurring Rev',
             value: formatCurrency(kpis.totalRevenue),
             icon: TrendingUp,
             sub: '+8.4% vs last period',
-            color: 'text-emerald-600 bg-emerald-50',
+            color: 'text-[#1E5638] bg-[#EBF5EE]',
           },
           {
             label: 'Pending Receivables',
             value: formatCurrency(kpis.totalOutstanding),
             icon: CreditCard,
             sub: 'Invoices awaiting settlement',
-            color: 'text-amber-600 bg-amber-50',
+            color: 'text-[#8C4800] bg-[#FEF7EA]',
           },
           {
             label: 'Overdue Invoices',
             value: String(kpis.overdueInvoicesCount),
             icon: AlertTriangle,
             sub: 'Action required (Net 15)',
-            color: 'text-rose-600 bg-rose-50',
+            color: 'text-[#93152A] bg-[#FDECEE]',
           },
         ].map((kpi, idx) => {
           const Icon = kpi.icon;
           return (
             <Card key={idx} hoverable className="p-5">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <span className="text-xs font-bold text-[#7189A0] uppercase tracking-wider">
                   {kpi.label}
                 </span>
                 <div className={`p-2 rounded-lg ${kpi.color}`}>
                   <Icon className="h-4 w-4" />
                 </div>
               </div>
-              <div className="text-2xl font-black text-slate-900 mt-3 font-mono">
+              <div className="text-2xl font-black text-[#101E2B] mt-3 font-mono">
                 {kpi.value}
               </div>
-              <span className="text-xs text-slate-500 font-medium mt-1 block">
+              <span className="text-xs text-[#5A6D80] font-medium mt-1 block">
                 {kpi.sub}
               </span>
             </Card>
@@ -255,10 +255,10 @@ function DashboardOverview({
       <Card className="p-6 space-y-4">
         <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
           <div>
-            <h3 className="text-base font-bold text-slate-900">
+            <h3 className="text-base font-bold text-[#101E2B]">
               System Audit Activity Stream
             </h3>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-[#5A6D80]">
               Live audit stream of administrative actions, billing updates, and account events.
             </p>
           </div>

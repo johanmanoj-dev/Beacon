@@ -54,7 +54,7 @@ export const InvoicesPage: React.FC = () => {
       fetchInvoices();
       setTimeout(() => setActionAlert(null), 4000);
     } catch (err: any) {
-      setActionAlert({ message: err.response?.data?.message || 'Failed to confirm invoice', type: 'danger' });
+      setActionAlert({ message: err.message || 'Failed to confirm invoice', type: 'danger' });
     }
   };
 
@@ -66,7 +66,7 @@ export const InvoicesPage: React.FC = () => {
       fetchInvoices();
       setTimeout(() => setActionAlert(null), 4000);
     } catch (err: any) {
-      setActionAlert({ message: err.response?.data?.message || 'Failed to cancel invoice', type: 'danger' });
+      setActionAlert({ message: err.message || 'Failed to cancel invoice', type: 'danger' });
     }
   };
 
@@ -139,7 +139,7 @@ export const InvoicesPage: React.FC = () => {
         <button
           type="button"
           onClick={() => setSelectedInvoiceForDetail(inv)}
-          className="font-mono font-bold text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-left"
+          className="font-mono font-bold text-[#2B4257] hover:underline cursor-pointer text-left"
         >
           {inv.invoiceNumber}
         </button>
@@ -150,17 +150,17 @@ export const InvoicesPage: React.FC = () => {
       accessorKey: 'customerName',
       cell: (inv) => (
         <div>
-          <p className="font-semibold text-slate-900">{inv.customerName || `Customer #${inv.customerId}`}</p>
-          <p className="text-[11px] text-slate-500 font-mono">{inv.subscriptionNumber || `Sub #${inv.subscriptionId}`}</p>
+          <p className="font-semibold text-[#101E2B]">{inv.customerName || `Customer #${inv.customerId}`}</p>
+          <p className="text-[11px] text-[#7189A0] font-mono">{inv.subscriptionNumber || `Sub #${inv.subscriptionId}`}</p>
         </div>
       ),
     },
     {
       header: 'Billing Period',
       cell: (inv) => (
-        <div className="text-[11px] text-slate-600">
+        <div className="text-[11px] text-[#5A6D80]">
           <span>{formatDate(inv.billingPeriodStart)}</span>
-          <span className="text-slate-400 mx-1">→</span>
+          <span className="text-[#889AA9] mx-1">→</span>
           <span>{formatDate(inv.billingPeriodEnd)}</span>
         </div>
       ),
@@ -169,7 +169,7 @@ export const InvoicesPage: React.FC = () => {
       header: 'Total Billed',
       align: 'right',
       cell: (inv) => (
-        <span className="font-mono font-semibold text-slate-900">
+        <span className="font-mono font-semibold text-[#101E2B]">
           {formatCurrency(inv.totalAmount)}
         </span>
       ),
@@ -178,7 +178,7 @@ export const InvoicesPage: React.FC = () => {
       header: 'Amount Paid',
       align: 'right',
       cell: (inv) => (
-        <span className="font-mono font-medium text-emerald-600">
+        <span className="font-mono font-medium text-[#1E5638]">
           {formatCurrency(inv.amountPaid)}
         </span>
       ),
@@ -189,7 +189,7 @@ export const InvoicesPage: React.FC = () => {
       cell: (inv) => (
         <span
           className={`font-mono font-bold ${
-            inv.balanceDue > 0 ? 'text-amber-600' : 'text-slate-400'
+            (inv.balanceDue ?? 0) > 0 ? 'text-[#8C4800]' : 'text-[#889AA9]'
           }`}
         >
           {formatCurrency(inv.balanceDue)}
@@ -199,7 +199,7 @@ export const InvoicesPage: React.FC = () => {
     {
       header: 'Due Date',
       cell: (inv) => (
-        <span className="text-xs text-slate-700 font-medium">
+        <span className="text-xs text-[#2B4257] font-medium">
           {formatDate(inv.dueDate)}
         </span>
       ),
@@ -216,7 +216,7 @@ export const InvoicesPage: React.FC = () => {
           <button
             type="button"
             onClick={() => setSelectedInvoiceForDetail(inv)}
-            className="p-1 rounded text-slate-500 hover:text-blue-600 hover:bg-slate-100 transition-colors"
+            className="p-1 rounded text-[#5A6D80] hover:text-[#101E2B] hover:bg-[#F5F0E6] transition-colors cursor-pointer"
             title="View Details"
           >
             <Eye className="h-4 w-4" />
@@ -226,18 +226,18 @@ export const InvoicesPage: React.FC = () => {
             <button
               type="button"
               onClick={() => handleConfirmInvoice(inv.id)}
-              className="px-2 py-0.5 text-[11px] rounded bg-blue-50 text-blue-700 hover:bg-blue-100 font-medium transition-colors"
+              className="px-2 py-0.5 text-[11px] rounded bg-[#E9EFF5] text-[#2B4257] hover:bg-[#D8E2EC] font-medium transition-colors cursor-pointer"
             >
               Confirm
             </button>
           )}
 
-          {inv.balanceDue > 0 && inv.status !== 'CANCELLED' && (
+          {(inv.balanceDue ?? 0) > 0 && inv.status !== 'CANCELLED' && (
             <>
               <button
                 type="button"
                 onClick={() => setSelectedInvoiceForPayment(inv)}
-                className="px-2 py-0.5 text-[11px] rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-semibold transition-colors"
+                className="px-2 py-0.5 text-[11px] rounded bg-[#EBF5EE] text-[#1E5638] hover:bg-[#DBEFE1] font-semibold transition-colors cursor-pointer"
                 title="Staff Manual Settlement"
               >
                 Pay
@@ -245,7 +245,7 @@ export const InvoicesPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setSelectedInvoiceForGateway(inv)}
-                className="px-2 py-0.5 text-[11px] rounded bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-semibold transition-colors"
+                className="px-2 py-0.5 text-[11px] rounded bg-[#E9EFF5] text-[#2B4257] hover:bg-[#D8E2EC] font-semibold transition-colors cursor-pointer"
                 title="Customer Gateway Simulator"
               >
                 Simulate
@@ -257,7 +257,7 @@ export const InvoicesPage: React.FC = () => {
             <button
               type="button"
               onClick={() => handleCancelInvoice(inv.id)}
-              className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+              className="p-1 rounded text-[#7189A0] hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
               title="Cancel Invoice"
             >
               <XCircle className="h-4 w-4" />
@@ -271,18 +271,18 @@ export const InvoicesPage: React.FC = () => {
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12">
       {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E5DFD3] pb-5">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-blue-600 text-white shadow-sm">
+          <div className="p-2.5 rounded-xl bg-[#2B4257] text-[#FAF7F0] shadow-sm">
             <Receipt className="h-6 w-6" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+              <h1 className="text-2xl font-black text-[#101E2B] tracking-tight">
                 Invoices & Recurring Billing
               </h1>
             </div>
-            <p className="text-sm text-slate-500 mt-0.5">
+            <p className="text-sm text-[#5A6D80] mt-0.5">
               Automated recurring billing cycles, idempotent snapshot creation, and dual-track settlement engine.
             </p>
           </div>
@@ -302,7 +302,7 @@ export const InvoicesPage: React.FC = () => {
           <Button
             variant="primary"
             onClick={() => setIsRunBillingOpen(true)}
-            className="text-xs bg-blue-600 hover:bg-blue-700 shadow-sm"
+            className="text-xs"
           >
             <Play className="h-3.5 w-3.5 mr-1.5" />
             Run Recurring Billing
@@ -315,17 +315,17 @@ export const InvoicesPage: React.FC = () => {
         <div
           className={`p-3.5 rounded-xl border text-xs flex items-center justify-between ${
             actionAlert.type === 'success'
-              ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+              ? 'bg-[#EBF5EE] border-[#BDE3CA] text-[#1E5638]'
               : actionAlert.type === 'danger'
-              ? 'bg-rose-50 border-rose-200 text-rose-800'
-              : 'bg-blue-50 border-blue-200 text-blue-800'
+              ? 'bg-[#FDECEE] border-[#F8BFC7] text-[#93152A]'
+              : 'bg-[#E9EFF5] border-[#C8D7E5] text-[#2B4257]'
           }`}
         >
           <span>{actionAlert.message}</span>
           <button
             type="button"
             onClick={() => setActionAlert(null)}
-            className="text-slate-400 hover:text-slate-600 text-sm font-bold"
+            className="text-[#7189A0] hover:text-[#101E2B] text-sm font-bold cursor-pointer"
           >
             ×
           </button>
@@ -334,30 +334,30 @@ export const InvoicesPage: React.FC = () => {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-2xs">
-          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Total Invoices</p>
-          <p className="text-xl font-bold text-slate-900 mt-1">{kpis.totalInvoices}</p>
+        <div className="p-3.5 rounded-xl bg-white border border-[#E5DFD3] shadow-2xs">
+          <p className="text-[11px] font-semibold text-[#7189A0] uppercase tracking-wider">Total Invoices</p>
+          <p className="text-xl font-bold text-[#101E2B] mt-1">{kpis.totalInvoices}</p>
         </div>
-        <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-2xs">
-          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Total Billed</p>
-          <p className="text-xl font-bold text-slate-900 mt-1">{formatCurrency(kpis.totalBilled)}</p>
+        <div className="p-3.5 rounded-xl bg-white border border-[#E5DFD3] shadow-2xs">
+          <p className="text-[11px] font-semibold text-[#7189A0] uppercase tracking-wider">Total Billed</p>
+          <p className="text-xl font-bold text-[#101E2B] mt-1">{formatCurrency(kpis.totalBilled)}</p>
         </div>
-        <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-2xs">
-          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Total Collected</p>
-          <p className="text-xl font-bold text-emerald-600 mt-1">{formatCurrency(kpis.totalPaid)}</p>
+        <div className="p-3.5 rounded-xl bg-white border border-[#E5DFD3] shadow-2xs">
+          <p className="text-[11px] font-semibold text-[#7189A0] uppercase tracking-wider">Total Collected</p>
+          <p className="text-xl font-bold text-[#1E5638] mt-1">{formatCurrency(kpis.totalPaid)}</p>
         </div>
-        <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-2xs">
-          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Outstanding Due</p>
-          <p className="text-xl font-extrabold text-amber-600 mt-1">{formatCurrency(kpis.totalOutstanding)}</p>
+        <div className="p-3.5 rounded-xl bg-white border border-[#E5DFD3] shadow-2xs">
+          <p className="text-[11px] font-semibold text-[#7189A0] uppercase tracking-wider">Outstanding Due</p>
+          <p className="text-xl font-extrabold text-[#8C4800] mt-1">{formatCurrency(kpis.totalOutstanding)}</p>
         </div>
-        <div className="p-3.5 rounded-xl bg-white border border-slate-200 shadow-2xs">
-          <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Overdue Invoices</p>
-          <p className="text-xl font-bold text-rose-600 mt-1">{kpis.overdueCount}</p>
+        <div className="p-3.5 rounded-xl bg-white border border-[#E5DFD3] shadow-2xs">
+          <p className="text-[11px] font-semibold text-[#7189A0] uppercase tracking-wider">Overdue Invoices</p>
+          <p className="text-xl font-bold text-[#93152A] mt-1">{kpis.overdueCount}</p>
         </div>
       </div>
 
       {/* Filters and Search Bar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3 rounded-xl border border-slate-200">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3 rounded-xl border border-[#E5DFD3]">
         {/* Status Filter Tabs */}
         <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0">
           {['ALL', 'CONFIRMED', 'PARTIALLY_PAID', 'PAID', 'OVERDUE', 'DRAFT', 'CANCELLED'].map((st) => (
@@ -367,8 +367,8 @@ export const InvoicesPage: React.FC = () => {
               onClick={() => setSelectedStatus(st)}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
                 selectedStatus === st
-                  ? 'bg-blue-600 text-white shadow-xs'
-                  : 'text-slate-600 hover:bg-slate-100'
+                  ? 'bg-[#2B4257] text-[#FAF7F0] shadow-xs'
+                  : 'text-[#5A6D80] hover:bg-[#F5F0E6]'
               }`}
             >
               {st === 'ALL' ? 'All Invoices' : st.replace('_', ' ')}
@@ -378,13 +378,13 @@ export const InvoicesPage: React.FC = () => {
 
         {/* Search */}
         <div className="relative w-full sm:w-64">
-          <Search className="h-4 w-4 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <Search className="h-4 w-4 text-[#7189A0] absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search invoice or customer..."
-            className="w-full text-xs pl-8 pr-3 py-1.5 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 focus:bg-white"
+            className="w-full text-xs pl-8 pr-3 py-1.5 border border-[#E5DFD3] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2B4257] bg-[#FBF9F5] focus:bg-white text-[#101E2B]"
           />
         </div>
       </div>

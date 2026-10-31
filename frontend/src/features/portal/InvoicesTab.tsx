@@ -15,12 +15,9 @@ import { Button, Badge, Modal, Input, EmptyState, useToast } from '../../compone
 import { formatCurrency, formatDate } from '../../lib/utils';
 import type { Invoice, InvoiceStatus } from '../../types';
 
-
 export interface InvoicesTabProps {
   customerEmail?: string;
 }
-
-const TODAY = new Date();
 
 export const InvoicesTab: React.FC<InvoicesTabProps> = ({ customerEmail }) => {
   const { user } = useAuth();
@@ -79,8 +76,8 @@ export const InvoicesTab: React.FC<InvoicesTabProps> = ({ customerEmail }) => {
   }, [customerEmail]);
 
   const filteredInvoices = invoices.filter((inv) => {
-    if (filter === 'UNPAID') return inv.balanceDue > 0;
-    if (filter === 'PAID') return inv.status === 'PAID' || inv.balanceDue === 0;
+    if (filter === 'UNPAID') return (inv.balanceDue ?? 0) > 0;
+    if (filter === 'PAID') return inv.status === 'PAID' || (inv.balanceDue ?? 0) === 0;
     return true;
   });
 
@@ -133,8 +130,8 @@ export const InvoicesTab: React.FC<InvoicesTabProps> = ({ customerEmail }) => {
         setPaymentInvoice(null);
         setPaymentSuccess(null);
       }, 1500);
-    } catch (err: any) {
-      const msg = err.response?.data?.message || err.message || 'Payment processing failed';
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Payment processing failed';
       showToast(msg, 'error');
     } finally {
       setIsProcessingPayment(false);
@@ -146,24 +143,24 @@ export const InvoicesTab: React.FC<InvoicesTabProps> = ({ customerEmail }) => {
       {/* Header and Filter Controls */}
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
         <div>
-          <h2 className="text-lg font-bold text-slate-900">Billing Statements & Invoices</h2>
-          <p className="text-xs text-slate-500">
+          <h2 className="text-lg font-bold text-[#101E2B]">Billing Statements & Invoices</h2>
+          <p className="text-xs text-[#5A6D80]">
             Download official tax invoices, check outstanding balances, and pay due amounts online.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           {/* Status Filter Buttons */}
-          <div className="inline-flex rounded-lg border border-slate-200 bg-white p-1 text-xs">
+          <div className="inline-flex rounded-lg border border-[#E5DFD3] bg-white p-1 text-xs">
             {(['ALL', 'UNPAID', 'PAID'] as const).map((opt) => (
               <button
                 key={opt}
                 type="button"
                 onClick={() => setFilter(opt)}
-                className={`px-3 py-1 rounded font-semibold transition-colors ${
+                className={`px-3 py-1 rounded font-semibold transition-colors cursor-pointer ${
                   filter === opt
-                    ? 'bg-blue-600 text-white shadow-2xs'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-[#2B4257] text-[#FAF7F0] shadow-2xs'
+                    : 'text-[#5A6D80] hover:text-[#101E2B]'
                 }`}
               >
                 {opt === 'ALL' ? 'All Invoices' : opt === 'UNPAID' ? 'Pending Payment' : 'Settled'}
@@ -184,10 +181,10 @@ export const InvoicesTab: React.FC<InvoicesTabProps> = ({ customerEmail }) => {
       </div>
 
       {/* Invoices Table Card */}
-      <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden">
+      <div className="bg-white rounded-xl border border-[#E5DFD3] shadow-2xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
-            <thead className="bg-slate-50/75 border-b border-slate-200 text-slate-600 uppercase font-semibold tracking-wider">
+            <thead className="bg-[#F7F4EE] border-b border-[#E5DFD3] text-[#101E2B] uppercase font-semibold tracking-wider">
               <tr>
                 <th className="py-3 px-5">Invoice Number</th>
                 <th className="py-3 px-4">Billing Period</th>
@@ -198,7 +195,7 @@ export const InvoicesTab: React.FC<InvoicesTabProps> = ({ customerEmail }) => {
                 <th className="py-3 px-5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-slate-700">
+            <tbody className="divide-y divide-[#E5DFD3] text-[#5A6D80]">
               {filteredInvoices.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="p-6">
@@ -220,29 +217,29 @@ export const InvoicesTab: React.FC<InvoicesTabProps> = ({ customerEmail }) => {
                 </tr>
               ) : (
                 filteredInvoices.map((inv) => (
-                  <tr key={inv.id} className="hover:bg-slate-50/60 transition-colors">
-                    <td className="py-3.5 px-5 font-mono font-bold text-slate-900">
+                  <tr key={inv.id} className="hover:bg-[#FCFAF6] transition-colors">
+                    <td className="py-3.5 px-5 font-mono font-bold text-[#101E2B]">
                       {inv.invoiceNumber}
                       {inv.subscriptionNumber && (
-                        <span className="block text-[11px] text-slate-400 font-sans font-normal">
+                        <span className="block text-[11px] text-[#889AA9] font-sans font-normal">
                           For {inv.subscriptionNumber}
                         </span>
                       )}
                     </td>
-                    <td className="py-3.5 px-4 text-slate-600 font-medium">
+                    <td className="py-3.5 px-4 text-[#5A6D80] font-medium">
                       {formatDate(inv.billingPeriodStart)} – {formatDate(inv.billingPeriodEnd)}
                     </td>
                     <td className="py-3.5 px-4">
-                      <span className="font-semibold text-slate-800">{formatDate(inv.dueDate)}</span>
-                      {inv.balanceDue > 0 && new Date(inv.dueDate) < TODAY && (
+                      <span className="font-semibold text-[#101E2B]">{formatDate(inv.dueDate)}</span>
+                      {(inv.balanceDue ?? 0) > 0 && inv.dueDate && new Date(inv.dueDate).getTime() < Date.now() && (
                         <span className="block text-[10px] text-rose-600 font-bold">Past Due</span>
                       )}
                     </td>
-                    <td className="py-3.5 px-4 text-right font-bold text-slate-900">
+                    <td className="py-3.5 px-4 text-right font-bold text-[#101E2B]">
                       {formatCurrency(inv.totalAmount)}
                     </td>
                     <td className="py-3.5 px-4 text-right font-black">
-                      <span className={inv.balanceDue > 0 ? 'text-amber-700' : 'text-emerald-700'}>
+                      <span className={(inv.balanceDue ?? 0) > 0 ? 'text-amber-700' : 'text-emerald-700'}>
                         {formatCurrency(inv.balanceDue)}
                       </span>
                     </td>
@@ -257,12 +254,12 @@ export const InvoicesTab: React.FC<InvoicesTabProps> = ({ customerEmail }) => {
                         size="sm"
                         onClick={() => setPreviewInvoice(inv)}
                         title="View printable invoice"
-                        leftIcon={<Eye className="h-3.5 w-3.5 text-slate-500" />}
+                        leftIcon={<Eye className="h-3.5 w-3.5 text-[#5A6D80]" />}
                       >
                         View
                       </Button>
 
-                      {inv.balanceDue > 0 && (
+                      {(inv.balanceDue ?? 0) > 0 && (
                         <Button
                           variant="primary"
                           size="sm"
@@ -289,7 +286,7 @@ export const InvoicesTab: React.FC<InvoicesTabProps> = ({ customerEmail }) => {
           size="lg"
           footer={
             <div className="flex items-center justify-between w-full">
-              <span className="text-xs text-slate-400">Official Brightloop Invoicing System</span>
+              <span className="text-xs text-[#889AA9]">Official Brightloop Invoicing System</span>
               <div className="flex gap-2">
                 <Button
                   variant="outline"
@@ -306,30 +303,30 @@ export const InvoicesTab: React.FC<InvoicesTabProps> = ({ customerEmail }) => {
             </div>
           }
         >
-          <div className="p-4 sm:p-6 space-y-6 text-slate-800">
+          <div className="p-4 sm:p-6 space-y-6 text-[#101E2B]">
             {/* Invoice Top Header */}
-            <div className="flex justify-between items-start border-b border-slate-200 pb-5">
+            <div className="flex justify-between items-start border-b border-[#E5DFD3] pb-5">
               <div>
                 <div className="flex items-center gap-2">
-                  <div className="h-8 w-8 rounded-lg bg-blue-600 text-white font-black flex items-center justify-center text-sm">
+                  <div className="h-8 w-8 rounded-lg bg-[#2B4257] text-[#FAF7F0] font-black flex items-center justify-center text-sm">
                     B
                   </div>
-                  <span className="font-extrabold text-lg tracking-tight text-slate-900">
+                  <span className="font-extrabold text-lg tracking-tight text-[#101E2B]">
                     Brightloop Software
                   </span>
                 </div>
-                <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                <p className="text-xs text-[#5A6D80] mt-1 leading-relaxed">
                   Tax Invoice & Subscription Billing Statement<br />
                   GSTIN: 29AAACB1234F1Z5 | Support: billing@brightloop.com
                 </p>
               </div>
 
               <div className="text-right">
-                <h3 className="text-xl font-black text-slate-900">{previewInvoice.invoiceNumber}</h3>
-                <span className="text-xs text-slate-500 mt-0.5 block">
+                <h3 className="text-xl font-black text-[#101E2B]">{previewInvoice.invoiceNumber}</h3>
+                <span className="text-xs text-[#5A6D80] mt-0.5 block">
                   Issued: {formatDate(previewInvoice.issueDate)}
                 </span>
-                <span className="text-xs text-slate-500 block">
+                <span className="text-xs text-[#5A6D80] block">
                   Due Date: {formatDate(previewInvoice.dueDate)}
                 </span>
                 <div className="mt-2">
@@ -341,39 +338,39 @@ export const InvoicesTab: React.FC<InvoicesTabProps> = ({ customerEmail }) => {
             </div>
 
             {/* Billed To / Account info */}
-            <div className="grid grid-cols-2 gap-4 p-4 rounded-xl bg-slate-50 border border-slate-100 text-xs">
+            <div className="grid grid-cols-2 gap-4 p-4 rounded-xl bg-[#FAF7F0] border border-[#E5DFD3] text-xs">
               <div>
-                <span className="font-bold text-slate-700 uppercase tracking-wider block mb-1">
+                <span className="font-bold text-[#5A6D80] uppercase tracking-wider block mb-1">
                   Billed To
                 </span>
-                <span className="font-bold text-slate-900 text-sm block">
+                <span className="font-bold text-[#101E2B] text-sm block">
                   {previewInvoice.customerName || 'Client Organization'}
                 </span>
-                <span className="text-slate-500 block mt-0.5">
+                <span className="text-[#889AA9] block mt-0.5">
                   Subscription Ref: {previewInvoice.subscriptionNumber || 'SUB-2026-0001'}
                 </span>
               </div>
 
               <div className="text-right">
-                <span className="font-bold text-slate-700 uppercase tracking-wider block mb-1">
+                <span className="font-bold text-[#5A6D80] uppercase tracking-wider block mb-1">
                   Payment Summary
                 </span>
-                <span className="text-slate-600 block">
+                <span className="text-[#5A6D80] block">
                   Total Invoiced: <strong>{formatCurrency(previewInvoice.totalAmount)}</strong>
                 </span>
-                <span className="text-slate-600 block">
+                <span className="text-[#5A6D80] block">
                   Amount Paid: <strong>{formatCurrency(previewInvoice.amountPaid)}</strong>
                 </span>
-                <span className="text-sm font-black text-blue-700 block mt-1">
+                <span className="text-sm font-black text-[#2B4257] block mt-1">
                   Balance Due: {formatCurrency(previewInvoice.balanceDue)}
                 </span>
               </div>
             </div>
 
             {/* Items Table */}
-            <div className="rounded-xl border border-slate-200 overflow-hidden text-xs">
+            <div className="rounded-xl border border-[#E5DFD3] overflow-hidden text-xs">
               <table className="w-full text-left">
-                <thead className="bg-slate-50 text-slate-600 border-b border-slate-200 font-semibold uppercase tracking-wider">
+                <thead className="bg-[#F7F4EE] text-[#101E2B] border-b border-[#E5DFD3] font-semibold uppercase tracking-wider">
                   <tr>
                     <th className="py-2.5 px-4">Item Description</th>
                     <th className="py-2.5 px-3 text-center">Qty</th>
@@ -382,14 +379,14 @@ export const InvoicesTab: React.FC<InvoicesTabProps> = ({ customerEmail }) => {
                     <th className="py-2.5 px-4 text-right">Total</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-[#E5DFD3]">
                   {previewInvoice.items.map((it, idx) => (
-                    <tr key={idx}>
-                      <td className="py-3 px-4 font-medium text-slate-800">{it.description}</td>
+                    <tr key={idx} className="hover:bg-[#FCFAF6]">
+                      <td className="py-3 px-4 font-medium text-[#101E2B]">{it.description}</td>
                       <td className="py-3 px-3 text-center">{it.quantity}</td>
                       <td className="py-3 px-3 text-right">{formatCurrency(it.unitPrice)}</td>
                       <td className="py-3 px-3 text-right">{formatCurrency(it.taxAmount)}</td>
-                      <td className="py-3 px-4 text-right font-bold text-slate-900">
+                      <td className="py-3 px-4 text-right font-bold text-[#101E2B]">
                         {formatCurrency(it.lineTotal)}
                       </td>
                     </tr>
@@ -400,16 +397,16 @@ export const InvoicesTab: React.FC<InvoicesTabProps> = ({ customerEmail }) => {
 
             {/* Bottom Subtotal and Taxes Calculation */}
             <div className="flex justify-end">
-              <div className="w-64 space-y-1.5 text-xs text-slate-600">
+              <div className="w-64 space-y-1.5 text-xs text-[#5A6D80]">
                 <div className="flex justify-between">
                   <span>Subtotal:</span>
-                  <span className="font-semibold text-slate-800">
+                  <span className="font-semibold text-[#101E2B]">
                     {formatCurrency(previewInvoice.subtotal)}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span>Taxes (18% GST):</span>
-                  <span className="font-semibold text-slate-800">
+                  <span className="font-semibold text-[#101E2B]">
                     {formatCurrency(previewInvoice.taxAmount)}
                   </span>
                 </div>
@@ -421,11 +418,11 @@ export const InvoicesTab: React.FC<InvoicesTabProps> = ({ customerEmail }) => {
                     </span>
                   </div>
                 )}
-                <div className="flex justify-between pt-2 border-t border-slate-200 text-sm font-black text-slate-900">
+                <div className="flex justify-between pt-2 border-t border-[#E5DFD3] text-sm font-black text-[#101E2B]">
                   <span>Total Amount:</span>
                   <span>{formatCurrency(previewInvoice.totalAmount)}</span>
                 </div>
-                <div className="flex justify-between text-blue-700 font-bold">
+                <div className="flex justify-between text-[#2B4257] font-bold">
                   <span>Outstanding Balance:</span>
                   <span>{formatCurrency(previewInvoice.balanceDue)}</span>
                 </div>
@@ -455,7 +452,7 @@ export const InvoicesTab: React.FC<InvoicesTabProps> = ({ customerEmail }) => {
               <>
                 {/* Method selector */}
                 <div className="space-y-2">
-                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wide">
+                  <label className="block text-xs font-semibold text-[#101E2B] uppercase tracking-wide">
                     Choose Simulated Payment Rail
                   </label>
                   <div className="grid grid-cols-3 gap-2">
@@ -468,14 +465,14 @@ export const InvoicesTab: React.FC<InvoicesTabProps> = ({ customerEmail }) => {
                         key={m.id}
                         type="button"
                         onClick={() => setPayMethod(m.id as any)}
-                        className={`p-3 rounded-lg border text-left transition-all ${
+                        className={`p-3 rounded-lg border text-left transition-all cursor-pointer ${
                           payMethod === m.id
-                            ? 'border-blue-600 bg-blue-50/70 text-blue-900 ring-2 ring-blue-500/20'
-                            : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                            ? 'border-[#2B4257] bg-[#F5F0E6] text-[#101E2B] ring-2 ring-[#2B4257]/20 shadow-xs'
+                            : 'border-[#E5DFD3] bg-white text-[#5A6D80] hover:bg-[#FAF7F0] hover:text-[#101E2B]'
                         }`}
                       >
                         <span className="block text-xs font-bold">{m.label}</span>
-                        <span className="block text-[10px] text-slate-400 mt-0.5">{m.sub}</span>
+                        <span className="block text-[10px] text-[#889AA9] mt-0.5">{m.sub}</span>
                       </button>
                     ))}
                   </div>
@@ -483,21 +480,21 @@ export const InvoicesTab: React.FC<InvoicesTabProps> = ({ customerEmail }) => {
 
                 {/* Form fields based on payment method */}
                 {payMethod === 'UPI' && (
-                  <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 space-y-2">
+                  <div className="p-3.5 rounded-lg bg-[#FAF7F0] border border-[#E5DFD3] space-y-2">
                     <Input
                       label="Virtual Payment Address (VPA / UPI ID)"
                       value={upiId}
                       onChange={(e) => setUpiId(e.target.value)}
                       placeholder="username@bank"
                     />
-                    <span className="text-[11px] text-slate-400 block">
+                    <span className="text-[11px] text-[#889AA9] block">
                       Mock UPI simulation: requests are approved immediately in sandbox.
                     </span>
                   </div>
                 )}
 
                 {payMethod === 'CREDIT_CARD' && (
-                  <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200 space-y-3">
+                  <div className="p-3.5 rounded-lg bg-[#FAF7F0] border border-[#E5DFD3] space-y-3">
                     <Input
                       label="Test Card Number"
                       value="4111 2222 3333 4444"
@@ -512,24 +509,24 @@ export const InvoicesTab: React.FC<InvoicesTabProps> = ({ customerEmail }) => {
                 )}
 
                 {payMethod === 'NET_BANKING' && (
-                  <div className="p-3.5 rounded-lg bg-slate-50 border border-slate-200">
-                    <span className="text-xs font-semibold text-slate-700 block mb-1.5">
+                  <div className="p-3.5 rounded-lg bg-[#FAF7F0] border border-[#E5DFD3]">
+                    <span className="text-xs font-semibold text-[#101E2B] block mb-1.5">
                       Selected Simulated Bank
                     </span>
-                    <div className="p-2.5 rounded bg-white border border-slate-200 text-xs font-medium text-slate-800 flex items-center gap-2">
-                      <Building className="h-4 w-4 text-blue-600" />
+                    <div className="p-2.5 rounded bg-white border border-[#E5DFD3] text-xs font-medium text-[#101E2B] flex items-center gap-2">
+                      <Building className="h-4 w-4 text-[#2B4257]" />
                       Brightloop Sandbox Corporate Bank (Direct Debit)
                     </div>
                   </div>
                 )}
 
                 {/* Amount to pay */}
-                <div className="p-4 rounded-xl bg-blue-50/80 border border-blue-200/80 flex items-center justify-between">
+                <div className="p-4 rounded-xl bg-[#F5F0E6] border border-[#E5DFD3] flex items-center justify-between">
                   <div>
-                    <span className="text-xs text-blue-800 block font-medium">Payment Amount</span>
-                    <span className="text-xs text-blue-600">Full invoice balance settlement</span>
+                    <span className="text-xs text-[#101E2B] block font-semibold">Payment Amount</span>
+                    <span className="text-xs text-[#5A6D80]">Full invoice balance settlement</span>
                   </div>
-                  <span className="text-xl font-black text-blue-950">
+                  <span className="text-xl font-black text-[#2B4257]">
                     {formatCurrency(paymentInvoice.balanceDue)}
                   </span>
                 </div>
@@ -560,3 +557,4 @@ export const InvoicesTab: React.FC<InvoicesTabProps> = ({ customerEmail }) => {
     </div>
   );
 };
+export default InvoicesTab;

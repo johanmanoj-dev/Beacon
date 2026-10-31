@@ -74,7 +74,7 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
         onClose();
       }, 1000);
     } catch (err: any) {
-      const msg = err.response?.data?.message || err.message || 'Failed to record payment.';
+      const msg = err.message || 'Failed to record payment.';
       setErrorMessage(msg);
     } finally {
       setIsSubmitting(false);
@@ -87,7 +87,7 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
       onClose={onClose}
       title={
         <div className="flex items-center gap-2">
-          <CreditCard className="h-5 w-5 text-blue-600" />
+          <CreditCard className="h-5 w-5 text-[#2B4257]" />
           <span>Record Staff Payment</span>
         </div>
       }
@@ -96,23 +96,23 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Invoice Balance Snapshot */}
-        <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-2">
-          <div className="flex justify-between items-center text-xs text-slate-500">
-            <span>Customer: <strong className="text-slate-800">{invoice.customerName || `Customer #${invoice.customerId}`}</strong></span>
-            <span>Invoice: <strong className="text-slate-800">{invoice.invoiceNumber}</strong></span>
+        <div className="bg-[#FAF7F0] border border-[#E5DFD3] rounded-xl p-4 space-y-2">
+          <div className="flex justify-between items-center text-xs text-[#5A6D80]">
+            <span>Customer: <strong className="text-[#101E2B]">{invoice.customerName || `Customer #${invoice.customerId}`}</strong></span>
+            <span>Invoice: <strong className="text-[#101E2B] font-mono">{invoice.invoiceNumber}</strong></span>
           </div>
-          <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-200 text-center">
+          <div className="grid grid-cols-3 gap-2 pt-2 border-t border-[#E5DFD3] text-center">
             <div>
-              <p className="text-[11px] text-slate-500 font-medium">Total Billed</p>
-              <p className="text-sm font-bold text-slate-800">{formatCurrency(invoice.totalAmount)}</p>
+              <p className="text-[11px] text-[#7189A0] font-medium">Total Billed</p>
+              <p className="text-sm font-bold text-[#101E2B]">{formatCurrency(invoice.totalAmount)}</p>
             </div>
             <div>
-              <p className="text-[11px] text-slate-500 font-medium">Already Paid</p>
-              <p className="text-sm font-bold text-emerald-600">{formatCurrency(invoice.amountPaid)}</p>
+              <p className="text-[11px] text-[#7189A0] font-medium">Already Paid</p>
+              <p className="text-sm font-bold text-[#1E5638]">{formatCurrency(invoice.amountPaid)}</p>
             </div>
             <div>
-              <p className="text-[11px] text-slate-500 font-medium">Balance Due</p>
-              <p className="text-sm font-extrabold text-amber-600">{formatCurrency(balanceDue)}</p>
+              <p className="text-[11px] text-[#7189A0] font-medium">Balance Due</p>
+              <p className="text-sm font-extrabold text-[#8C4800]">{formatCurrency(balanceDue)}</p>
             </div>
           </div>
         </div>
@@ -120,11 +120,11 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
         {/* Amount Input with Quick Full Pay Button */}
         <div>
           <div className="flex justify-between items-center mb-1">
-            <label className="text-xs font-semibold text-slate-700">Payment Amount ($)</label>
+            <label className="text-xs font-semibold text-[#2B4257]">Payment Amount ($)</label>
             <button
               type="button"
               onClick={() => setAmount(String(balanceDue))}
-              className="text-xs text-blue-600 hover:text-blue-800 font-medium cursor-pointer"
+              className="text-xs text-[#2B4257] hover:underline font-medium cursor-pointer"
             >
               Set Full Balance ({formatCurrency(balanceDue)})
             </button>
@@ -142,10 +142,10 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
           />
           {/* Realtime Remaining Calculation */}
           <div className="flex justify-between items-center mt-1 text-xs">
-            <span className="text-slate-500">
+            <span className="text-[#5A6D80]">
               Remaining after payment:
             </span>
-            <span className={`font-semibold ${isOverpaying ? 'text-rose-600' : 'text-slate-800'}`}>
+            <span className={`font-semibold ${isOverpaying ? 'text-rose-600' : 'text-[#101E2B]'}`}>
               {formatCurrency(remainingAfterPayment)}
             </span>
           </div>
@@ -153,7 +153,7 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
 
         {/* Overpayment Warning Guard */}
         {isOverpaying && (
-          <div className="flex items-center gap-2 p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs">
+          <div className="flex items-center gap-2 p-2.5 rounded-lg bg-[#FDECEE] border border-[#F8BFC7] text-[#93152A] text-xs">
             <AlertCircle className="h-4 w-4 shrink-0" />
             <span>Overpayment rejected: amount cannot exceed the balance due of {formatCurrency(balanceDue)}.</span>
           </div>
@@ -161,7 +161,7 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
 
         {/* Payment Method */}
         <div>
-          <label className="block text-xs font-semibold text-slate-700 mb-1">Payment Method</label>
+          <label className="block text-xs font-semibold text-[#2B4257] mb-1">Payment Method</label>
           <Select
             value={paymentMethod}
             onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
@@ -176,7 +176,7 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
 
         {/* Reference / Transaction Number */}
         <div>
-          <label className="block text-xs font-semibold text-slate-700 mb-1">Reference / UTR Number</label>
+          <label className="block text-xs font-semibold text-[#2B4257] mb-1">Reference / UTR Number</label>
           <Input
             value={referenceNumber}
             onChange={(e) => setReferenceNumber(e.target.value)}
@@ -186,33 +186,33 @@ export const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({
 
         {/* Notes */}
         <div>
-          <label className="block text-xs font-semibold text-slate-700 mb-1">Audit Notes (Optional)</label>
+          <label className="block text-xs font-semibold text-[#2B4257] mb-1">Audit Notes (Optional)</label>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={2}
-            className="w-full text-xs rounded-lg border border-slate-300 p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            className="w-full text-xs rounded-lg border border-[#E5DFD3] p-2 focus:ring-2 focus:ring-[#2B4257] focus:outline-none bg-white text-[#101E2B]"
             placeholder="e.g. Verified by finance officer against bank statement"
           />
         </div>
 
         {/* Feedback Messages */}
         {errorMessage && (
-          <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-lg text-xs flex items-center gap-2">
+          <div className="p-3 bg-[#FDECEE] border border-[#F8BFC7] text-[#93152A] rounded-lg text-xs flex items-center gap-2">
             <AlertCircle className="h-4 w-4 shrink-0" />
             <span>{errorMessage}</span>
           </div>
         )}
 
         {successMessage && (
-          <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-lg text-xs flex items-center gap-2">
+          <div className="p-3 bg-[#EBF5EE] border border-[#BDE3CA] text-[#1E5638] rounded-lg text-xs flex items-center gap-2">
             <CheckCircle2 className="h-4 w-4 shrink-0" />
             <span>{successMessage}</span>
           </div>
         )}
 
         {/* Footer actions */}
-        <div className="flex justify-end gap-2 pt-3 border-t border-slate-200">
+        <div className="flex justify-end gap-2 pt-3 border-t border-[#E5DFD3]">
           <Button type="button" variant="ghost" onClick={onClose} disabled={isSubmitting}>
             Cancel
           </Button>

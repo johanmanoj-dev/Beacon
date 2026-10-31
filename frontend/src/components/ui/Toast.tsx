@@ -43,8 +43,8 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       case 'info':
       default:
         return {
-          bg: 'bg-blue-50 text-blue-900 border-blue-200',
-          icon: <Info className="h-4 w-4 text-blue-600 shrink-0" />,
+          bg: 'bg-[#F5F0E6] text-[#101E2B] border-[#E5DFD3]',
+          icon: <Info className="h-4 w-4 text-[#2B4257] shrink-0" />,
         };
     }
   };
@@ -69,7 +69,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               <button
                 type="button"
                 onClick={() => dismissToast(toast.id)}
-                className="text-slate-400 hover:text-slate-700 p-0.5 rounded transition-colors"
+                className="text-[#889AA9] hover:text-[#101E2B] p-0.5 rounded transition-colors cursor-pointer"
                 title="Dismiss"
               >
                 <X className="h-3.5 w-3.5" />

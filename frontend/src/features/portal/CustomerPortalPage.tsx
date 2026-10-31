@@ -97,40 +97,40 @@ export const CustomerPortalPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Customer Header Banner */}
-      <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 rounded-2xl p-6 sm:p-8 text-white shadow-lg relative overflow-hidden">
-        <div className="absolute right-0 top-0 bottom-0 w-96 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-blue-500/10 via-transparent to-transparent pointer-events-none" />
+      <div className="bg-gradient-to-r from-[#182635] via-[#2B4257] to-[#182635] rounded-2xl p-6 sm:p-8 text-[#FAF7F0] shadow-lg relative overflow-hidden border border-[#2B4257]">
+        <div className="absolute right-0 top-0 bottom-0 w-96 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/10 via-transparent to-transparent pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                <CheckCircle2 className="h-3 w-3" /> Tenant Isolated Customer Portal
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#2B4257]/40 text-[#FAF7F0] border border-[#526C84]">
+                <CheckCircle2 className="h-3 w-3 text-emerald-400" /> Tenant Isolated Customer Portal
               </span>
-              <span className="text-xs text-slate-400 font-mono">B2B Portal v2.0</span>
+              <span className="text-xs text-[#CBD7E2] font-mono">B2B Portal v2.0</span>
             </div>
 
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-[#FAF7F0]">
               Welcome, {user?.fullName || 'Customer'}
             </h1>
 
-            <p className="text-xs sm:text-sm text-slate-300 flex items-center gap-2">
-              <Building2 className="h-4 w-4 text-blue-400 shrink-0" />
+            <p className="text-xs sm:text-sm text-[#CBD7E2] flex items-center gap-2">
+              <Building2 className="h-4 w-4 text-[#FAF7F0] shrink-0" />
               <span>{customerCompany}</span>
-              <span className="text-slate-500">•</span>
-              <Mail className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-              <span className="font-mono text-slate-400">{customerEmail}</span>
+              <span className="text-[#889AA9]">•</span>
+              <Mail className="h-3.5 w-3.5 text-[#CBD7E2] shrink-0" />
+              <span className="font-mono text-[#CBD7E2]">{customerEmail}</span>
             </p>
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="bg-white/10 backdrop-blur-md rounded-xl p-3.5 border border-white/10 text-right min-w-40">
-              <span className="text-[11px] uppercase font-semibold tracking-wider text-slate-300 block">
+            <div className="bg-white/10 backdrop-blur-md rounded-xl p-3.5 border border-white/15 text-right min-w-40">
+              <span className="text-[11px] uppercase font-semibold tracking-wider text-[#FAF7F0]/80 block">
                 Pending Balance Due
               </span>
               <span className="text-2xl font-black text-amber-300 mt-0.5 block">
                 {formatCurrency(metrics.pendingBalance)}
               </span>
-              <span className="text-[10px] text-slate-400 block mt-0.5">{metrics.pendingBalance > 0 ? "Due in 15 days" : "No balance due"}</span>
+              <span className="text-[10px] text-[#FAF7F0]/70 block mt-0.5">{metrics.pendingBalance > 0 ? "Due in 15 days" : "No balance due"}</span>
             </div>
           </div>
         </div>
@@ -144,63 +144,63 @@ export const CustomerPortalPage: React.FC = () => {
             value: `${metrics.activeSubsCount} Plans`,
             sub: metrics.activeSubsCount > 0 ? metrics.topSubName : 'No active plans',
             icon: Layers,
-            color: 'text-blue-600 bg-blue-50',
+            color: 'text-[#2B4257] bg-[#E9EFF5]',
           },
           {
             label: 'Next Renewal Date',
             value: metrics.nextRenewalDate,
             sub: metrics.activeSubsCount > 0 ? 'Auto-renews (Net 15 terms)' : 'No renewals scheduled',
             icon: Calendar,
-            color: 'text-emerald-600 bg-emerald-50',
+            color: 'text-emerald-700 bg-emerald-50',
           },
           {
             label: 'Outstanding Invoices',
             value: `${metrics.pendingInvoicesCount} Pending`,
             sub: metrics.firstPendingInvNumber !== 'None' ? `${metrics.firstPendingInvNumber} (${formatCurrency(metrics.pendingBalance)})` : 'All invoices settled',
             icon: CreditCard,
-            color: 'text-amber-600 bg-amber-50',
+            color: 'text-[#101E2B] bg-[#F5F0E6]',
           },
           {
             label: 'Account Security',
             value: 'Compliant',
             sub: 'Live password policy verified',
             icon: Lock,
-            color: 'text-purple-600 bg-purple-50',
+            color: 'text-[#2B4257] bg-[#F5F0E6]',
           },
         ].map((card, i) => {
           const Icon = card.icon;
           return (
             <Card key={i} className="p-4" hoverable>
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <span className="text-xs font-bold text-[#5A6D80] uppercase tracking-wider">
                   {card.label}
                 </span>
                 <div className={`p-2 rounded-lg ${card.color}`}>
                   <Icon className="h-4 w-4" />
                 </div>
               </div>
-              <div className="text-xl font-black text-slate-900 mt-2">{card.value}</div>
-              <span className="text-xs text-slate-500 mt-0.5 block">{card.sub}</span>
+              <div className="text-xl font-black text-[#101E2B] mt-2">{card.value}</div>
+              <span className="text-xs text-[#5A6D80] mt-0.5 block">{card.sub}</span>
             </Card>
           );
         })}
       </div>
 
       {/* Tabs Navigation Bar */}
-      <div className="border-b border-slate-200">
+      <div className="border-b border-[#E5DFD3]">
         <nav className="flex space-x-6">
           <button
             type="button"
             onClick={() => setActiveTab('subscriptions')}
-            className={`flex items-center gap-2 py-3.5 border-b-2 font-bold text-sm transition-colors ${
+            className={`flex items-center gap-2 py-3.5 border-b-2 font-bold text-sm transition-colors cursor-pointer ${
               activeTab === 'subscriptions'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
+                ? 'border-[#2B4257] text-[#2B4257]'
+                : 'border-transparent text-[#5A6D80] hover:text-[#101E2B]'
             }`}
           >
             <Layers className="h-4 w-4" />
             <span>My Subscriptions</span>
-            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-bold">
+            <span className="text-xs bg-[#F5F0E6] text-[#2B4257] px-2 py-0.5 rounded-full font-bold border border-[#E5DFD3]">
               {metrics.activeSubsCount}
             </span>
           </button>
@@ -208,15 +208,15 @@ export const CustomerPortalPage: React.FC = () => {
           <button
             type="button"
             onClick={() => setActiveTab('invoices')}
-            className={`flex items-center gap-2 py-3.5 border-b-2 font-bold text-sm transition-colors ${
+            className={`flex items-center gap-2 py-3.5 border-b-2 font-bold text-sm transition-colors cursor-pointer ${
               activeTab === 'invoices'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
+                ? 'border-[#2B4257] text-[#2B4257]'
+                : 'border-transparent text-[#5A6D80] hover:text-[#101E2B]'
             }`}
           >
             <Receipt className="h-4 w-4" />
             <span>My Invoices & Receipts</span>
-            <span className="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold">
+            <span className="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold border border-amber-200">
               {metrics.pendingInvoicesCount} Due
             </span>
           </button>
@@ -224,10 +224,10 @@ export const CustomerPortalPage: React.FC = () => {
           <button
             type="button"
             onClick={() => setActiveTab('profile')}
-            className={`flex items-center gap-2 py-3.5 border-b-2 font-bold text-sm transition-colors ${
+            className={`flex items-center gap-2 py-3.5 border-b-2 font-bold text-sm transition-colors cursor-pointer ${
               activeTab === 'profile'
-                ? 'border-blue-600 text-blue-600'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
+                ? 'border-[#2B4257] text-[#2B4257]'
+                : 'border-transparent text-[#5A6D80] hover:text-[#101E2B]'
             }`}
           >
             <Shield className="h-4 w-4" />
@@ -244,18 +244,18 @@ export const CustomerPortalPage: React.FC = () => {
       {activeTab === 'profile' && (
         <Card className="p-6 space-y-6">
           <div>
-            <h2 className="text-lg font-bold text-slate-900">Tenant Account Profile</h2>
-            <p className="text-xs text-slate-500">
+            <h2 className="text-lg font-bold text-[#101E2B]">Tenant Account Profile</h2>
+            <p className="text-xs text-[#5A6D80]">
               Details for your registered organization and isolated self-service workspace.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
-              <span className="font-bold text-slate-500 uppercase tracking-wider block">
+            <div className="p-4 rounded-xl bg-[#FAF7F0] border border-[#E5DFD3] space-y-2">
+              <span className="font-bold text-[#5A6D80] uppercase tracking-wider block">
                 Company & Contact Information
               </span>
-              <div className="space-y-1.5 pt-1 text-slate-700">
+              <div className="space-y-1.5 pt-1 text-[#101E2B]">
                 <p>
                   <strong>Company:</strong> {customerCompany}
                 </p>
@@ -271,11 +271,11 @@ export const CustomerPortalPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
-              <span className="font-bold text-slate-500 uppercase tracking-wider block">
+            <div className="p-4 rounded-xl bg-[#FAF7F0] border border-[#E5DFD3] space-y-2">
+              <span className="font-bold text-[#5A6D80] uppercase tracking-wider block">
                 Security & Data Isolation
               </span>
-              <div className="space-y-2 pt-1 text-slate-700">
+              <div className="space-y-2 pt-1 text-[#101E2B]">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
                   <span>Tenant Isolation active (Zero cross-customer data leakage)</span>

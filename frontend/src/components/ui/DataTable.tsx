@@ -104,18 +104,18 @@ export function DataTable<T extends Record<string, any>>({
               leftIcon={<Search className="h-4 w-4" />}
             />
           </div>
-          <div className="text-xs text-slate-500 font-medium">
-            Showing <span className="font-semibold text-slate-800">{totalItems}</span> total entries
+          <div className="text-xs text-[#5A6D80] font-medium">
+            Showing <span className="font-semibold text-[#101E2B]">{totalItems}</span> total entries
           </div>
         </div>
       )}
 
       {/* Table Container */}
-      <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-2xs">
+      <div className="rounded-xl border border-[#E5DFD3] bg-white overflow-hidden shadow-2xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm border-collapse">
             <thead>
-              <tr className="border-b border-slate-200 bg-slate-50/75 text-xs font-semibold text-slate-600 uppercase tracking-wider">
+              <tr className="border-b border-[#E5DFD3] bg-[#F7F4EE] text-xs font-semibold text-[#4A5D6E] uppercase tracking-wider">
                 {columns.map((col, idx) => (
                   <th
                     key={idx}
@@ -131,24 +131,24 @@ export function DataTable<T extends Record<string, any>>({
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-slate-700">
+            <tbody className="divide-y divide-[#F0EAE1] text-[#223447]">
               {isLoading ? (
                 <tr>
-                  <td colSpan={columns.length} className="px-6 py-16 text-center text-slate-400">
+                  <td colSpan={columns.length} className="px-6 py-16 text-center text-[#7189A0]">
                     <div className="flex flex-col items-center justify-center gap-2">
-                      <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+                      <Loader2 className="h-6 w-6 animate-spin text-[#2B4257]" />
                       <span className="text-sm font-medium">Loading records...</span>
                     </div>
                   </td>
                 </tr>
               ) : paginatedData.length === 0 ? (
                 <tr>
-                  <td colSpan={columns.length} className="px-6 py-16 text-center text-slate-400">
+                  <td colSpan={columns.length} className="px-6 py-16 text-center text-[#7189A0]">
                     <div className="flex flex-col items-center justify-center gap-2">
-                      <Inbox className="h-8 w-8 text-slate-300 stroke-[1.5]" />
-                      <span className="text-sm font-medium text-slate-500">{emptyMessage}</span>
+                      <Inbox className="h-8 w-8 text-[#97ABBD] stroke-[1.5]" />
+                      <span className="text-sm font-medium text-[#5A6D80]">{emptyMessage}</span>
                       {searchTerm && (
-                        <p className="text-xs text-slate-400">
+                        <p className="text-xs text-[#889AA9]">
                           Try adjusting your search criteria
                         </p>
                       )}
@@ -162,8 +162,8 @@ export function DataTable<T extends Record<string, any>>({
                     onClick={() => onRowClick && onRowClick(row)}
                     className={cn(
                       'transition-colors duration-100',
-                      onRowClick ? 'cursor-pointer hover:bg-blue-50/50' : 'hover:bg-slate-50/70',
-                      rowIdx % 2 === 1 ? 'bg-slate-50/30' : 'bg-white'
+                      onRowClick ? 'cursor-pointer hover:bg-[#E9EFF5]/60' : 'hover:bg-[#FBF9F5]',
+                      rowIdx % 2 === 1 ? 'bg-[#FCFAF6]/60' : 'bg-white'
                     )}
                   >
                     {columns.map((col, colIdx) => {
@@ -198,22 +198,22 @@ export function DataTable<T extends Record<string, any>>({
 
         {/* Pagination Bar */}
         {!isLoading && totalItems > 0 && (
-          <div className="px-5 py-3 border-t border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-600">
+          <div className="px-5 py-3 border-t border-[#E5DFD3] bg-[#FAF7F0] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#5A6D80]">
             <div className="flex items-center gap-3">
               <span>
-                Showing <span className="font-semibold text-slate-900">{startEntry}</span> to{' '}
-                <span className="font-semibold text-slate-900">{endEntry}</span> of{' '}
-                <span className="font-semibold text-slate-900">{totalItems}</span> results
+                Showing <span className="font-semibold text-[#101E2B]">{startEntry}</span> to{' '}
+                <span className="font-semibold text-[#101E2B]">{endEntry}</span> of{' '}
+                <span className="font-semibold text-[#101E2B]">{totalItems}</span> results
               </span>
               <div className="flex items-center gap-1.5 ml-2">
-                <span className="text-slate-500">Rows per page:</span>
+                <span className="text-[#7189A0]">Rows per page:</span>
                 <select
                   value={pageSize}
                   onChange={(e) => {
                     setPageSize(Number(e.target.value));
                     setCurrentPage(1);
                   }}
-                  className="rounded border border-slate-300 bg-white py-1 px-2 text-xs font-medium text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="rounded border border-[#E5DFD3] bg-white py-1 px-2 text-xs font-medium text-[#2B4257] focus:outline-none focus:ring-1 focus:ring-[#2B4257]"
                 >
                   {pageSizeOptions.map((opt) => (
                     <option key={opt} value={opt}>
@@ -229,7 +229,7 @@ export function DataTable<T extends Record<string, any>>({
                 type="button"
                 onClick={() => handlePageChange(1)}
                 disabled={safeCurrentPage === 1}
-                className="p-1.5 rounded border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="p-1.5 rounded border border-[#E5DFD3] bg-white text-[#2B4257] hover:bg-[#F5F0E6] disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
                 title="First Page"
               >
                 <ChevronsLeft className="h-4 w-4" />
@@ -238,13 +238,13 @@ export function DataTable<T extends Record<string, any>>({
                 type="button"
                 onClick={() => handlePageChange(safeCurrentPage - 1)}
                 disabled={safeCurrentPage === 1}
-                className="p-1.5 rounded border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="p-1.5 rounded border border-[#E5DFD3] bg-white text-[#2B4257] hover:bg-[#F5F0E6] disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
                 title="Previous Page"
               >
                 <ChevronLeft className="h-4 w-4" />
               </button>
 
-              <span className="px-3 py-1 font-semibold text-slate-800">
+              <span className="px-3 py-1 font-semibold text-[#101E2B]">
                 Page {safeCurrentPage} of {totalPages}
               </span>
 
@@ -252,7 +252,7 @@ export function DataTable<T extends Record<string, any>>({
                 type="button"
                 onClick={() => handlePageChange(safeCurrentPage + 1)}
                 disabled={safeCurrentPage === totalPages}
-                className="p-1.5 rounded border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="p-1.5 rounded border border-[#E5DFD3] bg-white text-[#2B4257] hover:bg-[#F5F0E6] disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
                 title="Next Page"
               >
                 <ChevronRight className="h-4 w-4" />
@@ -261,7 +261,7 @@ export function DataTable<T extends Record<string, any>>({
                 type="button"
                 onClick={() => handlePageChange(totalPages)}
                 disabled={safeCurrentPage === totalPages}
-                className="p-1.5 rounded border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="p-1.5 rounded border border-[#E5DFD3] bg-white text-[#2B4257] hover:bg-[#F5F0E6] disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
                 title="Last Page"
               >
                 <ChevronsRight className="h-4 w-4" />

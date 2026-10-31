@@ -71,8 +71,9 @@ export const SimulatedGatewayModal: React.FC<SimulatedGatewayModalProps> = ({
       });
 
       setTransactionId(res.data.transactionId);
-    } catch (err: any) {
-      setOutcomeMessage(err.response?.data?.message || 'Failed to initialize checkout session.');
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to initialize checkout session.';
+      setOutcomeMessage(errorMsg);
     } finally {
       setIsInitializing(false);
     }
@@ -115,9 +116,10 @@ export const SimulatedGatewayModal: React.FC<SimulatedGatewayModalProps> = ({
           `Transaction declined: ${failureReason}. The outstanding balance remains ${formatCurrency(invoice.balanceDue)}.`
         );
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setOutcome('FAILED');
-      setOutcomeMessage(err.response?.data?.message || 'Simulation execution failed.');
+      const errorMsg = err instanceof Error ? err.message : 'Simulation execution failed.';
+      setOutcomeMessage(errorMsg);
     } finally {
       setIsConfirming(false);
     }
@@ -137,8 +139,9 @@ export const SimulatedGatewayModal: React.FC<SimulatedGatewayModalProps> = ({
       setOutcomeMessage(
         `[Idempotent Replay Verified #${replayCount + 1}] Server returned original outcome: ${res.data.status}. Zero duplicate ledger records created.`
       );
-    } catch (err: any) {
-      setOutcomeMessage(`Replay error: ${err.message}`);
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : 'Replay verification error.';
+      setOutcomeMessage(`Replay error: ${errorMsg}`);
     } finally {
       setIsConfirming(false);
     }
@@ -150,8 +153,8 @@ export const SimulatedGatewayModal: React.FC<SimulatedGatewayModalProps> = ({
       onClose={onClose}
       title={
         <div className="flex items-center gap-2">
-          <ShieldCheck className="h-5 w-5 text-indigo-600" />
-          <span>Checkout Gateway Simulator</span>
+          <ShieldCheck className="h-5 w-5 text-[#2B4257]" />
+          <span className="text-[#101E2B] font-bold">Checkout Gateway Simulator</span>
         </div>
       }
       description={`Simulated self-hosted payment session for Invoice ${invoice.invoiceNumber}`}
@@ -159,52 +162,52 @@ export const SimulatedGatewayModal: React.FC<SimulatedGatewayModalProps> = ({
     >
       <div className="space-y-4">
         {/* Banner: Zero 3rd Party BaaS */}
-        <div className="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-100 text-xs text-indigo-900">
+        <div className="flex items-center justify-between p-3 rounded-xl bg-[#F5F0E6] border border-[#E5DFD3] text-xs text-[#101E2B]">
           <div className="flex items-center gap-2">
-            <Layers className="h-4 w-4 text-indigo-600 shrink-0" />
+            <Layers className="h-4 w-4 text-[#2B4257] shrink-0" />
             <div>
-              <p className="font-bold">Brightloop Native Gateway Engine</p>
-              <p className="text-[11px] text-indigo-700">Strictly isolated local gateway simulator — zero 3rd-party BaaS dependencies.</p>
+              <p className="font-bold text-[#101E2B]">Brightloop Native Gateway Engine</p>
+              <p className="text-[11px] text-[#5A6D80]">Strictly isolated local gateway simulator — zero 3rd-party BaaS dependencies.</p>
             </div>
           </div>
-          <Badge variant="purple" size="sm">Local Testnet</Badge>
+          <Badge variant="info" size="sm">Local Testnet</Badge>
         </div>
 
         {/* Invoice Summary Ribbon */}
-        <div className="flex justify-between items-center p-3 rounded-lg bg-slate-50 border border-slate-200">
+        <div className="flex justify-between items-center p-3 rounded-lg bg-[#FAF7F0] border border-[#E5DFD3]">
           <div>
-            <span className="text-[11px] text-slate-500 uppercase tracking-wider block font-medium">Customer Bill</span>
-            <span className="text-sm font-bold text-slate-900">{invoice.customerName || `Customer #${invoice.customerId}`}</span>
+            <span className="text-[11px] text-[#5A6D80] uppercase tracking-wider block font-semibold">Customer Bill</span>
+            <span className="text-sm font-bold text-[#101E2B]">{invoice.customerName || `Customer #${invoice.customerId}`}</span>
           </div>
           <div className="text-right">
-            <span className="text-[11px] text-slate-500 uppercase tracking-wider block font-medium">Amount Due</span>
-            <span className="text-base font-extrabold text-indigo-600">{formatCurrency(invoice.balanceDue)}</span>
+            <span className="text-[11px] text-[#5A6D80] uppercase tracking-wider block font-semibold">Amount Due</span>
+            <span className="text-base font-extrabold text-[#2B4257]">{formatCurrency(invoice.balanceDue)}</span>
           </div>
         </div>
 
         {/* Session Metadata Details */}
         {isInitializing ? (
-          <div className="flex items-center justify-center p-2 text-xs text-slate-500 gap-2">
-            <Loader2 className="h-4 w-4 animate-spin text-indigo-600" />
+          <div className="flex items-center justify-center p-2 text-xs text-[#5A6D80] gap-2">
+            <Loader2 className="h-4 w-4 animate-spin text-[#2B4257]" />
             <span>Initializing checkout session...</span>
           </div>
         ) : transactionId ? (
-          <div className="flex items-center justify-between text-[11px] font-mono text-slate-500 px-1">
-            <span>TXN: <strong className="text-slate-800">{transactionId}</strong></span>
-            <span>IDEM: <strong className="text-slate-800">{idempotencyKey.slice(0, 16)}...</strong></span>
+          <div className="flex items-center justify-between text-[11px] font-mono text-[#5A6D80] px-1">
+            <span>TXN: <strong className="text-[#101E2B]">{transactionId}</strong></span>
+            <span>IDEM: <strong className="text-[#101E2B]">{idempotencyKey.slice(0, 16)}...</strong></span>
           </div>
         ) : null}
 
         {/* Payment Method Selector Tabs */}
         <div>
-          <div className="flex border-b border-slate-200 gap-4 mb-4">
+          <div className="flex border-b border-[#E5DFD3] gap-4 mb-4">
             <button
               type="button"
               onClick={() => setSelectedMethod('UPI')}
               className={`flex items-center gap-2 pb-2.5 text-xs font-bold border-b-2 transition-all cursor-pointer ${
                 selectedMethod === 'UPI'
-                  ? 'border-indigo-600 text-indigo-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-800'
+                  ? 'border-[#2B4257] text-[#2B4257]'
+                  : 'border-transparent text-[#5A6D80] hover:text-[#101E2B]'
               }`}
             >
               <QrCode className="h-4 w-4" />
@@ -216,8 +219,8 @@ export const SimulatedGatewayModal: React.FC<SimulatedGatewayModalProps> = ({
               onClick={() => setSelectedMethod('CREDIT_CARD')}
               className={`flex items-center gap-2 pb-2.5 text-xs font-bold border-b-2 transition-all cursor-pointer ${
                 selectedMethod === 'CREDIT_CARD'
-                  ? 'border-indigo-600 text-indigo-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-800'
+                  ? 'border-[#2B4257] text-[#2B4257]'
+                  : 'border-transparent text-[#5A6D80] hover:text-[#101E2B]'
               }`}
             >
               <CreditCard className="h-4 w-4" />
@@ -229,8 +232,8 @@ export const SimulatedGatewayModal: React.FC<SimulatedGatewayModalProps> = ({
               onClick={() => setSelectedMethod('NET_BANKING')}
               className={`flex items-center gap-2 pb-2.5 text-xs font-bold border-b-2 transition-all cursor-pointer ${
                 selectedMethod === 'NET_BANKING'
-                  ? 'border-indigo-600 text-indigo-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-800'
+                  ? 'border-[#2B4257] text-[#2B4257]'
+                  : 'border-transparent text-[#5A6D80] hover:text-[#101E2B]'
               }`}
             >
               <Building className="h-4 w-4" />
@@ -240,20 +243,20 @@ export const SimulatedGatewayModal: React.FC<SimulatedGatewayModalProps> = ({
 
           {/* Tab 1: UPI */}
           {selectedMethod === 'UPI' && (
-            <div className="bg-slate-50 rounded-xl p-4 border border-slate-200 text-center space-y-3">
-              <div className="inline-block p-3 bg-white rounded-xl shadow-xs border border-slate-200">
-                <div className="w-32 h-32 bg-slate-900 rounded-lg flex flex-col items-center justify-center p-2 text-white text-[10px] space-y-1">
-                  <QrCode className="h-16 w-16 text-indigo-300" />
-                  <span className="font-mono text-[9px]">SCAN & PAY</span>
+            <div className="bg-[#FAF7F0] rounded-xl p-4 border border-[#E5DFD3] text-center space-y-3">
+              <div className="inline-block p-3 bg-white rounded-xl shadow-xs border border-[#E5DFD3]">
+                <div className="w-32 h-32 bg-[#182635] rounded-lg flex flex-col items-center justify-center p-2 text-white text-[10px] space-y-1">
+                  <QrCode className="h-16 w-16 text-[#F5F0E6]" />
+                  <span className="font-mono text-[9px] text-[#E5DFD3]">SCAN & PAY</span>
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Simulated VPA / UPI ID</label>
+                <label className="block text-xs font-semibold text-[#101E2B] mb-1">Simulated VPA / UPI ID</label>
                 <input
                   type="text"
                   value={upiId}
                   onChange={(e) => setUpiId(e.target.value)}
-                  className="w-64 text-center font-mono text-xs px-3 py-1.5 border border-slate-300 rounded-lg bg-white"
+                  className="w-64 text-center font-mono text-xs px-3 py-1.5 border border-[#E5DFD3] rounded-lg bg-white text-[#101E2B] focus:outline-none focus:ring-2 focus:ring-[#2B4257]"
                 />
               </div>
             </div>
@@ -262,36 +265,36 @@ export const SimulatedGatewayModal: React.FC<SimulatedGatewayModalProps> = ({
           {/* Tab 2: Test Card */}
           {selectedMethod === 'CREDIT_CARD' && (
             <div className="space-y-3">
-              <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-4 rounded-xl shadow-md border border-slate-700 space-y-3 max-w-sm mx-auto">
-                <div className="flex justify-between items-center text-xs text-slate-300">
+              <div className="bg-gradient-to-r from-[#182635] via-[#223447] to-[#182635] text-white p-4 rounded-xl shadow-md border border-[#2B4257] space-y-3 max-w-sm mx-auto">
+                <div className="flex justify-between items-center text-xs text-[#E5DFD3]">
                   <span className="font-bold tracking-wider">BRIGHTLOOP TEST CARD</span>
-                  <CreditCard className="h-5 w-5 text-indigo-400" />
+                  <CreditCard className="h-5 w-5 text-[#F5F0E6]" />
                 </div>
-                <div className="font-mono text-lg tracking-widest pt-2">
+                <div className="font-mono text-lg tracking-widest pt-2 text-[#FAF7F0]">
                   {cardNumber}
                 </div>
-                <div className="flex justify-between items-end text-[11px] text-slate-300 pt-1">
+                <div className="flex justify-between items-end text-[11px] text-[#E5DFD3] pt-1">
                   <div>
-                    <span className="text-[9px] uppercase tracking-wider block text-slate-400">Card Holder</span>
-                    <span className="font-semibold">{cardHolder}</span>
+                    <span className="text-[9px] uppercase tracking-wider block text-[#889AA9]">Card Holder</span>
+                    <span className="font-semibold text-white">{cardHolder}</span>
                   </div>
                   <div>
-                    <span className="text-[9px] uppercase tracking-wider block text-slate-400">Expires / CVC</span>
-                    <span className="font-mono">{cardExpiry} • {cardCvc}</span>
+                    <span className="text-[9px] uppercase tracking-wider block text-[#889AA9]">Expires / CVC</span>
+                    <span className="font-mono text-white">{cardExpiry} • {cardCvc}</span>
                   </div>
                 </div>
               </div>
 
               {/* Quick Preset Buttons */}
               <div className="flex items-center justify-center gap-2 text-xs">
-                <span className="text-slate-500 text-[11px]">Presets:</span>
+                <span className="text-[#5A6D80] text-[11px]">Presets:</span>
                 <button
                   type="button"
                   onClick={() => {
                     setCardNumber('4242 4242 4242 4242');
                     setCardExpiry('12/28');
                   }}
-                  className="px-2 py-0.5 rounded bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium text-[11px] cursor-pointer"
+                  className="px-2.5 py-1 rounded-md bg-[#F5F0E6] hover:bg-[#E5DFD3] text-[#101E2B] font-medium text-[11px] transition-colors cursor-pointer"
                 >
                   Success Card (4242)
                 </button>
@@ -301,7 +304,7 @@ export const SimulatedGatewayModal: React.FC<SimulatedGatewayModalProps> = ({
                     setCardNumber('4000 0000 0000 0002');
                     setCardExpiry('01/24');
                   }}
-                  className="px-2 py-0.5 rounded bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium text-[11px] cursor-pointer"
+                  className="px-2.5 py-1 rounded-md bg-[#F5F0E6] hover:bg-[#E5DFD3] text-[#101E2B] font-medium text-[11px] transition-colors cursor-pointer"
                 >
                   Expired Card
                 </button>
@@ -319,11 +322,11 @@ export const SimulatedGatewayModal: React.FC<SimulatedGatewayModalProps> = ({
                   onClick={() => setSelectedBank(bank)}
                   className={`p-3 rounded-lg border text-xs font-semibold text-left transition-all cursor-pointer ${
                     selectedBank === bank
-                      ? 'border-indigo-600 bg-indigo-50 text-indigo-900 shadow-xs'
-                      : 'border-slate-200 hover:border-slate-300 bg-white text-slate-700'
+                      ? 'border-[#2B4257] bg-[#F5F0E6] text-[#101E2B] shadow-xs'
+                      : 'border-[#E5DFD3] hover:border-[#D5CDC0] bg-white text-[#5A6D80] hover:text-[#101E2B]'
                   }`}
                 >
-                  <Building className="h-4 w-4 mb-1 text-slate-500" />
+                  <Building className={`h-4 w-4 mb-1 ${selectedBank === bank ? 'text-[#2B4257]' : 'text-[#889AA9]'}`} />
                   {bank}
                 </button>
               ))}
@@ -339,7 +342,7 @@ export const SimulatedGatewayModal: React.FC<SimulatedGatewayModalProps> = ({
                 ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
                 : outcome === 'FAILED'
                 ? 'bg-rose-50 border-rose-200 text-rose-800'
-                : 'bg-blue-50 border-blue-200 text-blue-800'
+                : 'bg-[#F5F0E6] border-[#E5DFD3] text-[#101E2B]'
             }`}
           >
             {outcome === 'SUCCESS' ? (
@@ -347,15 +350,15 @@ export const SimulatedGatewayModal: React.FC<SimulatedGatewayModalProps> = ({
             ) : outcome === 'FAILED' ? (
               <XCircle className="h-4 w-4 text-rose-600 shrink-0 mt-0.5" />
             ) : (
-              <AlertCircle className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
+              <AlertCircle className="h-4 w-4 text-[#2B4257] shrink-0 mt-0.5" />
             )}
             <div className="flex-1 leading-relaxed">{outcomeMessage}</div>
           </div>
         )}
 
         {/* Action Controls & Simulation Buttons */}
-        <div className="pt-3 border-t border-slate-200 space-y-2">
-          <div className="text-[11px] font-medium text-slate-500 text-center">
+        <div className="pt-3 border-t border-[#E5DFD3] space-y-2">
+          <div className="text-[11px] font-medium text-[#5A6D80] text-center">
             Click an outcome below to simulate bank authorization response:
           </div>
           <div className="flex items-center justify-between gap-3">

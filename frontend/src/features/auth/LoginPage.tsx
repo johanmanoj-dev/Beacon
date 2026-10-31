@@ -66,24 +66,24 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#FBF9F5] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
         {/* Brand Logo */}
-        <div className="inline-flex items-center justify-center h-12 w-12 rounded-xl bg-blue-600 text-white font-black text-xl shadow-md mb-3">
+        <div className="inline-flex items-center justify-center h-12 w-12 rounded-xl bg-[#2B4257] text-[#FAF7F0] font-black text-xl shadow-md mb-3">
           B
         </div>
-        <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+        <h2 className="text-3xl font-extrabold text-[#101E2B] tracking-tight">
           Brightloop
         </h2>
-        <p className="mt-1 text-sm text-slate-500 font-medium">
+        <p className="mt-1 text-sm text-[#5A6D80] font-medium">
           Subscription Management & Recurring Invoicing Platform
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4 sm:px-0">
-        <Card className="shadow-lg border-slate-200">
+        <Card className="shadow-lg border-[#E5DFD3]">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-xl font-bold text-slate-900">Sign in to your account</CardTitle>
+            <CardTitle className="text-xl font-bold text-[#101E2B]">Sign in to your account</CardTitle>
             <CardDescription>
               Enter your credentials to access your billing workspace
             </CardDescription>
@@ -116,12 +116,12 @@ export const LoginPage: React.FC = () => {
 
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-xs font-semibold text-slate-700 tracking-wide uppercase">
+                  <label className="block text-xs font-semibold text-[#101E2B] tracking-wide uppercase">
                     Password <span className="text-rose-500">*</span>
                   </label>
                   <Link
                     to="/forgot-password"
-                    className="text-xs font-medium text-blue-600 hover:text-blue-700 hover:underline"
+                    className="text-xs font-medium text-[#2B4257] hover:underline"
                   >
                     Forgot password?
                   </Link>
@@ -137,7 +137,7 @@ export const LoginPage: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="text-slate-400 hover:text-slate-600 focus:outline-none"
+                        className="text-[#889AA9] hover:text-[#101E2B] focus:outline-none cursor-pointer"
                       >
                         {showPassword ? (
                           <EyeOff className="h-4 w-4" />
@@ -164,13 +164,13 @@ export const LoginPage: React.FC = () => {
             </form>
 
             {/* Fill Test Credentials Buttons */}
-            <div className="pt-4 border-t border-slate-100">
+            <div className="pt-4 border-t border-[#E5DFD3]">
               <div className="flex items-center justify-between mb-2.5">
-                <span className="text-xs font-semibold text-slate-600 flex items-center gap-1.5">
-                  <Sparkles className="h-3.5 w-3.5 text-blue-600" />
+                <span className="text-xs font-semibold text-[#5A6D80] flex items-center gap-1.5">
+                  <Sparkles className="h-3.5 w-3.5 text-[#2B4257]" />
                   Fill Test Credentials:
                 </span>
-                <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded font-mono">
+                <span className="text-[10px] bg-[#F5F0E6] text-[#2B4257] px-2 py-0.5 rounded font-mono border border-[#E5DFD3]">
                   Click to prefill
                 </span>
               </div>
@@ -178,46 +178,46 @@ export const LoginPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => handleFillTestCreds('ADMIN')}
-                  className={`px-2.5 py-2.5 text-xs font-semibold rounded-lg border transition-all text-center flex flex-col items-center justify-center gap-0.5 ${
+                  className={`px-2.5 py-2.5 text-xs font-semibold rounded-lg border transition-all text-center flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
                     email === TEST_CREDENTIALS.ADMIN.email
-                      ? 'border-blue-500 bg-blue-50/70 text-blue-900 ring-1 ring-blue-500 shadow-xs'
-                      : 'border-slate-200 bg-white hover:bg-slate-50 hover:border-blue-300 text-slate-700'
+                      ? 'border-[#2B4257] bg-[#F5F0E6] text-[#101E2B] ring-1 ring-[#2B4257] shadow-xs'
+                      : 'border-[#E5DFD3] bg-white hover:bg-[#FAF7F0] text-[#101E2B]'
                   }`}
                 >
-                  <span className="font-bold text-blue-600">Admin</span>
-                  <span className="text-[10px] text-slate-400 font-normal">Full Control</span>
+                  <span className="font-bold text-[#2B4257]">Admin</span>
+                  <span className="text-[10px] text-[#889AA9] font-normal">Full Control</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => handleFillTestCreds('STAFF')}
-                  className={`px-2.5 py-2.5 text-xs font-semibold rounded-lg border transition-all text-center flex flex-col items-center justify-center gap-0.5 ${
+                  className={`px-2.5 py-2.5 text-xs font-semibold rounded-lg border transition-all text-center flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
                     email === TEST_CREDENTIALS.STAFF.email
-                      ? 'border-blue-500 bg-blue-50/70 text-blue-900 ring-1 ring-blue-500 shadow-xs'
-                      : 'border-slate-200 bg-white hover:bg-slate-50 hover:border-blue-300 text-slate-700'
+                      ? 'border-[#2B4257] bg-[#F5F0E6] text-[#101E2B] ring-1 ring-[#2B4257] shadow-xs'
+                      : 'border-[#E5DFD3] bg-white hover:bg-[#FAF7F0] text-[#101E2B]'
                   }`}
                 >
-                  <span className="font-bold text-slate-800">Staff</span>
-                  <span className="text-[10px] text-slate-400 font-normal">Operations</span>
+                  <span className="font-bold text-[#101E2B]">Staff</span>
+                  <span className="text-[10px] text-[#889AA9] font-normal">Operations</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => handleFillTestCreds('CUSTOMER')}
-                  className={`px-2.5 py-2.5 text-xs font-semibold rounded-lg border transition-all text-center flex flex-col items-center justify-center gap-0.5 ${
+                  className={`px-2.5 py-2.5 text-xs font-semibold rounded-lg border transition-all text-center flex flex-col items-center justify-center gap-0.5 cursor-pointer ${
                     email === TEST_CREDENTIALS.CUSTOMER.email
                       ? 'border-emerald-500 bg-emerald-50/70 text-emerald-900 ring-1 ring-emerald-500 shadow-xs'
-                      : 'border-slate-200 bg-white hover:bg-slate-50 hover:border-emerald-300 text-slate-700'
+                      : 'border-[#E5DFD3] bg-white hover:bg-[#FAF7F0] text-[#101E2B]'
                   }`}
                 >
                   <span className="font-bold text-emerald-600">Customer</span>
-                  <span className="text-[10px] text-slate-400 font-normal">Portal View</span>
+                  <span className="text-[10px] text-[#889AA9] font-normal">Portal View</span>
                 </button>
               </div>
             </div>
           </CardContent>
 
-          <CardFooter className="justify-center border-t border-slate-100 text-xs text-slate-500">
+          <CardFooter className="justify-center border-t border-[#E5DFD3] text-xs text-[#5A6D80]">
             Don't have an account yet?{' '}
-            <Link to="/register" className="ml-1 font-semibold text-blue-600 hover:underline">
+            <Link to="/register" className="ml-1 font-semibold text-[#2B4257] hover:underline">
               Create an account
             </Link>
           </CardFooter>

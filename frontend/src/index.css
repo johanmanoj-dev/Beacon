@@ -2,16 +2,57 @@
 
 :root {
   --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  
+  /* Cream Palette */
+  --color-cream-canvas: #FBF9F5;
+  --color-cream-surface: #FFFFFF;
+  --color-cream-muted: #F5F0E6;
+  --color-cream-subtle: #F0EAE1;
+  --color-cream-border: #E5DFD3;
+  --color-cream-border-subtle: #EDE7DC;
+
+  /* Blue-Grey Palette */
+  --color-bluegrey-950: #101E2B;
+  --color-bluegrey-900: #182635;
+  --color-bluegrey-800: #223447;
+  --color-bluegrey-700: #2B4257;
+  --color-bluegrey-600: #3E5A73;
+  --color-bluegrey-500: #526C84;
+  --color-bluegrey-400: #7189A0;
+  --color-bluegrey-300: #97ABBD;
+  --color-bluegrey-200: #C4D3E0;
+  --color-bluegrey-100: #E4ECF2;
+  --color-bluegrey-50: #F2F6F9;
 }
 
 body {
   margin: 0;
   font-family: var(--font-sans);
-  background-color: #f8fafc;
-  color: #0f172a;
+  background-color: #FBF9F5;
+  color: #101E2B;
   -webkit-font-smoothing: antialiased;
 }
 
 #root {
   min-height: 100vh;
+  background-color: #FBF9F5;
+}
+
+/* Custom scrollbars with cream and blue-grey theme */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F5F0E6;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #C4D3E0;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #97ABBD;
 }

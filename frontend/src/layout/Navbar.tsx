@@ -47,34 +47,34 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleMobileMenu }) => {
   const activeBadge = (role && roleBadges[role]) ? roleBadges[role] : { variant: 'info' as const, label: role || 'User' };
 
   return (
-    <header className="h-16 bg-white border-b border-slate-200 px-6 sm:px-8 flex items-center justify-between shrink-0 shadow-2xs z-20">
+    <header className="h-16 bg-white border-b border-[#E5DFD3] px-6 sm:px-8 flex items-center justify-between shrink-0 shadow-2xs z-20">
       {/* Breadcrumb / Title & Mobile Menu Toggle */}
       <div className="flex items-center gap-2.5">
         {onToggleMobileMenu && (
           <button
             type="button"
             onClick={onToggleMobileMenu}
-            className="p-1.5 -ml-1 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg md:hidden"
+            className="p-1.5 -ml-1 text-[#5A6D80] hover:text-[#101E2B] hover:bg-[#F5F0E6] rounded-lg md:hidden cursor-pointer"
             title="Toggle menu"
           >
             <Menu className="h-5 w-5" />
           </button>
         )}
-        <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider hidden sm:inline">
+        <span className="text-xs font-semibold text-[#7189A0] uppercase tracking-wider hidden sm:inline">
           Brightloop
         </span>
-        <span className="text-slate-300 hidden sm:inline">/</span>
-        <h1 className="text-sm sm:text-base font-bold text-slate-900 capitalize tracking-tight">
+        <span className="text-[#C4D3E0] hidden sm:inline">/</span>
+        <h1 className="text-sm sm:text-base font-bold text-[#101E2B] capitalize tracking-tight">
           {getPageTitle()}
         </h1>
       </div>
 
       {/* Right Controls */}
       <div className="flex items-center gap-4">
-        {/* Fast Role Switcher for Hackathon Demonstration */}
-        <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg text-xs font-medium border border-slate-200/60">
-          <span className="text-slate-500 px-2 hidden md:flex items-center gap-1 font-semibold text-[11px] uppercase tracking-wider">
-            <UserCheck className="h-3.5 w-3.5" />
+        {/* Fast Role Switcher */}
+        <div className="flex items-center gap-1 bg-[#F5F0E6] p-1 rounded-lg text-xs font-medium border border-[#E5DFD3]">
+          <span className="text-[#5A6D80] px-2 hidden md:flex items-center gap-1 font-semibold text-[11px] uppercase tracking-wider">
+            <UserCheck className="h-3.5 w-3.5 text-[#2B4257]" />
             Switch View:
           </span>
           {(['ADMIN', 'STAFF', 'CUSTOMER'] as const).map((r) => (
@@ -82,10 +82,10 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleMobileMenu }) => {
               key={r}
               type="button"
               onClick={() => handleRoleSwitch(r)}
-              className={`px-2.5 py-1 rounded text-xs transition-all font-medium ${
+              className={`px-2.5 py-1 rounded text-xs transition-all font-medium cursor-pointer ${
                 role === r
-                  ? 'bg-white text-blue-700 shadow-xs font-bold'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+                  ? 'bg-[#2B4257] text-[#FAF7F0] shadow-xs font-bold'
+                  : 'text-[#5A6D80] hover:text-[#101E2B] hover:bg-[#EAE3D6]'
               }`}
             >
               {r}
@@ -94,9 +94,9 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleMobileMenu }) => {
         </div>
 
         {/* User Info & Logout Button */}
-        <div className="flex items-center gap-3 pl-2 border-l border-slate-200">
+        <div className="flex items-center gap-3 pl-2 border-l border-[#E5DFD3]">
           <div className="hidden sm:block text-right">
-            <span className="text-xs font-bold text-slate-800 block leading-tight">
+            <span className="text-xs font-bold text-[#101E2B] block leading-tight">
               {user?.fullName || 'User'}
             </span>
             <div className="mt-0.5">
@@ -109,7 +109,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleMobileMenu }) => {
           <button
             type="button"
             onClick={logout}
-            className="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-slate-100 transition-colors"
+            className="p-1.5 rounded-lg text-[#7189A0] hover:text-rose-600 hover:bg-[#F5F0E6] transition-colors cursor-pointer"
             title="Log out"
           >
             <LogOut className="h-4 w-4" />

@@ -62,23 +62,23 @@ export const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-10 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#FBF9F5] flex flex-col justify-center py-10 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-lg text-center">
-        <div className="inline-flex items-center justify-center h-12 w-12 rounded-xl bg-blue-600 text-white font-black text-xl shadow-md mb-3">
+        <div className="inline-flex items-center justify-center h-12 w-12 rounded-xl bg-[#2B4257] text-[#FAF7F0] font-black text-xl shadow-md mb-3">
           B
         </div>
-        <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+        <h2 className="text-3xl font-extrabold text-[#101E2B] tracking-tight">
           Create Brightloop Account
         </h2>
-        <p className="mt-1 text-sm text-slate-500 font-medium">
+        <p className="mt-1 text-sm text-[#5A6D80] font-medium">
           Get started with automated subscription and billing workflows
         </p>
       </div>
 
       <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-lg px-4 sm:px-0">
-        <Card className="shadow-lg border-slate-200">
+        <Card className="shadow-lg border-[#E5DFD3]">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-xl font-bold text-slate-900">Sign Up</CardTitle>
+            <CardTitle className="text-xl font-bold text-[#101E2B]">Sign Up</CardTitle>
             <CardDescription>
               Enter your details to create an account with role-based access
             </CardDescription>
@@ -136,7 +136,7 @@ export const RegisterPage: React.FC = () => {
 
               {/* Password Input */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 tracking-wide uppercase mb-1.5">
+                <label className="block text-xs font-semibold text-[#101E2B] tracking-wide uppercase mb-1.5">
                   Password <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
@@ -150,7 +150,7 @@ export const RegisterPage: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="text-slate-400 hover:text-slate-600 focus:outline-none"
+                        className="text-[#889AA9] hover:text-[#101E2B] focus:outline-none cursor-pointer"
                       >
                         {showPassword ? (
                           <EyeOff className="h-4 w-4" />
@@ -204,9 +204,9 @@ export const RegisterPage: React.FC = () => {
             </form>
           </CardContent>
 
-          <CardFooter className="justify-center border-t border-slate-100 text-xs text-slate-500">
+          <CardFooter className="justify-center border-t border-[#E5DFD3] text-xs text-[#5A6D80]">
             Already have an account?{' '}
-            <Link to="/login" className="ml-1 font-semibold text-blue-600 hover:underline">
+            <Link to="/login" className="ml-1 font-semibold text-[#2B4257] hover:underline">
               Sign in
             </Link>
           </CardFooter>

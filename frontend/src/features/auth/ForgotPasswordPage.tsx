@@ -46,23 +46,23 @@ export const ForgotPasswordPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#FBF9F5] flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <div className="inline-flex items-center justify-center h-12 w-12 rounded-xl bg-blue-600 text-white font-black text-xl shadow-md mb-3">
+        <div className="inline-flex items-center justify-center h-12 w-12 rounded-xl bg-[#2B4257] text-[#FAF7F0] font-black text-xl shadow-md mb-3">
           B
         </div>
-        <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+        <h2 className="text-3xl font-extrabold text-[#101E2B] tracking-tight">
           Reset Your Password
         </h2>
-        <p className="mt-1 text-sm text-slate-500 font-medium">
+        <p className="mt-1 text-sm text-[#5A6D80] font-medium">
           Recover access to your Brightloop account
         </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4 sm:px-0">
-        <Card className="shadow-lg border-slate-200">
+        <Card className="shadow-lg border-[#E5DFD3]">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-xl font-bold text-slate-900">
+            <CardTitle className="text-xl font-bold text-[#101E2B]">
               {step === 'request' ? 'Request Password Reset' : 'Set New Compliant Password'}
             </CardTitle>
             <CardDescription>
@@ -156,10 +156,10 @@ export const ForgotPasswordPage: React.FC = () => {
             )}
           </CardContent>
 
-          <CardFooter className="justify-center border-t border-slate-100 text-xs text-slate-500">
+          <CardFooter className="justify-center border-t border-[#E5DFD3] text-xs text-[#5A6D80]">
             <Link
               to="/login"
-              className="inline-flex items-center gap-1.5 font-semibold text-blue-600 hover:underline"
+              className="inline-flex items-center gap-1.5 font-semibold text-[#2B4257] hover:underline"
             >
               <ArrowLeft className="h-3.5 w-3.5" /> Back to sign in
             </Link>

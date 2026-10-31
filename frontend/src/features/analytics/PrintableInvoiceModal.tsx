@@ -37,16 +37,16 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-slate-900/60 backdrop-blur-xs">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-[#101E2B]/60 backdrop-blur-xs">
       <div
-        className="relative w-full max-w-4xl rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden my-8 flex flex-col max-h-[92vh]"
+        className="relative w-full max-w-4xl rounded-2xl bg-white shadow-2xl border border-[#E5DFD3] overflow-hidden my-8 flex flex-col max-h-[92vh]"
         role="dialog"
       >
         {/* Top Control Bar (Hidden when printing via CSS @media print) */}
-        <div className="px-6 py-4 border-b border-slate-200 bg-slate-50 flex items-center justify-between gap-4 print:hidden shrink-0">
+        <div className="px-6 py-4 border-b border-[#E5DFD3] bg-[#FAF7F0] flex items-center justify-between gap-4 print:hidden shrink-0">
           <div className="flex items-center gap-2">
-            <FileText className="h-5 w-5 text-blue-600" />
-            <span className="font-bold text-slate-800 text-sm">
+            <FileText className="h-5 w-5 text-[#2B4257]" />
+            <span className="font-bold text-[#101E2B] text-sm">
               Official Tax Invoice Preview — {invoice.invoiceNumber}
             </span>
             <Badge variant={getStatusBadgeVariant(invoice.status)} size="sm" withDot>
@@ -66,7 +66,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-200/60 transition-colors"
+              className="text-[#889AA9] hover:text-[#101E2B] p-1.5 rounded-lg hover:bg-[#F5F0E6] transition-colors cursor-pointer"
               aria-label="Close"
             >
               <X className="h-5 w-5" />
@@ -75,40 +75,40 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
         </div>
 
         {/* Printable Invoice Paper Container */}
-        <div className="p-8 sm:p-12 overflow-y-auto flex-1 bg-white text-slate-900 print:p-0 print:overflow-visible">
+        <div className="p-8 sm:p-12 overflow-y-auto flex-1 bg-white text-[#101E2B] print:p-0 print:overflow-visible">
           {/* Header Block */}
-          <div className="flex flex-col sm:flex-row justify-between items-start gap-6 border-b border-slate-200 pb-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start gap-6 border-b border-[#E5DFD3] pb-8">
             <div className="space-y-2">
               <div className="flex items-center gap-2.5">
-                <div className="h-10 w-10 rounded-xl bg-blue-600 text-white font-black flex items-center justify-center text-lg shadow-sm">
+                <div className="h-10 w-10 rounded-xl bg-[#2B4257] text-[#FAF7F0] font-black flex items-center justify-center text-lg shadow-sm">
                   B
                 </div>
                 <div>
-                  <span className="text-xl font-black tracking-tight text-slate-900 block leading-tight">
+                  <span className="text-xl font-black tracking-tight text-[#101E2B] block leading-tight">
                     Brightloop Software Inc.
                   </span>
-                  <span className="text-[11px] font-semibold text-blue-600 uppercase tracking-wider block">
+                  <span className="text-[11px] font-semibold text-[#2B4257] uppercase tracking-wider block">
                     Subscription & Recurring Billing Systems
                   </span>
                 </div>
               </div>
 
-              <div className="text-xs text-slate-500 leading-relaxed pt-2">
+              <div className="text-xs text-[#5A6D80] leading-relaxed pt-2">
                 <p>100 Montgomery Street, Suite 2400</p>
                 <p>San Francisco, CA 94104, USA</p>
-                <p className="font-mono pt-1">GSTIN: 29AAACB1234F1Z5 | CIN: U72200KA2026PTC</p>
+                <p className="font-mono pt-1 text-[#889AA9]">GSTIN: 29AAACB1234F1Z5 | CIN: U72200KA2026PTC</p>
                 <p>Email: billing@brightloop.com | Web: www.brightloop.io</p>
               </div>
             </div>
 
             <div className="text-left sm:text-right space-y-1">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block">
+              <span className="text-xs font-bold text-[#889AA9] uppercase tracking-widest block">
                 TAX INVOICE
               </span>
-              <h2 className="text-2xl font-black text-slate-900 tracking-tight font-mono">
+              <h2 className="text-2xl font-black text-[#101E2B] tracking-tight font-mono">
                 {invoice.invoiceNumber}
               </h2>
-              <div className="pt-2 text-xs space-y-1 text-slate-600">
+              <div className="pt-2 text-xs space-y-1 text-[#5A6D80]">
                 <p>
                   <strong>Issue Date:</strong> {formatDate(invoice.issueDate)}
                 </p>
@@ -121,7 +121,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
                 </p>
                 <p>
                   <strong>Subscription Ref:</strong>{' '}
-                  <span className="font-mono font-semibold text-blue-700">
+                  <span className="font-mono font-semibold text-[#2B4257]">
                     {invoice.subscriptionNumber || 'SUB-2026-0001'}
                   </span>
                 </p>
@@ -130,16 +130,16 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
           </div>
 
           {/* Client & Billing Info */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 my-6 p-5 bg-slate-50/80 rounded-xl border border-slate-100 text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 my-6 p-5 bg-[#FAF7F0] rounded-xl border border-[#E5DFD3] text-xs">
             <div>
-              <span className="font-bold text-slate-400 uppercase tracking-wider block mb-1">
+              <span className="font-bold text-[#889AA9] uppercase tracking-wider block mb-1">
                 Billed To Client
               </span>
-              <p className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
-                <Building2 className="h-4 w-4 text-slate-500" />
+              <p className="text-sm font-bold text-[#101E2B] flex items-center gap-1.5">
+                <Building2 className="h-4 w-4 text-[#889AA9]" />
                 {invoice.customerName || 'Acme Software Labs'}
               </p>
-              <div className="text-slate-600 mt-1.5 space-y-0.5">
+              <div className="text-[#5A6D80] mt-1.5 space-y-0.5">
                 <p>Attn: Finance & Accounts Payable</p>
                 <p>Billing Contact: customer@acme.com</p>
                 <p>42 Innovation Way, Suite 300, San Francisco, CA</p>
@@ -147,7 +147,7 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
             </div>
 
             <div className="sm:text-right space-y-1">
-              <span className="font-bold text-slate-400 uppercase tracking-wider block mb-1">
+              <span className="font-bold text-[#889AA9] uppercase tracking-wider block mb-1">
                 Settlement Status
               </span>
               <div className="sm:inline-block">
@@ -155,20 +155,20 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
                   {invoice.status}
                 </Badge>
               </div>
-              <p className="text-slate-600 pt-1">
+              <p className="text-[#5A6D80] pt-1">
                 Payment Terms:{' '}
-                <strong className="text-slate-800">Net 15 (Standard B2B Terms)</strong>
+                <strong className="text-[#101E2B]">Net 15 (Standard B2B Terms)</strong>
               </p>
-              <p className="text-xs text-slate-500">
-                Currency: <strong className="text-slate-800">USD ($)</strong>
+              <p className="text-xs text-[#889AA9]">
+                Currency: <strong className="text-[#101E2B]">USD ($)</strong>
               </p>
             </div>
           </div>
 
           {/* Line Items Table */}
-          <div className="rounded-xl border border-slate-200 overflow-hidden mb-6 text-xs">
+          <div className="rounded-xl border border-[#E5DFD3] overflow-hidden mb-6 text-xs">
             <table className="w-full text-left border-collapse">
-              <thead className="bg-slate-100/80 border-b border-slate-200 text-slate-700 uppercase font-bold tracking-wider">
+              <thead className="bg-[#F7F4EE] border-b border-[#E5DFD3] text-[#101E2B] uppercase font-bold tracking-wider">
                 <tr>
                   <th className="py-3 px-4">#</th>
                   <th className="py-3 px-4">Product & Specification</th>
@@ -178,12 +178,12 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
                   <th className="py-3 px-4 text-right">Line Total</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700">
+              <tbody className="divide-y divide-[#E5DFD3]/60 text-[#101E2B]">
                 {invoice.items && invoice.items.length > 0 ? (
                   invoice.items.map((item, idx) => (
-                    <tr key={idx} className="hover:bg-slate-50/50">
-                      <td className="py-3 px-4 font-mono text-slate-400">{idx + 1}</td>
-                      <td className="py-3 px-4 font-semibold text-slate-900">
+                    <tr key={idx} className="hover:bg-[#FBF9F5]">
+                      <td className="py-3 px-4 font-mono text-[#889AA9]">{idx + 1}</td>
+                      <td className="py-3 px-4 font-semibold text-[#101E2B]">
                         {item.description}
                       </td>
                       <td className="py-3 px-3 text-center font-medium">{item.quantity}</td>
@@ -193,21 +193,21 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
                       <td className="py-3 px-3 text-right font-mono">
                         {formatCurrency(item.taxAmount)}
                       </td>
-                      <td className="py-3 px-4 text-right font-bold text-slate-900 font-mono">
+                      <td className="py-3 px-4 text-right font-bold text-[#101E2B] font-mono">
                         {formatCurrency(item.lineTotal)}
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td className="py-3 px-4 font-mono text-slate-400">1</td>
-                    <td className="py-3 px-4 font-semibold text-slate-900">
+                    <td className="py-3 px-4 font-mono text-[#889AA9]">1</td>
+                    <td className="py-3 px-4 font-semibold text-[#101E2B]">
                       Cloud ERP Software Suite (with Brand: Odoo +$560 variant)
                     </td>
                     <td className="py-3 px-3 text-center font-medium">1</td>
                     <td className="py-3 px-3 text-right font-mono">{formatCurrency(1560)}</td>
                     <td className="py-3 px-3 text-right font-mono">{formatCurrency(280.8)}</td>
-                    <td className="py-3 px-4 text-right font-bold text-slate-900 font-mono">
+                    <td className="py-3 px-4 text-right font-bold text-[#101E2B] font-mono">
                       {formatCurrency(1840.8)}
                     </td>
                   </tr>
@@ -217,24 +217,24 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
           </div>
 
           {/* Totals & Net Due Calculation */}
-          <div className="flex flex-col sm:flex-row justify-between items-start gap-6 border-t border-slate-200 pt-6">
-            <div className="space-y-3 max-w-sm text-xs text-slate-500">
-              <div className="p-3 bg-blue-50/60 rounded-lg border border-blue-200/60 text-blue-900">
+          <div className="flex flex-col sm:flex-row justify-between items-start gap-6 border-t border-[#E5DFD3] pt-6">
+            <div className="space-y-3 max-w-sm text-xs text-[#5A6D80]">
+              <div className="p-3 bg-[#F5F0E6] rounded-lg border border-[#E5DFD3] text-[#101E2B]">
                 <span className="font-bold flex items-center gap-1.5">
-                  <ShieldCheck className="h-3.5 w-3.5 text-blue-600" />
+                  <ShieldCheck className="h-3.5 w-3.5 text-[#2B4257]" />
                   Historical Snapshot Protection
                 </span>
-                <p className="text-[11px] text-blue-800/80 mt-0.5 leading-relaxed">
+                <p className="text-[11px] text-[#5A6D80] mt-0.5 leading-relaxed">
                   Unit rates, taxes, and applied volume discounts reflect immutable historical
                   snapshots at invoice generation time.
                 </p>
               </div>
 
               <div>
-                <span className="font-bold text-slate-700 block uppercase tracking-wide text-[10px]">
+                <span className="font-bold text-[#101E2B] block uppercase tracking-wide text-[10px]">
                   Electronic Payment Instructions
                 </span>
-                <p className="font-mono text-[11px] text-slate-600 mt-1">
+                <p className="font-mono text-[11px] text-[#5A6D80] mt-1">
                   Bank: Silicon Valley Corporate Bank<br />
                   Routing / IFSC: SVCB0001890<br />
                   Account: 9028-4411-9238-0012<br />
@@ -244,43 +244,43 @@ export const PrintableInvoiceModal: React.FC<PrintableInvoiceModalProps> = ({
             </div>
 
             <div className="w-full sm:w-72 space-y-2 text-xs">
-              <div className="flex justify-between text-slate-600">
+              <div className="flex justify-between text-[#5A6D80]">
                 <span>Subtotal (Net):</span>
-                <span className="font-mono font-semibold text-slate-800">
+                <span className="font-mono font-semibold text-[#101E2B]">
                   {formatCurrency(invoice.subtotal)}
                 </span>
               </div>
-              <div className="flex justify-between text-slate-600">
+              <div className="flex justify-between text-[#5A6D80]">
                 <span>GST Tax (18%):</span>
-                <span className="font-mono font-semibold text-slate-800">
+                <span className="font-mono font-semibold text-[#101E2B]">
                   {formatCurrency(invoice.taxAmount)}
                 </span>
               </div>
-              {invoice.discountAmount > 0 && (
+              {(invoice.discountAmount ?? 0) > 0 && (
                 <div className="flex justify-between text-emerald-600 font-medium">
                   <span>Promotional Discount:</span>
-                  <span className="font-mono">-{formatCurrency(invoice.discountAmount)}</span>
+                  <span className="font-mono">-{formatCurrency(invoice.discountAmount ?? 0)}</span>
                 </div>
               )}
-              <div className="flex justify-between pt-2 border-t border-slate-200 text-sm font-bold text-slate-900">
+              <div className="flex justify-between pt-2 border-t border-[#E5DFD3] text-sm font-bold text-[#101E2B]">
                 <span>Total Amount Invoiced:</span>
                 <span className="font-mono font-black">{formatCurrency(invoice.totalAmount)}</span>
               </div>
-              <div className="flex justify-between text-slate-600">
+              <div className="flex justify-between text-[#5A6D80]">
                 <span>Total Amount Paid:</span>
                 <span className="font-mono font-medium text-emerald-600">
                   -{formatCurrency(invoice.amountPaid)}
                 </span>
               </div>
-              <div className="flex justify-between items-center p-2.5 rounded-lg bg-blue-50 border border-blue-200 text-blue-900 font-black text-sm">
+              <div className="flex justify-between items-center p-2.5 rounded-lg bg-[#F5F0E6] border border-[#E5DFD3] text-[#101E2B] font-black text-sm">
                 <span>Net Balance Due:</span>
-                <span className="font-mono text-base">{formatCurrency(invoice.balanceDue)}</span>
+                <span className="font-mono text-base text-[#2B4257]">{formatCurrency(invoice.balanceDue ?? 0)}</span>
               </div>
             </div>
           </div>
 
           {/* Footer Signature */}
-          <div className="mt-12 pt-6 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-400">
+          <div className="mt-12 pt-6 border-t border-[#E5DFD3] flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-[#889AA9]">
             <span>Authorized Signatory • Brightloop Billing Operations Lead</span>
             <span className="font-mono text-[10px]">
               SHA-256 Verified Digest • Brightloop Automated Billing Engine
