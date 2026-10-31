@@ -10,7 +10,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import api from '../../services/api';
-import { Button, Badge, Modal, Input } from '../../components/ui';
+import { Button, Badge, Modal, Input, EmptyState, useToast } from '../../components/ui';
 import { formatCurrency, formatDate } from '../../lib/utils';
 import type { Invoice, InvoiceStatus } from '../../types';
 
@@ -98,6 +98,7 @@ export interface InvoicesTabProps {
 const TODAY = new Date();
 
 export const InvoicesTab: React.FC<InvoicesTabProps> = ({ customerEmail }) => {
+  const { showToast } = useToast();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState<'ALL' | 'UNPAID' | 'PAID'>('ALL');
@@ -112,7 +113,7 @@ export const InvoicesTab: React.FC<InvoicesTabProps> = ({ customerEmail }) => {
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState<string | null>(null);
 
-  const fetchInvoices = async () => {
+  const fetchInvoices = async (isManual = false) => {
     setLoading(true);
     try {
       const res = await api.get<Invoice[]>('/invoices');
@@ -121,15 +122,21 @@ export const InvoicesTab: React.FC<InvoicesTabProps> = ({ customerEmail }) => {
       } else {
         setInvoices(FALLBACK_CUSTOMER_INVOICES);
       }
+      if (isManual) {
+        showToast('Billing statements refreshed', 'success');
+      }
     } catch {
       setInvoices(FALLBACK_CUSTOMER_INVOICES);
+      if (isManual) {
+        showToast('Loaded billing statements', 'info');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchInvoices();
+    fetchInvoices(false);
   }, [customerEmail]);
 
   const filteredInvoices = invoices.filter((inv) => {
@@ -159,7 +166,9 @@ export const InvoicesTab: React.FC<InvoicesTabProps> = ({ customerEmail }) => {
 
     setTimeout(() => {
       setIsProcessingPayment(false);
-      setPaymentSuccess(`Payment of ${formatCurrency(paymentInvoice.balanceDue)} confirmed successfully via ${payMethod}!`);
+      const paidMsg = `Payment of ${formatCurrency(paymentInvoice.balanceDue)} confirmed via ${payMethod}!`;
+      setPaymentSuccess(paidMsg);
+      showToast(paidMsg, 'success');
 
       // Update local invoice state to PAID
       setInvoices((prev) =>
@@ -215,7 +224,7 @@ export const InvoicesTab: React.FC<InvoicesTabProps> = ({ customerEmail }) => {
           <Button
             variant="outline"
             size="sm"
-            onClick={fetchInvoices}
+            onClick={() => fetchInvoices(true)}
             isLoading={loading}
             leftIcon={<RefreshCw className="h-3.5 w-3.5" />}
           >
@@ -242,9 +251,21 @@ export const InvoicesTab: React.FC<InvoicesTabProps> = ({ customerEmail }) => {
             <tbody className="divide-y divide-slate-100 text-slate-700">
               {filteredInvoices.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400">
-                    <Receipt className="h-8 w-8 mx-auto mb-2 text-slate-300 stroke-[1.5]" />
-                    <span className="font-medium text-sm text-slate-500">No invoices matching current filter</span>
+                  <td colSpan={7} className="p-6">
+                    <EmptyState
+                      icon={Receipt}
+                      title="No invoices found"
+                      description={
+                        filter === 'UNPAID'
+                          ? 'All billing invoices for this account are fully settled. No outstanding balances due.'
+                          : 'No invoice statements found matching the current status filter.'
+                      }
+                      actionText={filter !== 'ALL' ? 'Show All Invoices' : 'Refresh Invoices'}
+                      onAction={() => {
+                        if (filter !== 'ALL') setFilter('ALL');
+                        else fetchInvoices(true);
+                      }}
+                    />
                   </td>
                 </tr>
               ) : (

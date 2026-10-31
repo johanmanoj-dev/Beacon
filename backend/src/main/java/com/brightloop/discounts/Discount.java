@@ -54,9 +54,27 @@ public class Discount {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "applies_to", nullable = false)
-    private DiscountScope appliesTo;
+    @Builder.Default
+    private DiscountScope appliesTo = DiscountScope.SUBSCRIPTION;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;
+
+    public boolean isValid(LocalDate date, BigDecimal purchaseAmount, int quantity) {
+        if (date != null) {
+            if (startDate != null && date.isBefore(startDate)) return false;
+            if (endDate != null && date.isAfter(endDate)) return false;
+        }
+        if (usageLimit != null && timesUsed != null && timesUsed >= usageLimit) {
+            return false;
+        }
+        if (minPurchaseAmount != null && purchaseAmount != null && purchaseAmount.compareTo(minPurchaseAmount) < 0) {
+            return false;
+        }
+        if (minQuantity != null && quantity < minQuantity) {
+            return false;
+        }
+        return true;
+    }
 }

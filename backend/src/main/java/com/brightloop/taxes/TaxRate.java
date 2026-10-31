@@ -24,7 +24,7 @@ public class TaxRate {
     @Column(name = "rate_percent", nullable = false, precision = 5, scale = 2)
     private BigDecimal ratePercent;
 
-    @Column(name = "is_active", nullable = false)
+    @Column(name = "is_active")
     @Builder.Default
     private Boolean isActive = true;
 }

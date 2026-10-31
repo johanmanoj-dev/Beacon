@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { RefreshCw, Calendar, Tag, ShieldCheck, Eye, Sparkles } from 'lucide-react';
+import { RefreshCw, Calendar, Tag, ShieldCheck, Eye, Sparkles, Layers } from 'lucide-react';
 import api from '../../services/api';
-import { Button, Badge, Modal } from '../../components/ui';
+import { Button, Badge, Modal, EmptyState, useToast } from '../../components/ui';
 import { formatCurrency, formatDate } from '../../lib/utils';
 import type { Subscription } from '../../types';
 
@@ -75,11 +75,12 @@ export interface SubscriptionsTabProps {
 }
 
 export const SubscriptionsTab: React.FC<SubscriptionsTabProps> = ({ customerEmail }) => {
+  const { showToast } = useToast();
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedSub, setSelectedSub] = useState<Subscription | null>(null);
 
-  const fetchSubscriptions = async () => {
+  const fetchSubscriptions = async (isManual = false) => {
     setLoading(true);
     try {
       const res = await api.get<Subscription[]>('/subscriptions');
@@ -88,16 +89,21 @@ export const SubscriptionsTab: React.FC<SubscriptionsTabProps> = ({ customerEmai
       } else {
         setSubscriptions(FALLBACK_CUSTOMER_SUBSCRIPTIONS);
       }
+      if (isManual) {
+        showToast('Active subscriptions refreshed', 'success');
+      }
     } catch {
-      // Fallback demo data if backend subscriptions endpoint is under development by Johan
       setSubscriptions(FALLBACK_CUSTOMER_SUBSCRIPTIONS);
+      if (isManual) {
+        showToast('Loaded baseline subscriptions', 'info');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchSubscriptions();
+    fetchSubscriptions(false);
   }, [customerEmail]);
 
   return (
@@ -114,7 +120,7 @@ export const SubscriptionsTab: React.FC<SubscriptionsTabProps> = ({ customerEmai
           <Button
             variant="outline"
             size="sm"
-            onClick={fetchSubscriptions}
+            onClick={() => fetchSubscriptions(true)}
             isLoading={loading}
             leftIcon={<RefreshCw className="h-3.5 w-3.5" />}
           >
@@ -123,116 +129,127 @@ export const SubscriptionsTab: React.FC<SubscriptionsTabProps> = ({ customerEmai
         </div>
       </div>
 
-      {/* Subscriptions Grid Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {subscriptions.map((sub) => {
-          const itemsList = sub.items || [];
-          const totalMonthly = itemsList.reduce((acc, curr) => acc + (Number(curr.lineTotal) || 0), 0);
+      {/* Subscriptions Grid Cards or Empty State */}
+      {subscriptions.length === 0 ? (
+        <EmptyState
+          icon={Layers}
+          title="No active subscriptions found"
+          description="There are currently no active software subscriptions linked to your account. Reach out to Brightloop staff or request a customized quotation to get started."
+          actionText="Reload Subscriptions"
+          onAction={() => fetchSubscriptions(true)}
+          actionIcon={<RefreshCw className="h-3.5 w-3.5" />}
+        />
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {subscriptions.map((sub) => {
+            const itemsList = sub.items || [];
+            const totalMonthly = itemsList.reduce((acc, curr) => acc + (Number(curr.lineTotal) || 0), 0);
 
-          return (
-            <div
-              key={sub.id}
-              className="bg-white rounded-xl border border-slate-200/90 shadow-2xs hover:shadow-md hover:border-blue-300 transition-all duration-200 flex flex-col justify-between overflow-hidden"
-            >
-              {/* Card Header */}
-              <div className="p-6 border-b border-slate-100 bg-gradient-to-r from-slate-50/50 to-white">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-mono text-xs font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200/60">
-                        {sub.subscriptionNumber}
-                      </span>
-                      <Badge variant="success" size="sm" withDot>
-                        {sub.status}
-                      </Badge>
-                    </div>
-                    <h3 className="text-base font-bold text-slate-900 mt-1">
-                      {sub.planName || 'Enterprise Subscription Plan'}
-                    </h3>
-                  </div>
-
-                  <div className="text-right">
-                    <span className="text-xs text-slate-400 block font-medium">Estimated Amount</span>
-                    <span className="text-lg font-black text-slate-900">
-                      {formatCurrency(totalMonthly)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card Body */}
-              <div className="p-6 space-y-4 flex-1">
-                {/* Timeline metadata */}
-                <div className="grid grid-cols-2 gap-3 p-3 bg-slate-50/80 rounded-lg text-xs border border-slate-100">
-                  <div>
-                    <span className="text-slate-400 font-medium block">Started On</span>
-                    <span className="font-semibold text-slate-700 flex items-center gap-1.5 mt-0.5">
-                      <Calendar className="h-3.5 w-3.5 text-slate-400" />
-                      {formatDate(sub.startDate)}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 font-medium block">Next Renewal Date</span>
-                    <span className="font-bold text-blue-700 flex items-center gap-1.5 mt-0.5">
-                      <Calendar className="h-3.5 w-3.5 text-blue-500" />
-                      {formatDate(sub.nextBillingDate)}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Subscribed items snippet */}
-                <div>
-                  <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-2">
-                    Included Line Items ({itemsList.length})
-                  </span>
-                  <div className="space-y-1.5">
-                    {itemsList.map((item, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-center justify-between text-xs py-1.5 px-2.5 rounded bg-white border border-slate-100 hover:border-slate-200 transition-colors"
-                      >
-                        <div className="min-w-0 pr-2">
-                          <span className="font-medium text-slate-800 block truncate">
-                            {item.productName}
-                          </span>
-                          {item.variantName && (
-                            <span className="text-[11px] text-blue-600 flex items-center gap-1 mt-0.5">
-                              <Tag className="h-3 w-3" />
-                              {item.variantName}
-                            </span>
-                          )}
-                        </div>
-                        <div className="text-right shrink-0">
-                          <span className="font-semibold text-slate-900">
-                            {item.quantity} × {formatCurrency(item.unitPrice)}
-                          </span>
-                        </div>
+            return (
+              <div
+                key={sub.id}
+                className="bg-white rounded-xl border border-slate-200/90 shadow-2xs hover:shadow-md hover:border-blue-300 transition-all duration-200 flex flex-col justify-between overflow-hidden"
+              >
+                {/* Card Header */}
+                <div className="p-6 border-b border-slate-100 bg-gradient-to-r from-slate-50/50 to-white">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-mono text-xs font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200/60">
+                          {sub.subscriptionNumber}
+                        </span>
+                        <Badge variant="success" size="sm" withDot>
+                          {sub.status}
+                        </Badge>
                       </div>
-                    ))}
+                      <h3 className="text-base font-bold text-slate-900 mt-1">
+                        {sub.planName || 'Enterprise Subscription Plan'}
+                      </h3>
+                    </div>
+
+                    <div className="text-right">
+                      <span className="text-xs text-slate-400 block font-medium">Estimated Amount</span>
+                      <span className="text-lg font-black text-slate-900">
+                        {formatCurrency(totalMonthly)}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Card Footer */}
-              <div className="px-6 py-3.5 border-t border-slate-100 bg-slate-50/40 flex items-center justify-between">
-                <span className="text-xs text-slate-500 flex items-center gap-1">
-                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
-                  Auto-renews via {sub.paymentTerms}
-                </span>
+                {/* Card Body */}
+                <div className="p-6 space-y-4 flex-1">
+                  {/* Timeline metadata */}
+                  <div className="grid grid-cols-2 gap-3 p-3 bg-slate-50/80 rounded-lg text-xs border border-slate-100">
+                    <div>
+                      <span className="text-slate-400 font-medium block">Started On</span>
+                      <span className="font-semibold text-slate-700 flex items-center gap-1.5 mt-0.5">
+                        <Calendar className="h-3.5 w-3.5 text-slate-400" />
+                        {formatDate(sub.startDate)}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 font-medium block">Next Renewal Date</span>
+                      <span className="font-bold text-blue-700 flex items-center gap-1.5 mt-0.5">
+                        <Calendar className="h-3.5 w-3.5 text-blue-500" />
+                        {formatDate(sub.nextBillingDate)}
+                      </span>
+                    </div>
+                  </div>
 
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setSelectedSub(sub)}
-                  leftIcon={<Eye className="h-3.5 w-3.5 text-slate-500" />}
-                >
-                  View Details
-                </Button>
+                  {/* Subscribed items snippet */}
+                  <div>
+                    <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-2">
+                      Included Line Items ({itemsList.length})
+                    </span>
+                    <div className="space-y-1.5">
+                      {itemsList.map((item, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center justify-between text-xs py-1.5 px-2.5 rounded bg-white border border-slate-100 hover:border-slate-200 transition-colors"
+                        >
+                          <div className="min-w-0 pr-2">
+                            <span className="font-medium text-slate-800 block truncate">
+                              {item.productName}
+                            </span>
+                            {item.variantName && (
+                              <span className="text-[11px] text-blue-600 flex items-center gap-1 mt-0.5">
+                                <Tag className="h-3 w-3" />
+                                {item.variantName}
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-right shrink-0">
+                            <span className="font-semibold text-slate-900">
+                              {item.quantity} × {formatCurrency(item.unitPrice)}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card Footer */}
+                <div className="px-6 py-3.5 border-t border-slate-100 bg-slate-50/40 flex items-center justify-between">
+                  <span className="text-xs text-slate-500 flex items-center gap-1">
+                    <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+                    Auto-renews via {sub.paymentTerms}
+                  </span>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSelectedSub(sub)}
+                    leftIcon={<Eye className="h-3.5 w-3.5 text-slate-500" />}
+                  >
+                    View Details
+                  </Button>
+                </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Subscription Line Items Breakdown Modal */}
       {selectedSub && (
