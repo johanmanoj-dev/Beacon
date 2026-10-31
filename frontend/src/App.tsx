@@ -12,6 +12,7 @@ import api from './services/api';
 import { AuthProvider } from './context';
 import { LoginPage, RegisterPage, ForgotPasswordPage } from './features/auth';
 import { AppShell, ProtectedRoute } from './layout';
+import { CataloguePage, CustomerListPage } from './features/catalogue';
 import {
   Button,
   Input,
@@ -248,14 +249,17 @@ function DashboardOverview({
           <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/70 space-y-2">
             <div className="flex items-center justify-between">
               <span className="font-bold text-slate-800">Track 1: Johan</span>
-              <Badge variant="neutral" size="sm">Core & Subs</Badge>
+              <Badge variant="success" size="sm">Phase 1 Complete</Badge>
             </div>
             <p className="text-xs text-slate-500 leading-relaxed">
-              Auth backend, Product variants (+$560 price adjustment), Plans, Quotation to Subscription state machine.
+              Auth backend, Products, Variants (+$560 Odoo bump), Plans, and Customers Directory fully functional.
             </p>
-            <div className="pt-1">
+            <div className="pt-1 flex items-center gap-3">
               <Link to="/catalogue" className="text-xs font-semibold text-blue-600 hover:underline">
-                View Catalogue Module →
+                Open Catalogue →
+              </Link>
+              <Link to="/customers" className="text-xs font-semibold text-blue-600 hover:underline">
+                Open Customers →
               </Link>
             </div>
           </div>
@@ -360,7 +364,7 @@ function DashboardOverview({
   );
 }
 
-// Module View Placeholder for Johan and Elsa
+// Module View Placeholder for remaining Phase 2/3 tracks
 function GenericModuleView({
   title,
   description,
@@ -455,18 +459,24 @@ export default function App() {
             }
           />
 
+          {/* Johan's Phase 1 Features: Catalogue & Customers */}
           <Route
             path="/catalogue"
             element={
               <ProtectedRoute allowedRoles={['ADMIN', 'STAFF']}>
                 <AppShell backendStatus={backendStatus}>
-                  <GenericModuleView
-                    title="Products, Variants & Plans Catalogue"
-                    description="Product definitions, custom price adjustments (+560 variant bump), and billing intervals."
-                    track="Track 1"
-                    assignedTo="Johan"
-                    badgeText="Johan Workspace"
-                  />
+                  <CataloguePage />
+                </AppShell>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/customers"
+            element={
+              <ProtectedRoute allowedRoles={['ADMIN', 'STAFF']}>
+                <AppShell backendStatus={backendStatus}>
+                  <CustomerListPage />
                 </AppShell>
               </ProtectedRoute>
             }
@@ -497,23 +507,6 @@ export default function App() {
                   <GenericModuleView
                     title="Subscriptions Lifecycle Management"
                     description="Subscription state machine (Draft, Active, Paused, Closed, Renewed)."
-                    track="Track 1"
-                    assignedTo="Johan"
-                    badgeText="Johan Workspace"
-                  />
-                </AppShell>
-              </ProtectedRoute>
-            }
-          />
-
-          <Route
-            path="/customers"
-            element={
-              <ProtectedRoute allowedRoles={['ADMIN', 'STAFF']}>
-                <AppShell backendStatus={backendStatus}>
-                  <GenericModuleView
-                    title="Customer Accounts & Portal Access"
-                    description="Manage customer organization records and associate with portal login credentials."
                     track="Track 1"
                     assignedTo="Johan"
                     badgeText="Johan Workspace"
