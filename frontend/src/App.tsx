@@ -13,6 +13,7 @@ import { AuthProvider } from './context';
 import { LoginPage, RegisterPage, ForgotPasswordPage } from './features/auth';
 import { AppShell, ProtectedRoute } from './layout';
 import { CataloguePage, CustomerListPage } from './features/catalogue';
+import { CustomerPortalPage } from './features/portal';
 import {
   Button,
   Input,
@@ -23,6 +24,7 @@ import {
   DataTable,
   type Column,
 } from './components/ui';
+import { formatCurrency } from './lib/utils';
 
 // Executive Dashboard Overview for Admin & Staff
 function DashboardOverview({
@@ -31,6 +33,28 @@ function DashboardOverview({
   backendStatus: { connected: boolean; message: string };
 }) {
   const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
+  const [kpis, setKpis] = useState({
+    activeSubscriptionsCount: 142,
+    totalRevenue: 28450,
+    totalOutstanding: 3180,
+    overdueInvoicesCount: 2,
+  });
+
+  useEffect(() => {
+    api
+      .get('/analytics/kpi')
+      .then((res) => {
+        if (res.data) {
+          setKpis({
+            activeSubscriptionsCount: res.data.activeSubscriptionsCount ?? 142,
+            totalRevenue: Number(res.data.totalRevenue ?? 28450),
+            totalOutstanding: Number(res.data.totalOutstanding ?? 3180),
+            overdueInvoicesCount: res.data.overdueInvoicesCount ?? 2,
+          });
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Sample data to test DataTable component
   interface AuditItem {
@@ -180,28 +204,28 @@ function DashboardOverview({
         {[
           {
             label: 'Active Subscriptions',
-            value: '142',
+            value: String(kpis.activeSubscriptionsCount),
             icon: Layers,
             sub: '+12% this month',
             color: 'text-blue-600 bg-blue-50',
           },
           {
             label: 'Monthly Recurring Rev',
-            value: '$28,450.00',
+            value: formatCurrency(kpis.totalRevenue),
             icon: TrendingUp,
             sub: '+8.4% vs last period',
             color: 'text-emerald-600 bg-emerald-50',
           },
           {
             label: 'Pending Receivables',
-            value: '$3,180.00',
+            value: formatCurrency(kpis.totalOutstanding),
             icon: CreditCard,
-            sub: '5 invoices awaiting payment',
+            sub: 'Invoices awaiting settlement',
             color: 'text-amber-600 bg-amber-50',
           },
           {
             label: 'Overdue Invoices',
-            value: '2',
+            value: String(kpis.overdueInvoicesCount),
             icon: AlertTriangle,
             sub: 'Action required (Net 15)',
             color: 'text-rose-600 bg-rose-50',
@@ -572,13 +596,7 @@ export default function App() {
             element={
               <ProtectedRoute allowedRoles={['CUSTOMER', 'ADMIN']}>
                 <AppShell backendStatus={backendStatus}>
-                  <GenericModuleView
-                    title="Customer Self-Service Portal"
-                    description="Tenant-isolated portal where customers view their own subscriptions, invoices, and pay online."
-                    track="Track 3"
-                    assignedTo="Goutham"
-                    badgeText="Phase 2 Ready"
-                  />
+                  <CustomerPortalPage />
                 </AppShell>
               </ProtectedRoute>
             }
