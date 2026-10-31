@@ -1,11 +1,9 @@
 package com.brightloop.invoices;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 @Entity
 @Table(name = "invoice_items")
@@ -22,10 +20,9 @@ public class InvoiceItem {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "invoice_id", nullable = false)
-    @JsonBackReference
     private Invoice invoice;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false)
     private String description;
 
     @Column(nullable = false)
@@ -48,25 +45,4 @@ public class InvoiceItem {
 
     @Column(name = "line_total", nullable = false, precision = 12, scale = 2)
     private BigDecimal lineTotal;
-
-    /**
-     * Exact decimal line calculation:
-     * subtotal = quantity * unitPrice
-     * discount = discountAmount (fixed or preset)
-     * taxable = max(0, subtotal - discount)
-     * tax = taxable * (taxRatePercent / 100)
-     * lineTotal = taxable + tax
-     */
-    public void calculateLine() {
-        if (quantity == null || quantity <= 0) quantity = 1;
-        if (unitPrice == null) unitPrice = BigDecimal.ZERO;
-        if (taxRatePercent == null) taxRatePercent = BigDecimal.ZERO;
-        if (discountAmount == null) discountAmount = BigDecimal.ZERO;
-
-        BigDecimal base = unitPrice.multiply(BigDecimal.valueOf(quantity));
-        BigDecimal afterDiscount = base.subtract(discountAmount).max(BigDecimal.ZERO);
-        this.taxAmount = afterDiscount.multiply(taxRatePercent)
-                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-        this.lineTotal = afterDiscount.add(this.taxAmount);
-    }
 }

@@ -23,4 +23,13 @@ public class GatewayConfirmRequest {
     private PaymentAttemptStatus simulatedStatus;
 
     private String failureReason;
+    private String simulatedFailureReason;
+
+    public String getFailureReason() {
+        return failureReason != null ? failureReason : simulatedFailureReason;
+    }
+
+    public String getSimulatedFailureReason() {
+        return simulatedFailureReason != null ? simulatedFailureReason : failureReason;
+    }
 }

@@ -5,10 +5,7 @@ import com.brightloop.catalogue.BillingInterval;
 import com.brightloop.discounts.Discount;
 import com.brightloop.discounts.DiscountRepository;
 import com.brightloop.discounts.DiscountType;
-import com.brightloop.invoices.Invoice;
-import com.brightloop.invoices.InvoiceItem;
-import com.brightloop.invoices.InvoiceRepository;
-import com.brightloop.invoices.InvoiceStatus;
+import com.brightloop.invoices.*;
 import com.brightloop.subscriptions.Subscription;
 import com.brightloop.subscriptions.SubscriptionItem;
 import com.brightloop.subscriptions.SubscriptionRepository;
@@ -23,7 +20,6 @@ import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -32,182 +28,182 @@ public class BillingService {
 
     private final SubscriptionRepository subscriptionRepository;
     private final InvoiceRepository invoiceRepository;
+    private final InvoiceService invoiceService;
     private final DiscountRepository discountRepository;
 
     @Transactional
-    public BillingRunResponse runBilling(LocalDate asOfDate) {
-        if (asOfDate == null) {
-            asOfDate = LocalDate.now();
-        }
+    public BillingRunResponse runBilling(LocalDate targetDate) {
+        final LocalDate runDate = (targetDate != null) ? targetDate : LocalDate.now();
+        log.info("Starting recurring billing run for target date: {}", runDate);
 
-        log.info("Executing recurring billing engine as of date: {}", asOfDate);
+        List<Subscription> activeSubs = subscriptionRepository.findByStatus(SubscriptionStatus.ACTIVE);
 
-        List<Subscription> activeSubscriptions = subscriptionRepository.findByStatus(SubscriptionStatus.ACTIVE);
-        List<String> generatedInvoiceNumbers = new ArrayList<>();
-        BigDecimal totalBilled = BigDecimal.ZERO;
-        int generatedCount = 0;
+        int createdCount = 0;
         int skippedCount = 0;
+        BigDecimal totalBilled = BigDecimal.ZERO;
+        List<String> generatedNumbers = new ArrayList<>();
 
-        for (Subscription sub : activeSubscriptions) {
+        for (Subscription sub : activeSubs) {
             LocalDate nextBilling = sub.getNextBillingDate();
-            if (nextBilling == null || nextBilling.isAfter(asOfDate)) {
+            if (nextBilling == null) {
+                continue;
+            }
+
+            if (nextBilling.isAfter(runDate)) {
+                // Check if this subscription was already invoiced for the cycle covering runDate
+                boolean alreadyInvoicedForCycle = invoiceRepository.existsBySubscriptionIdAndBillingPeriodEnd(sub.getId(), nextBilling)
+                        || invoiceRepository.findBySubscriptionId(sub.getId()).stream()
+                                .anyMatch(inv -> inv.getBillingPeriodEnd() != null && !inv.getBillingPeriodEnd().isBefore(runDate));
+
+                if (alreadyInvoicedForCycle) {
+                    log.info("Idempotent skip: Subscription {} is already billed for cycle covering {}",
+                            sub.getSubscriptionNumber(), runDate);
+                    skippedCount++;
+                }
                 continue;
             }
 
             LocalDate periodStart = nextBilling;
-            LocalDate periodEnd = computePeriodEnd(periodStart, sub.getPlan().getBillingInterval());
+            LocalDate periodEnd = computePeriodEnd(periodStart, sub.getPlan() != null ? sub.getPlan().getBillingInterval() : BillingInterval.MONTHLY);
 
-            // 1. Idempotency Check: Verify no invoice exists for this subscription and period
-            boolean alreadyBilled = invoiceRepository.existsBySubscriptionIdAndBillingPeriodStartAndBillingPeriodEnd(
-                    sub.getId(), periodStart, periodEnd
-            );
+            // 1. Strict Idempotency Check: cannot create multiple invoices for the same subscription period
+            boolean alreadyInvoiced = invoiceRepository.existsBySubscriptionIdAndBillingPeriodStartAndBillingPeriodEnd(
+                    sub.getId(), periodStart, periodEnd);
 
-            if (alreadyBilled) {
-                log.info("Idempotency match: Subscription {} is already billed for interval {} to {}. Skipping.",
+            if (alreadyInvoiced) {
+                log.warn("IDEMPOTENCY TRIGGERED: Invoice already exists for subscription {} for period {} to {}. Skipping duplicate generation.",
                         sub.getSubscriptionNumber(), periodStart, periodEnd);
                 skippedCount++;
                 continue;
             }
 
-            // 2. Generate unique sequential invoice number
-            String invoiceNumber = generateNextInvoiceNumber();
-
-            // 3. Compute Item Snapshots, Taxes & Subtotal
-            BigDecimal subtotal = BigDecimal.ZERO;
-            BigDecimal totalTax = BigDecimal.ZERO;
-            int totalSeats = 0;
-            List<InvoiceItem> invoiceItems = new ArrayList<>();
-
-            for (SubscriptionItem item : sub.getItems()) {
-                BigDecimal qty = BigDecimal.valueOf(item.getQuantity());
-                BigDecimal lineSubtotal = item.getUnitPrice().multiply(qty).setScale(2, RoundingMode.HALF_UP);
-                totalSeats += item.getQuantity();
-
-                BigDecimal taxRate = item.getTaxRatePercent() != null ? item.getTaxRatePercent() : BigDecimal.ZERO;
-                BigDecimal lineTax = lineSubtotal.multiply(taxRate)
-                        .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-
-                subtotal = subtotal.add(lineSubtotal);
-                totalTax = totalTax.add(lineTax);
-
-                String description = item.getProduct().getName();
-                if (item.getVariant() != null) {
-                    description += " (" + item.getVariant().getVariantName() + ")";
-                }
-
-                InvoiceItem invItem = InvoiceItem.builder()
-                        .description(description)
-                        .quantity(item.getQuantity())
-                        .unitPrice(item.getUnitPrice())
-                        .taxRatePercent(taxRate)
-                        .taxAmount(lineTax)
-                        .discountAmount(BigDecimal.ZERO)
-                        .lineTotal(lineSubtotal.add(lineTax))
-                        .build();
-
-                invoiceItems.add(invItem);
-            }
-
-            // 4. Automated Promotional Discount Validation (e.g. VOL10 for >= 5 seats)
-            BigDecimal discountAmount = BigDecimal.ZERO;
-            if (totalSeats >= 5) {
-                Optional<Discount> volDiscount = discountRepository.findByCodeIgnoreCase("VOL10");
-                if (volDiscount.isPresent()) {
-                    Discount d = volDiscount.get();
-                    boolean isValid = (d.getStartDate() == null || !asOfDate.isBefore(d.getStartDate()))
-                            && (d.getEndDate() == null || !asOfDate.isAfter(d.getEndDate()))
-                            && (d.getUsageLimit() == null || d.getTimesUsed() == null || d.getTimesUsed() < d.getUsageLimit());
-
-                    if (isValid) {
-                        if (d.getDiscountType() == DiscountType.PERCENTAGE) {
-                            discountAmount = subtotal.multiply(d.getValue())
-                                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-                        } else {
-                            discountAmount = d.getValue().min(subtotal);
-                        }
-                        log.info("Applied volume discount {} of {} to invoice {}", d.getCode(), discountAmount, invoiceNumber);
-                    }
-                }
-            }
-
-            BigDecimal totalAmount = subtotal.add(totalTax).subtract(discountAmount).max(BigDecimal.ZERO);
-
-            // 5. Construct and persist Invoice entity
+            // 2. Generate new invoice with frozen line item price snapshots
+            String invoiceNumber = invoiceService.generateNextInvoiceNumber();
             Invoice invoice = Invoice.builder()
                     .invoiceNumber(invoiceNumber)
                     .subscription(sub)
                     .customer(sub.getCustomer())
                     .billingPeriodStart(periodStart)
                     .billingPeriodEnd(periodEnd)
-                    .issueDate(LocalDate.now())
-                    .dueDate(LocalDate.now().plusDays(15))
-                    .subtotal(subtotal)
-                    .taxAmount(totalTax)
-                    .discountAmount(discountAmount)
-                    .totalAmount(totalAmount)
+                    .issueDate(runDate)
+                    .dueDate(runDate.plusDays(15))
                     .amountPaid(BigDecimal.ZERO)
-                    .balanceDue(totalAmount)
                     .status(InvoiceStatus.CONFIRMED)
                     .items(new ArrayList<>())
                     .build();
 
-            for (InvoiceItem it : invoiceItems) {
-                invoice.addItem(it);
+            int totalSeats = sub.getItems().stream().mapToInt(SubscriptionItem::getQuantity).sum();
+            BigDecimal grossSubtotal = sub.getItems().stream()
+                    .map(i -> i.getUnitPrice().multiply(BigDecimal.valueOf(i.getQuantity())))
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            BigDecimal discountPercent = calculateApplicableDiscountPercent(runDate, grossSubtotal, totalSeats);
+
+            BigDecimal subtotalAcc = BigDecimal.ZERO;
+            BigDecimal discountAcc = BigDecimal.ZERO;
+            BigDecimal taxAcc = BigDecimal.ZERO;
+
+            for (SubscriptionItem item : sub.getItems()) {
+                BigDecimal qty = BigDecimal.valueOf(item.getQuantity());
+                BigDecimal lineSubtotal = item.getUnitPrice().multiply(qty).setScale(2, RoundingMode.HALF_UP);
+
+                BigDecimal lineDiscount = BigDecimal.ZERO;
+                if (discountPercent.compareTo(BigDecimal.ZERO) > 0) {
+                    lineDiscount = lineSubtotal.multiply(discountPercent).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+                }
+
+                BigDecimal taxableAmount = lineSubtotal.subtract(lineDiscount);
+                BigDecimal taxRate = (item.getTaxRatePercent() != null) ? item.getTaxRatePercent() : new BigDecimal("18.00");
+                BigDecimal lineTax = taxableAmount.multiply(taxRate).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+
+                BigDecimal lineTotal = taxableAmount.add(lineTax).setScale(2, RoundingMode.HALF_UP);
+
+                String desc = item.getProduct() != null ? item.getProduct().getName() : "Subscription Item";
+                if (item.getVariant() != null) {
+                    desc += " (" + item.getVariant().getVariantName() + ")";
+                }
+
+                InvoiceItem invoiceItem = InvoiceItem.builder()
+                        .invoice(invoice)
+                        .description(desc)
+                        .quantity(item.getQuantity())
+                        .unitPrice(item.getUnitPrice())
+                        .taxRatePercent(taxRate)
+                        .taxAmount(lineTax)
+                        .discountAmount(lineDiscount)
+                        .lineTotal(lineTotal)
+                        .build();
+
+                invoice.getItems().add(invoiceItem);
+
+                subtotalAcc = subtotalAcc.add(lineSubtotal);
+                discountAcc = discountAcc.add(lineDiscount);
+                taxAcc = taxAcc.add(lineTax);
             }
 
-            invoiceRepository.saveAndFlush(invoice);
-            generatedInvoiceNumbers.add(invoiceNumber);
-            totalBilled = totalBilled.add(totalAmount);
-            generatedCount++;
+            BigDecimal totalAmount = subtotalAcc.subtract(discountAcc).add(taxAcc).setScale(2, RoundingMode.HALF_UP);
 
-            // 6. Advance subscription next_billing_date to next cycle
-            LocalDate advancedBillingDate = advanceBillingDate(periodStart, sub.getPlan().getBillingInterval());
-            sub.setNextBillingDate(advancedBillingDate);
+            invoice.setSubtotal(subtotalAcc);
+            invoice.setDiscountAmount(discountAcc);
+            invoice.setTaxAmount(taxAcc);
+            invoice.setTotalAmount(totalAmount);
+            invoice.setBalanceDue(totalAmount);
+
+            Invoice savedInvoice = invoiceRepository.save(invoice);
+
+            // 3. Advance next billing date on subscription
+            sub.setNextBillingDate(periodEnd);
             subscriptionRepository.save(sub);
 
-            log.info("Created recurring invoice {} for subscription {}. Next billing date advanced to {}",
-                    invoiceNumber, sub.getSubscriptionNumber(), advancedBillingDate);
+            createdCount++;
+            totalBilled = totalBilled.add(totalAmount);
+            generatedNumbers.add(savedInvoice.getInvoiceNumber());
+            log.info("Generated invoice {} for subscription {} [Total: ${}]",
+                    savedInvoice.getInvoiceNumber(), sub.getSubscriptionNumber(), totalAmount);
         }
 
-        String msg = String.format("Recurring billing run finished: %d invoice(s) generated, %d skipped due to idempotency.",
-                generatedCount, skippedCount);
+        String msg = String.format("Billing run complete: %d invoices generated ($%s), %d skipped due to idempotency",
+                createdCount, totalBilled.toPlainString(), skippedCount);
 
         return BillingRunResponse.builder()
-                .invoicesGenerated(generatedCount)
+                .runDate(runDate)
+                .invoicesCreated(createdCount)
+                .invoicesGenerated(createdCount)
+                .invoicesSkipped(skippedCount)
                 .skippedCount(skippedCount)
                 .totalAmountBilled(totalBilled)
-                .generatedInvoiceNumbers(generatedInvoiceNumbers)
+                .generatedInvoiceNumbers(generatedNumbers)
                 .message(msg)
                 .build();
     }
 
-    private synchronized String generateNextInvoiceNumber() {
-        long count = invoiceRepository.count() + 1;
-        String candidate = String.format("INV-2026-%04d", count);
-        while (invoiceRepository.findByInvoiceNumber(candidate).isPresent()) {
-            count++;
-            candidate = String.format("INV-2026-%04d", count);
-        }
-        return candidate;
+    private LocalDate computePeriodStart(LocalDate end, BillingInterval interval) {
+        if (interval == null) interval = BillingInterval.MONTHLY;
+        return switch (interval) {
+            case DAILY -> end.minusDays(1);
+            case WEEKLY -> end.minusWeeks(1);
+            case MONTHLY -> end.minusMonths(1);
+            case YEARLY -> end.minusYears(1);
+        };
     }
 
     private LocalDate computePeriodEnd(LocalDate start, BillingInterval interval) {
-        if (interval == null) return start.plusMonths(1).minusDays(1);
+        if (interval == null) interval = BillingInterval.MONTHLY;
         return switch (interval) {
-            case YEARLY -> start.plusYears(1).minusDays(1);
-            case WEEKLY -> start.plusWeeks(1).minusDays(1);
-            case DAILY -> start;
-            case MONTHLY -> start.plusMonths(1).minusDays(1);
+            case DAILY -> start.plusDays(1);
+            case WEEKLY -> start.plusWeeks(1);
+            case MONTHLY -> start.plusMonths(1);
+            case YEARLY -> start.plusYears(1);
         };
     }
 
-    private LocalDate advanceBillingDate(LocalDate current, BillingInterval interval) {
-        if (interval == null) return current.plusMonths(1);
-        return switch (interval) {
-            case YEARLY -> current.plusYears(1);
-            case WEEKLY -> current.plusWeeks(1);
-            case DAILY -> current.plusDays(1);
-            case MONTHLY -> current.plusMonths(1);
-        };
+    private BigDecimal calculateApplicableDiscountPercent(LocalDate date, BigDecimal purchaseAmount, int totalQuantity) {
+        // Look up active volume discount rule, e.g. "VOLUME10" or "VOL10"
+        return discountRepository.findByCode("VOLUME10")
+                .or(() -> discountRepository.findByCodeIgnoreCase("VOL10"))
+                .or(() -> discountRepository.findByCode("VOL10"))
+                .filter(d -> d.isValid(date, purchaseAmount, totalQuantity))
+                .filter(d -> d.getDiscountType() == DiscountType.PERCENTAGE)
+                .map(Discount::getValue)
+                .orElse(BigDecimal.ZERO);
     }
 }

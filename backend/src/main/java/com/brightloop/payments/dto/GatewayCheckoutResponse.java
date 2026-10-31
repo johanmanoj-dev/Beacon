@@ -18,6 +18,8 @@ public class GatewayCheckoutResponse {
     private String invoiceNumber;
     private String customerName;
     private BigDecimal amount;
+    private String currency;
+    private String clientSecret;
     private String paymentMethod;
     private String status;
     private String message;

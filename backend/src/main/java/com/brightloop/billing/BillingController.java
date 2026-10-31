@@ -18,8 +18,10 @@ public class BillingController {
 
     @PostMapping("/run")
     public ResponseEntity<BillingRunResponse> runBilling(
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate asOfDate
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate asOfDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate
     ) {
-        return ResponseEntity.ok(billingService.runBilling(asOfDate));
+        LocalDate date = asOfDate != null ? asOfDate : targetDate;
+        return ResponseEntity.ok(billingService.runBilling(date));
     }
 }

@@ -1,16 +1,13 @@
 package com.brightloop.payments;
 
-import com.brightloop.payments.dto.ManualPaymentRequest;
-import com.brightloop.payments.dto.PaymentResponse;
+import com.brightloop.payments.dto.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/payments")
@@ -30,21 +27,23 @@ public class PaymentController {
         return ResponseEntity.ok(paymentService.getAllPayments());
     }
 
+    @GetMapping("/invoice/{invoiceId}")
+    public ResponseEntity<List<PaymentResponse>> getByInvoiceId(@PathVariable Long invoiceId) {
+        return ResponseEntity.ok(paymentService.getPaymentsByInvoiceId(invoiceId));
+    }
+
     @PostMapping("/manual")
-    public ResponseEntity<?> recordManualPayment(@Valid @RequestBody ManualPaymentRequest request) {
-        try {
-            PaymentResponse resp = paymentService.recordManualPayment(request);
-            return ResponseEntity.status(HttpStatus.CREATED).body(resp);
-        } catch (IllegalArgumentException e) {
-            Map<String, String> err = new HashMap<>();
-            err.put("error", "Bad Request");
-            err.put("message", e.getMessage());
-            return ResponseEntity.badRequest().body(err);
-        } catch (IllegalStateException e) {
-            Map<String, String> err = new HashMap<>();
-            err.put("error", "Conflict");
-            err.put("message", e.getMessage());
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(err);
-        }
+    public ResponseEntity<PaymentResponse> recordManual(@Valid @RequestBody ManualPaymentRequest request) {
+        return new ResponseEntity<>(paymentService.recordManualPayment(request), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/gateway/checkout")
+    public ResponseEntity<CheckoutSessionResponse> initiateCheckout(@Valid @RequestBody CheckoutSessionRequest request) {
+        return ResponseEntity.ok(paymentService.initiateCheckoutSession(request));
+    }
+
+    @PostMapping("/gateway/confirm")
+    public ResponseEntity<PaymentResponse> confirmPayment(@Valid @RequestBody ConfirmPaymentRequest request) {
+        return ResponseEntity.ok(paymentService.confirmPayment(request));
     }
 }

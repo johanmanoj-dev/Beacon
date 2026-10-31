@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -23,217 +24,9 @@ import java.util.stream.Collectors;
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
-    private final PaymentAttemptRepository attemptRepository;
+    private final PaymentAttemptRepository paymentAttemptRepository;
     private final InvoiceRepository invoiceRepository;
     private final UserRepository userRepository;
-
-    @Transactional
-    public PaymentResponse recordManualPayment(ManualPaymentRequest req) {
-        Invoice invoice = invoiceRepository.findById(req.getInvoiceId())
-                .orElseThrow(() -> new IllegalArgumentException("Invoice not found with id: " + req.getInvoiceId()));
-
-        if (invoice.getStatus() == InvoiceStatus.CANCELLED) {
-            throw new IllegalStateException("Cannot record payment against a CANCELLED invoice");
-        }
-
-        if (invoice.getStatus() == InvoiceStatus.PAID || invoice.getBalanceDue().compareTo(BigDecimal.ZERO) == 0) {
-            throw new IllegalStateException("Invoice is already fully PAID. Balance due is $0.00");
-        }
-
-        if (req.getAmount().compareTo(invoice.getBalanceDue()) > 0) {
-            throw new IllegalArgumentException(String.format(
-                    "Payment amount ($%s) cannot exceed invoice balance due ($%s)",
-                    req.getAmount(), invoice.getBalanceDue()
-            ));
-        }
-
-        User staffUser = null;
-        if (req.getRecordedByUserId() != null) {
-            staffUser = userRepository.findById(req.getRecordedByUserId()).orElse(null);
-        }
-
-        String refNum = req.getReferenceNumber();
-        if (refNum == null || refNum.trim().isEmpty()) {
-            refNum = "REF-" + System.currentTimeMillis();
-        }
-
-        Payment payment = Payment.builder()
-                .invoice(invoice)
-                .amount(req.getAmount())
-                .paymentMethod(req.getPaymentMethod())
-                .referenceNumber(refNum)
-                .paymentDate(LocalDateTime.now())
-                .notes(req.getNotes())
-                .recordedBy(staffUser)
-                .build();
-
-        payment = paymentRepository.save(payment);
-
-        // Atomic balance recalculation
-        BigDecimal newAmountPaid = invoice.getAmountPaid().add(req.getAmount());
-        BigDecimal newBalanceDue = invoice.getTotalAmount().subtract(newAmountPaid).max(BigDecimal.ZERO);
-        invoice.setAmountPaid(newAmountPaid);
-        invoice.setBalanceDue(newBalanceDue);
-
-        if (newBalanceDue.compareTo(BigDecimal.ZERO) == 0) {
-            invoice.setStatus(InvoiceStatus.PAID);
-        } else {
-            invoice.setStatus(InvoiceStatus.PARTIALLY_PAID);
-        }
-
-        invoiceRepository.save(invoice);
-
-        log.info("Recorded manual payment {} of ${} for invoice {}. New balance: ${}",
-                payment.getId(), payment.getAmount(), invoice.getInvoiceNumber(), newBalanceDue);
-
-        return PaymentResponse.fromEntity(payment);
-    }
-
-    @Transactional
-    public GatewayCheckoutResponse initiateGatewayCheckout(GatewayCheckoutRequest req) {
-        Invoice invoice = invoiceRepository.findById(req.getInvoiceId())
-                .orElseThrow(() -> new IllegalArgumentException("Invoice not found with id: " + req.getInvoiceId()));
-
-        if (invoice.getStatus() == InvoiceStatus.CANCELLED || invoice.getStatus() == InvoiceStatus.PAID) {
-            throw new IllegalStateException("Invoice cannot accept gateway payment in status " + invoice.getStatus());
-        }
-
-        String idempotencyKey = req.getIdempotencyKey();
-        if (idempotencyKey == null || idempotencyKey.trim().isEmpty()) {
-            idempotencyKey = "IDEM-" + UUID.randomUUID().toString().substring(0, 8);
-        }
-
-        // Return existing attempt if matching idempotency key already created
-        var existingAttempt = attemptRepository.findByIdempotencyKey(idempotencyKey);
-        if (existingAttempt.isPresent()) {
-            PaymentAttempt att = existingAttempt.get();
-            return GatewayCheckoutResponse.builder()
-                    .transactionId(att.getTransactionId())
-                    .idempotencyKey(att.getIdempotencyKey())
-                    .invoiceId(invoice.getId())
-                    .invoiceNumber(invoice.getInvoiceNumber())
-                    .customerName(invoice.getCustomer() != null ? invoice.getCustomer().getCompanyName() : null)
-                    .amount(att.getAmount())
-                    .paymentMethod(att.getPaymentMethod())
-                    .status(att.getStatus().name())
-                    .message("Existing checkout session retrieved")
-                    .build();
-        }
-
-        String transactionId = "TXN-SIM-" + System.currentTimeMillis() + "-" + UUID.randomUUID().toString().substring(0, 4).toUpperCase();
-        String method = req.getPaymentMethod() != null ? req.getPaymentMethod() : "SIMULATED_GATEWAY";
-
-        PaymentAttempt attempt = PaymentAttempt.builder()
-                .invoice(invoice)
-                .amount(req.getAmount())
-                .transactionId(transactionId)
-                .paymentMethod(method)
-                .status(PaymentAttemptStatus.PENDING)
-                .idempotencyKey(idempotencyKey)
-                .build();
-
-        attemptRepository.save(attempt);
-
-        return GatewayCheckoutResponse.builder()
-                .transactionId(transactionId)
-                .idempotencyKey(idempotencyKey)
-                .invoiceId(invoice.getId())
-                .invoiceNumber(invoice.getInvoiceNumber())
-                .customerName(invoice.getCustomer() != null ? invoice.getCustomer().getCompanyName() : null)
-                .amount(req.getAmount())
-                .paymentMethod(method)
-                .status(PaymentAttemptStatus.PENDING.name())
-                .message("Gateway checkout initialized. Awaiting confirmation.")
-                .build();
-    }
-
-    @Transactional
-    public GatewayConfirmResponse confirmGatewayPayment(GatewayConfirmRequest req) {
-        PaymentAttempt attempt = attemptRepository.findByTransactionId(req.getTransactionId())
-                .orElseThrow(() -> new IllegalArgumentException("Transaction not found: " + req.getTransactionId()));
-
-        Invoice invoice = attempt.getInvoice();
-
-        // Idempotency: If attempt is already completed, return existing result without duplicate charge
-        if (attempt.getStatus() == PaymentAttemptStatus.SUCCESS) {
-            return GatewayConfirmResponse.builder()
-                    .transactionId(attempt.getTransactionId())
-                    .status(PaymentAttemptStatus.SUCCESS)
-                    .invoiceId(invoice.getId())
-                    .invoiceNumber(invoice.getInvoiceNumber())
-                    .amountPaid(attempt.getAmount())
-                    .remainingBalance(invoice.getBalanceDue())
-                    .updatedInvoiceStatus(invoice.getStatus())
-                    .message("Payment already confirmed previously (Idempotent replay).")
-                    .build();
-        }
-
-        if (req.getSimulatedStatus() == PaymentAttemptStatus.SUCCESS) {
-            attempt.setStatus(PaymentAttemptStatus.SUCCESS);
-            attempt.setCompletedAt(LocalDateTime.now());
-            attemptRepository.save(attempt);
-
-            // Create actual payment ledger entry
-            Payment payment = Payment.builder()
-                    .invoice(invoice)
-                    .amount(attempt.getAmount())
-                    .paymentMethod(PaymentMethod.SIMULATED_GATEWAY)
-                    .referenceNumber(attempt.getTransactionId())
-                    .paymentDate(LocalDateTime.now())
-                    .notes("Simulated checkout gateway settlement")
-                    .recordedBy(null)
-                    .build();
-
-            paymentRepository.save(payment);
-
-            // Atomic balance recalculation
-            BigDecimal newAmountPaid = invoice.getAmountPaid().add(attempt.getAmount());
-            BigDecimal newBalanceDue = invoice.getTotalAmount().subtract(newAmountPaid).max(BigDecimal.ZERO);
-            invoice.setAmountPaid(newAmountPaid);
-            invoice.setBalanceDue(newBalanceDue);
-
-            if (newBalanceDue.compareTo(BigDecimal.ZERO) == 0) {
-                invoice.setStatus(InvoiceStatus.PAID);
-            } else {
-                invoice.setStatus(InvoiceStatus.PARTIALLY_PAID);
-            }
-
-            invoiceRepository.save(invoice);
-
-            log.info("Simulated checkout SUCCESS for transaction {}. Invoice {} transitioned to {}",
-                    attempt.getTransactionId(), invoice.getInvoiceNumber(), invoice.getStatus());
-
-            return GatewayConfirmResponse.builder()
-                    .transactionId(attempt.getTransactionId())
-                    .status(PaymentAttemptStatus.SUCCESS)
-                    .invoiceId(invoice.getId())
-                    .invoiceNumber(invoice.getInvoiceNumber())
-                    .amountPaid(attempt.getAmount())
-                    .remainingBalance(newBalanceDue)
-                    .updatedInvoiceStatus(invoice.getStatus())
-                    .message("Simulated checkout payment successful! Invoice balance updated.")
-                    .build();
-        } else {
-            String reason = req.getFailureReason() != null ? req.getFailureReason() : "Simulated card decline or gateway timeout";
-            attempt.setStatus(PaymentAttemptStatus.FAILED);
-            attempt.setFailureReason(reason);
-            attempt.setCompletedAt(LocalDateTime.now());
-            attemptRepository.save(attempt);
-
-            log.warn("Simulated checkout FAILED for transaction {}: {}", attempt.getTransactionId(), reason);
-
-            return GatewayConfirmResponse.builder()
-                    .transactionId(attempt.getTransactionId())
-                    .status(PaymentAttemptStatus.FAILED)
-                    .invoiceId(invoice.getId())
-                    .invoiceNumber(invoice.getInvoiceNumber())
-                    .amountPaid(BigDecimal.ZERO)
-                    .remainingBalance(invoice.getBalanceDue())
-                    .updatedInvoiceStatus(invoice.getStatus())
-                    .message("Simulated payment failed: " + reason)
-                    .build();
-        }
-    }
 
     @Transactional(readOnly = true)
     public List<PaymentResponse> getAllPayments() {
@@ -247,5 +40,226 @@ public class PaymentService {
         return paymentRepository.findByInvoiceIdOrderByPaymentDateDesc(invoiceId).stream()
                 .map(PaymentResponse::fromEntity)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public PaymentResponse recordManualPayment(ManualPaymentRequest request) {
+        Invoice invoice = invoiceRepository.findById(request.getInvoiceId())
+                .orElseThrow(() -> new IllegalArgumentException("Invoice not found with id: " + request.getInvoiceId()));
+
+        if (invoice.getStatus() == InvoiceStatus.PAID) {
+            throw new IllegalStateException("Invoice " + invoice.getInvoiceNumber() + " is already fully paid");
+        }
+        if (invoice.getStatus() == InvoiceStatus.CANCELLED) {
+            throw new IllegalStateException("Cannot record payment for a cancelled invoice");
+        }
+
+        BigDecimal payAmount = request.getAmount().setScale(2, RoundingMode.HALF_UP);
+        if (payAmount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Payment amount must be greater than zero");
+        }
+
+        if (payAmount.compareTo(invoice.getBalanceDue()) > 0) {
+            throw new IllegalArgumentException(String.format("Payment amount ($%s) cannot exceed outstanding balance due ($%s)",
+                    payAmount, invoice.getBalanceDue()));
+        }
+
+        User recorder = null;
+        if (request.getRecordedByUserId() != null) {
+            recorder = userRepository.findById(request.getRecordedByUserId()).orElse(null);
+        }
+
+        Payment payment = Payment.builder()
+                .invoice(invoice)
+                .amount(payAmount)
+                .paymentMethod(request.getPaymentMethod())
+                .referenceNumber(request.getReferenceNumber() != null ? request.getReferenceNumber().trim() : "REF-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase())
+                .paymentDate(LocalDateTime.now())
+                .notes(request.getNotes())
+                .recordedBy(recorder)
+                .build();
+
+        Payment savedPayment = paymentRepository.save(payment);
+
+        // Atomic balance recalculation
+        BigDecimal currentPaid = invoice.getAmountPaid() != null ? invoice.getAmountPaid() : BigDecimal.ZERO;
+        BigDecimal newAmountPaid = currentPaid.add(payAmount);
+        BigDecimal newBalanceDue = invoice.getTotalAmount().subtract(newAmountPaid).max(BigDecimal.ZERO).setScale(2, RoundingMode.HALF_UP);
+
+        invoice.setAmountPaid(newAmountPaid);
+        invoice.setBalanceDue(newBalanceDue);
+
+        if (newBalanceDue.compareTo(BigDecimal.ZERO) == 0) {
+            invoice.setStatus(InvoiceStatus.PAID);
+        } else {
+            invoice.setStatus(InvoiceStatus.PARTIALLY_PAID);
+        }
+
+        invoiceRepository.save(invoice);
+        log.info("Recorded manual payment {} of ${} for invoice {}. New balance: ${}",
+                savedPayment.getId(), payAmount, invoice.getInvoiceNumber(), newBalanceDue);
+
+        return PaymentResponse.fromEntity(savedPayment);
+    }
+
+    @Transactional
+    public CheckoutSessionResponse initiateCheckoutSession(CheckoutSessionRequest request) {
+        Invoice invoice = invoiceRepository.findById(request.getInvoiceId())
+                .orElseThrow(() -> new IllegalArgumentException("Invoice not found with id: " + request.getInvoiceId()));
+
+        if (invoice.getStatus() == InvoiceStatus.PAID || invoice.getBalanceDue().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalStateException("Invoice " + invoice.getInvoiceNumber() + " has zero balance due");
+        }
+
+        String transactionId = "TXN-SIM-" + System.currentTimeMillis() + "-" + UUID.randomUUID().toString().substring(0, 4).toUpperCase();
+        String idempotencyKey = (request.getIdempotencyKey() != null && !request.getIdempotencyKey().isBlank())
+                ? request.getIdempotencyKey()
+                : "IDEM-" + UUID.randomUUID().toString();
+
+        PaymentAttempt attempt = PaymentAttempt.builder()
+                .invoice(invoice)
+                .transactionId(transactionId)
+                .idempotencyKey(idempotencyKey)
+                .amount(request.getAmount() != null ? request.getAmount().setScale(2, RoundingMode.HALF_UP) : invoice.getBalanceDue())
+                .paymentMethod(request.getPaymentMethod() != null ? request.getPaymentMethod() : "SIMULATED_GATEWAY")
+                .status("PENDING")
+                .build();
+
+        paymentAttemptRepository.save(attempt);
+
+        return CheckoutSessionResponse.builder()
+                .transactionId(transactionId)
+                .invoiceId(invoice.getId())
+                .amount(attempt.getAmount())
+                .status("PENDING")
+                .paymentMethod(attempt.getPaymentMethod())
+                .build();
+    }
+
+    @Transactional
+    public PaymentResponse confirmPayment(ConfirmPaymentRequest request) {
+        PaymentAttempt attempt = paymentAttemptRepository.findByTransactionId(request.getTransactionId())
+                .orElseThrow(() -> new IllegalArgumentException("Payment attempt not found: " + request.getTransactionId()));
+
+        if ("SUCCESS".equalsIgnoreCase(attempt.getStatus())) {
+            log.info("Idempotent confirmation replay: Transaction {} was already processed successfully", request.getTransactionId());
+            Payment existingPayment = paymentRepository.findByInvoiceId(attempt.getInvoice().getId())
+                    .stream()
+                    .filter(p -> attempt.getTransactionId().equals(p.getReferenceNumber()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (existingPayment != null) {
+                return PaymentResponse.fromEntity(existingPayment);
+            }
+        }
+
+        Invoice invoice = attempt.getInvoice();
+
+        if ("SUCCESS".equalsIgnoreCase(request.getSimulatedOutcome())) {
+            attempt.setStatus("SUCCESS");
+            attempt.setCompletedAt(LocalDateTime.now());
+            paymentAttemptRepository.save(attempt);
+
+            Payment payment = Payment.builder()
+                    .invoice(invoice)
+                    .amount(attempt.getAmount())
+                    .paymentMethod(PaymentMethod.SIMULATED_GATEWAY)
+                    .referenceNumber(attempt.getTransactionId())
+                    .paymentDate(LocalDateTime.now())
+                    .notes("Simulated checkout gateway via " + attempt.getPaymentMethod())
+                    .build();
+
+            Payment savedPayment = paymentRepository.save(payment);
+
+            BigDecimal currentPaid = invoice.getAmountPaid() != null ? invoice.getAmountPaid() : BigDecimal.ZERO;
+            BigDecimal newPaid = currentPaid.add(attempt.getAmount());
+            BigDecimal newBalance = invoice.getTotalAmount().subtract(newPaid).max(BigDecimal.ZERO).setScale(2, RoundingMode.HALF_UP);
+
+            invoice.setAmountPaid(newPaid);
+            invoice.setBalanceDue(newBalance);
+
+            if (newBalance.compareTo(BigDecimal.ZERO) == 0) {
+                invoice.setStatus(InvoiceStatus.PAID);
+            } else {
+                invoice.setStatus(InvoiceStatus.PARTIALLY_PAID);
+            }
+
+            invoiceRepository.save(invoice);
+            log.info("Simulated payment SUCCESS for invoice {}. New balance: ${}, status: {}",
+                    invoice.getInvoiceNumber(), newBalance, invoice.getStatus());
+
+            return PaymentResponse.fromEntity(savedPayment);
+        } else {
+            attempt.setStatus("FAILED");
+            attempt.setFailureReason(request.getFailureReason() != null ? request.getFailureReason() : "Declined by issuing bank (Simulated failure test)");
+            attempt.setCompletedAt(LocalDateTime.now());
+            paymentAttemptRepository.save(attempt);
+
+            log.warn("Simulated payment FAILED for transaction {}", attempt.getTransactionId());
+            throw new RuntimeException("Simulated payment transaction failed: " + attempt.getFailureReason());
+        }
+    }
+
+    @Transactional
+    public GatewayCheckoutResponse initiateGatewayCheckout(GatewayCheckoutRequest req) {
+        CheckoutSessionResponse res = initiateCheckoutSession(CheckoutSessionRequest.builder()
+                .invoiceId(req.getInvoiceId())
+                .amount(req.getAmount())
+                .paymentMethod(req.getPaymentMethod())
+                .build());
+
+        return GatewayCheckoutResponse.builder()
+                .transactionId(res.getTransactionId())
+                .invoiceId(res.getInvoiceId())
+                .amount(res.getAmount())
+                .currency("USD")
+                .status("PENDING")
+                .clientSecret("sim_sec_" + UUID.randomUUID())
+                .paymentMethod(res.getPaymentMethod())
+                .build();
+    }
+
+    @Transactional
+    public GatewayConfirmResponse confirmGatewayPayment(GatewayConfirmRequest req) {
+        PaymentAttempt attempt = paymentAttemptRepository.findByTransactionId(req.getTransactionId())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid transaction ID: " + req.getTransactionId()));
+
+        Invoice invoice = attempt.getInvoice();
+        boolean isSuccess = req.getSimulatedStatus() == PaymentAttemptStatus.SUCCESS || "SUCCESS".equalsIgnoreCase(req.getSimulatedStatus() != null ? req.getSimulatedStatus().name() : "");
+
+        if (isSuccess) {
+            PaymentResponse pRes = confirmPayment(ConfirmPaymentRequest.builder()
+                    .transactionId(req.getTransactionId())
+                    .simulatedOutcome("SUCCESS")
+                    .build());
+
+            return GatewayConfirmResponse.builder()
+                    .transactionId(attempt.getTransactionId())
+                    .status(PaymentAttemptStatus.SUCCESS)
+                    .invoiceId(invoice.getId())
+                    .invoiceNumber(invoice.getInvoiceNumber())
+                    .amountPaid(attempt.getAmount())
+                    .remainingBalance(invoice.getBalanceDue())
+                    .updatedInvoiceStatus(invoice.getStatus())
+                    .message("Simulated checkout payment successful! Invoice balance updated.")
+                    .build();
+        } else {
+            attempt.setStatus("FAILED");
+            attempt.setFailureReason(req.getSimulatedFailureReason() != null ? req.getSimulatedFailureReason() : "Simulated decline");
+            attempt.setCompletedAt(LocalDateTime.now());
+            paymentAttemptRepository.save(attempt);
+
+            return GatewayConfirmResponse.builder()
+                    .transactionId(attempt.getTransactionId())
+                    .status(PaymentAttemptStatus.FAILED)
+                    .invoiceId(invoice.getId())
+                    .invoiceNumber(invoice.getInvoiceNumber())
+                    .amountPaid(BigDecimal.ZERO)
+                    .remainingBalance(invoice.getBalanceDue())
+                    .updatedInvoiceStatus(invoice.getStatus())
+                    .message("Simulated payment failed: " + attempt.getFailureReason())
+                    .build();
+        }
     }
 }

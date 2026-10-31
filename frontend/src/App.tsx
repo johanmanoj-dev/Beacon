@@ -15,7 +15,7 @@ import { AppShell, ProtectedRoute } from './layout';
 import { CataloguePage, CustomerListPage, QuotationsPage, SubscriptionsPage } from './features/catalogue';
 import { CustomerPortalPage } from './features/portal';
 import { FinanceDashboardPage, DemoScenarioModal } from './features/analytics';
-import { BillingConfigPage, InvoicesPage, PaymentsPage } from './features/billing';
+import { InvoicesPage, PaymentsPage, BillingRulesPage } from './features/billing';
 import {
   Button,
   Input,
@@ -599,7 +599,7 @@ export default function App() {
             element={
               <ProtectedRoute allowedRoles={['ADMIN']}>
                 <AppShell backendStatus={backendStatus}>
-                  <BillingConfigPage />
+                  <BillingRulesPage />
                 </AppShell>
               </ProtectedRoute>
             }
