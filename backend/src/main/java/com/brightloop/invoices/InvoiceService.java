@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -54,5 +55,28 @@ public class InvoiceService {
         return invoiceRepository.findByStatus(status).stream()
                 .map(InvoiceResponse::fromEntity)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public InvoiceResponse confirmInvoice(Long id) {
+        Invoice invoice = invoiceRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invoice not found with id: " + id));
+        if (invoice.getStatus() == InvoiceStatus.CANCELLED) {
+            throw new IllegalStateException("Cannot confirm a cancelled invoice");
+        }
+        invoice.setStatus(InvoiceStatus.CONFIRMED);
+        return InvoiceResponse.fromEntity(invoiceRepository.save(invoice));
+    }
+
+    @Transactional
+    public InvoiceResponse cancelInvoice(Long id) {
+        Invoice invoice = invoiceRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invoice not found with id: " + id));
+        if (invoice.getStatus() == InvoiceStatus.PAID) {
+            throw new IllegalStateException("Cannot cancel an already paid invoice");
+        }
+        invoice.setStatus(InvoiceStatus.CANCELLED);
+        invoice.setBalanceDue(BigDecimal.ZERO);
+        return InvoiceResponse.fromEntity(invoiceRepository.save(invoice));
     }
 }

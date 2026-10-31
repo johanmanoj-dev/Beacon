@@ -126,7 +126,8 @@ export const SubscriptionsTab: React.FC<SubscriptionsTabProps> = ({ customerEmai
       {/* Subscriptions Grid Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {subscriptions.map((sub) => {
-          const totalMonthly = sub.items.reduce((acc, curr) => acc + curr.lineTotal, 0);
+          const itemsList = sub.items || [];
+          const totalMonthly = itemsList.reduce((acc, curr) => acc + (Number(curr.lineTotal) || 0), 0);
 
           return (
             <div
@@ -182,10 +183,10 @@ export const SubscriptionsTab: React.FC<SubscriptionsTabProps> = ({ customerEmai
                 {/* Subscribed items snippet */}
                 <div>
                   <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-2">
-                    Included Line Items ({sub.items.length})
+                    Included Line Items ({itemsList.length})
                   </span>
                   <div className="space-y-1.5">
-                    {sub.items.map((item, idx) => (
+                    {itemsList.map((item, idx) => (
                       <div
                         key={idx}
                         className="flex items-center justify-between text-xs py-1.5 px-2.5 rounded bg-white border border-slate-100 hover:border-slate-200 transition-colors"
@@ -281,7 +282,7 @@ export const SubscriptionsTab: React.FC<SubscriptionsTabProps> = ({ customerEmai
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-slate-700">
-                  {selectedSub.items.map((it, idx) => (
+                  {(selectedSub.items || []).map((it, idx) => (
                     <tr key={idx} className="hover:bg-slate-50/50">
                       <td className="py-3 px-4 font-medium text-slate-900">
                         {it.productName}
@@ -309,7 +310,7 @@ export const SubscriptionsTab: React.FC<SubscriptionsTabProps> = ({ customerEmai
                 Snapshot Pricing Guarantee: Unit costs locked at subscription issuance.
               </span>
               <span className="font-extrabold text-sm">
-                Total: {formatCurrency(selectedSub.items.reduce((a, b) => a + b.lineTotal, 0))}
+                Total: {formatCurrency((selectedSub.items || []).reduce((a, b) => a + (Number(b.lineTotal) || 0), 0))}
               </span>
             </div>
           </div>

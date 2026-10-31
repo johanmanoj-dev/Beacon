@@ -15,7 +15,7 @@ import { AppShell, ProtectedRoute } from './layout';
 import { CataloguePage, CustomerListPage, QuotationsPage, SubscriptionsPage } from './features/catalogue';
 import { CustomerPortalPage } from './features/portal';
 import { FinanceDashboardPage, DemoScenarioModal } from './features/analytics';
-import { BillingConfigPage } from './features/billing';
+import { BillingConfigPage, InvoicesPage } from './features/billing';
 import {
   Button,
   Input,
@@ -575,13 +575,7 @@ export default function App() {
             element={
               <ProtectedRoute allowedRoles={['ADMIN', 'STAFF']}>
                 <AppShell backendStatus={backendStatus}>
-                  <GenericModuleView
-                    title="Invoices & Recurring Billing Engine"
-                    description="Automated billing runs, idempotent line snapshots, and invoice status transitions."
-                    track="Track 2"
-                    assignedTo="Elsa"
-                    badgeText="Elsa Workspace"
-                  />
+                  <InvoicesPage />
                 </AppShell>
               </ProtectedRoute>
             }

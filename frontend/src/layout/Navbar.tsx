@@ -40,6 +40,8 @@ export const Navbar: React.FC = () => {
     CUSTOMER: { variant: 'success', label: 'Customer' },
   };
 
+  const activeBadge = (role && roleBadges[role]) ? roleBadges[role] : { variant: 'info' as const, label: role || 'User' };
+
   return (
     <header className="h-16 bg-white border-b border-slate-200 px-6 sm:px-8 flex items-center justify-between shrink-0 shadow-2xs z-20">
       {/* Breadcrumb / Title */}
@@ -84,8 +86,8 @@ export const Navbar: React.FC = () => {
               {user?.fullName || 'User'}
             </span>
             <div className="mt-0.5">
-              <Badge variant={roleBadges[role].variant} size="sm" withDot>
-                {roleBadges[role].label}
+              <Badge variant={activeBadge.variant} size="sm" withDot>
+                {activeBadge.label}
               </Badge>
             </div>
           </div>

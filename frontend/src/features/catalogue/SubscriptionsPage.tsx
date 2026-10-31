@@ -122,7 +122,7 @@ export function SubscriptionsPage() {
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase();
     return (
-      sub.subscriptionNumber.toLowerCase().includes(q) ||
+      (sub.subscriptionNumber || '').toLowerCase().includes(q) ||
       (sub.customerName && sub.customerName.toLowerCase().includes(q)) ||
       (sub.planName && sub.planName.toLowerCase().includes(q))
     );

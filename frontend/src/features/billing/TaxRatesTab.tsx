@@ -46,9 +46,9 @@ export const TaxRatesTab: React.FC = () => {
 
   const openEditModal = (tax: TaxRate) => {
     setEditingTax(tax);
-    setName(tax.name);
-    setRatePercent(tax.ratePercent.toString());
-    setIsActive(tax.isActive);
+    setName(tax.name || '');
+    setRatePercent((tax.ratePercent ?? 0).toString());
+    setIsActive(!!tax.isActive);
     setFormErrors({});
     setIsModalOpen(true);
   };
