@@ -4,6 +4,7 @@ import com.brightloop.billing.dto.BillingRunResponse;
 import com.brightloop.catalogue.BillingInterval;
 import com.brightloop.discounts.Discount;
 import com.brightloop.discounts.DiscountRepository;
+import com.brightloop.discounts.DiscountScope;
 import com.brightloop.discounts.DiscountType;
 import com.brightloop.invoices.*;
 import com.brightloop.subscriptions.Subscription;
@@ -19,7 +20,9 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -40,7 +43,7 @@ public class BillingService {
 
         int createdCount = 0;
         int skippedCount = 0;
-        BigDecimal totalBilled = BigDecimal.ZERO;
+        BigDecimal totalBilled = BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
         List<String> generatedNumbers = new ArrayList<>();
 
         for (Subscription sub : activeSubs) {
@@ -87,32 +90,40 @@ public class BillingService {
                     .billingPeriodEnd(periodEnd)
                     .issueDate(runDate)
                     .dueDate(runDate.plusDays(15))
-                    .amountPaid(BigDecimal.ZERO)
+                    .amountPaid(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP))
                     .status(InvoiceStatus.CONFIRMED)
                     .items(new ArrayList<>())
                     .build();
 
-            int totalSeats = sub.getItems().stream().mapToInt(SubscriptionItem::getQuantity).sum();
-            BigDecimal grossSubtotal = sub.getItems().stream()
-                    .map(i -> i.getUnitPrice().multiply(BigDecimal.valueOf(i.getQuantity())))
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            List<SubscriptionItem> items = sub.getItems() != null ? sub.getItems() : Collections.emptyList();
+            int totalSeats = items.stream().mapToInt(i -> i.getQuantity() != null ? i.getQuantity() : 1).sum();
+            BigDecimal grossSubtotal = items.stream()
+                    .map(i -> {
+                        BigDecimal p = (i.getUnitPrice() != null) ? i.getUnitPrice().setScale(2, RoundingMode.HALF_UP) : BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+                        BigDecimal q = BigDecimal.valueOf(i.getQuantity() != null ? i.getQuantity() : 1);
+                        return p.multiply(q).setScale(2, RoundingMode.HALF_UP);
+                    })
+                    .reduce(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP), BigDecimal::add);
+
             BigDecimal discountPercent = calculateApplicableDiscountPercent(runDate, grossSubtotal, totalSeats);
 
-            BigDecimal subtotalAcc = BigDecimal.ZERO;
-            BigDecimal discountAcc = BigDecimal.ZERO;
-            BigDecimal taxAcc = BigDecimal.ZERO;
+            BigDecimal subtotalAcc = BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+            BigDecimal discountAcc = BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+            BigDecimal taxAcc = BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
 
-            for (SubscriptionItem item : sub.getItems()) {
-                BigDecimal qty = BigDecimal.valueOf(item.getQuantity());
-                BigDecimal lineSubtotal = item.getUnitPrice().multiply(qty).setScale(2, RoundingMode.HALF_UP);
+            for (SubscriptionItem item : items) {
+                int qInt = (item.getQuantity() != null) ? item.getQuantity() : 1;
+                BigDecimal qty = BigDecimal.valueOf(qInt);
+                BigDecimal uPrice = (item.getUnitPrice() != null) ? item.getUnitPrice().setScale(2, RoundingMode.HALF_UP) : BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+                BigDecimal lineSubtotal = uPrice.multiply(qty).setScale(2, RoundingMode.HALF_UP);
 
-                BigDecimal lineDiscount = BigDecimal.ZERO;
+                BigDecimal lineDiscount = BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
                 if (discountPercent.compareTo(BigDecimal.ZERO) > 0) {
                     lineDiscount = lineSubtotal.multiply(discountPercent).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
                 }
 
-                BigDecimal taxableAmount = lineSubtotal.subtract(lineDiscount);
-                BigDecimal taxRate = (item.getTaxRatePercent() != null) ? item.getTaxRatePercent() : new BigDecimal("18.00");
+                BigDecimal taxableAmount = lineSubtotal.subtract(lineDiscount).max(BigDecimal.ZERO).setScale(2, RoundingMode.HALF_UP);
+                BigDecimal taxRate = (item.getTaxRatePercent() != null) ? item.getTaxRatePercent().setScale(2, RoundingMode.HALF_UP) : new BigDecimal("18.00");
                 BigDecimal lineTax = taxableAmount.multiply(taxRate).divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
 
                 BigDecimal lineTotal = taxableAmount.add(lineTax).setScale(2, RoundingMode.HALF_UP);
@@ -125,8 +136,8 @@ public class BillingService {
                 InvoiceItem invoiceItem = InvoiceItem.builder()
                         .invoice(invoice)
                         .description(desc)
-                        .quantity(item.getQuantity())
-                        .unitPrice(item.getUnitPrice())
+                        .quantity(qInt)
+                        .unitPrice(uPrice)
                         .taxRatePercent(taxRate)
                         .taxAmount(lineTax)
                         .discountAmount(lineDiscount)
@@ -198,12 +209,21 @@ public class BillingService {
 
     private BigDecimal calculateApplicableDiscountPercent(LocalDate date, BigDecimal purchaseAmount, int totalQuantity) {
         // Look up active volume discount rule, e.g. "VOLUME10" or "VOL10"
-        return discountRepository.findByCode("VOLUME10")
+        Optional<Discount> volume10 = discountRepository.findByCode("VOLUME10")
                 .or(() -> discountRepository.findByCodeIgnoreCase("VOL10"))
-                .or(() -> discountRepository.findByCode("VOL10"))
-                .filter(d -> d.isValid(date, purchaseAmount, totalQuantity))
+                .or(() -> discountRepository.findByCode("VOL10"));
+
+        if (volume10.isPresent() && volume10.get().isValid(date, purchaseAmount, totalQuantity)
+                && volume10.get().getDiscountType() == DiscountType.PERCENTAGE) {
+            return volume10.get().getValue().setScale(2, RoundingMode.HALF_UP);
+        }
+
+        return discountRepository.findAll().stream()
+                .filter(d -> d.getAppliesTo() == DiscountScope.SUBSCRIPTION)
                 .filter(d -> d.getDiscountType() == DiscountType.PERCENTAGE)
-                .map(Discount::getValue)
-                .orElse(BigDecimal.ZERO);
+                .filter(d -> d.isValid(date, purchaseAmount, totalQuantity))
+                .map(d -> d.getValue().setScale(2, RoundingMode.HALF_UP))
+                .max(BigDecimal::compareTo)
+                .orElse(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP));
     }
 }

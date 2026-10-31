@@ -58,8 +58,8 @@ export function BillingRulesPage() {
     }
 
     const rate = parseFloat(taxRate);
-    if (isNaN(rate) || rate < 0) {
-      setError('Rate percent must be zero or positive');
+    if (isNaN(rate) || rate < 0 || rate > 100) {
+      setError('Rate percent must be between 0.00% and 100.00%');
       return;
     }
 
@@ -93,6 +93,10 @@ export function BillingRulesPage() {
     const val = parseFloat(discValue);
     if (isNaN(val) || val <= 0) {
       setError('Discount value must be greater than zero');
+      return;
+    }
+    if (discType === 'PERCENTAGE' && val > 100) {
+      setError('Percentage discount cannot exceed 100%');
       return;
     }
 
@@ -215,41 +219,49 @@ export function BillingRulesPage() {
             <span className="text-xs text-slate-400">Applied automatically during recurring billing runs</span>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-slate-600 border-collapse">
-              <thead className="bg-slate-50 text-slate-700 text-xs font-semibold uppercase tracking-wider border-b border-slate-200">
-                <tr>
-                  <th className="py-3 px-4">Tax Name</th>
-                  <th className="py-3 px-4 text-center">Rate (%)</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4">Policy Application</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 font-sans">
-                {taxes.map(t => (
-                  <tr key={t.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="py-3.5 px-4 font-semibold text-slate-900 flex items-center gap-2">
-                      <Percent className="w-4 h-4 text-indigo-600" />
-                      {t.name}
-                    </td>
-                    <td className="py-3.5 px-4 text-center font-mono font-bold text-slate-800">
-                      {t.ratePercent.toFixed(2)}%
-                    </td>
-                    <td className="py-3.5 px-4">
-                      {t.isActive ? (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Active</span>
-                      ) : (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-500">Disabled</span>
-                      )}
-                    </td>
-                    <td className="py-3.5 px-4 text-xs text-slate-500">
-                      Standard Goods & Services Tax added to all taxable lines
-                    </td>
+          {taxes.length === 0 ? (
+            <div className="p-8 text-center text-slate-500">
+              <Percent className="w-8 h-8 mx-auto text-slate-300 mb-2" />
+              <p className="text-sm font-medium">No statutory tax rates configured yet.</p>
+              <p className="text-xs text-slate-400 mt-1">Click "Add Tax Rate" above to create an 18% GST or VAT rule.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm text-slate-600 border-collapse">
+                <thead className="bg-slate-50 text-slate-700 text-xs font-semibold uppercase tracking-wider border-b border-slate-200">
+                  <tr>
+                    <th className="py-3 px-4">Tax Name</th>
+                    <th className="py-3 px-4 text-center">Rate (%)</th>
+                    <th className="py-3 px-4">Status</th>
+                    <th className="py-3 px-4">Policy Application</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-slate-100 font-sans">
+                  {taxes.map(t => (
+                    <tr key={t.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="py-3.5 px-4 font-semibold text-slate-900 flex items-center gap-2">
+                        <Percent className="w-4 h-4 text-indigo-600" />
+                        {t.name}
+                      </td>
+                      <td className="py-3.5 px-4 text-center font-mono font-bold text-slate-800">
+                        {t.ratePercent.toFixed(2)}%
+                      </td>
+                      <td className="py-3.5 px-4">
+                        {t.isActive ? (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">Active</span>
+                        ) : (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-500">Disabled</span>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-4 text-xs text-slate-500">
+                        Standard Goods & Services Tax added to all taxable lines
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
 
@@ -261,50 +273,58 @@ export function BillingRulesPage() {
             <span className="text-xs text-slate-400">Volume and promotional price deductions</span>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-slate-600 border-collapse">
-              <thead className="bg-slate-50 text-slate-700 text-xs font-semibold uppercase tracking-wider border-b border-slate-200">
-                <tr>
-                  <th className="py-3 px-4">Discount Code</th>
-                  <th className="py-3 px-4">Benefit</th>
-                  <th className="py-3 px-4">Type</th>
-                  <th className="py-3 px-4">Trigger Condition</th>
-                  <th className="py-3 px-4">Scope</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 font-sans">
-                {discounts.map(d => (
-                  <tr key={d.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="py-3.5 px-4 font-mono font-bold text-indigo-700 text-xs">
-                      {d.code}
-                    </td>
-                    <td className="py-3.5 px-4 font-bold text-slate-900 font-mono">
-                      {d.discountType === 'PERCENTAGE' ? `${d.value.toFixed(1)}% OFF` : `-$${d.value.toFixed(2)}`}
-                    </td>
-                    <td className="py-3.5 px-4 text-xs text-slate-600">
-                      {d.discountType}
-                    </td>
-                    <td className="py-3.5 px-4 text-xs text-slate-700">
-                      {d.minQuantity > 1 && (
-                        <div>Minimum {d.minQuantity} seats / units required</div>
-                      )}
-                      {d.minPurchaseAmount > 0 && (
-                        <div>Min purchase: ${d.minPurchaseAmount.toFixed(2)}</div>
-                      )}
-                      {d.minQuantity <= 1 && d.minPurchaseAmount <= 0 && (
-                        <div>All qualifying orders</div>
-                      )}
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
-                        {d.appliesTo}
-                      </span>
-                    </td>
+          {discounts.length === 0 ? (
+            <div className="p-8 text-center text-slate-500">
+              <Tag className="w-8 h-8 mx-auto text-slate-300 mb-2" />
+              <p className="text-sm font-medium">No promotional discount rules found.</p>
+              <p className="text-xs text-slate-400 mt-1">Click "Add Discount Rule" above to create an automated volume discount (e.g. 10% off for 5+ seats).</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm text-slate-600 border-collapse">
+                <thead className="bg-slate-50 text-slate-700 text-xs font-semibold uppercase tracking-wider border-b border-slate-200">
+                  <tr>
+                    <th className="py-3 px-4">Discount Code</th>
+                    <th className="py-3 px-4">Benefit</th>
+                    <th className="py-3 px-4">Type</th>
+                    <th className="py-3 px-4">Trigger Condition</th>
+                    <th className="py-3 px-4">Scope</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-slate-100 font-sans">
+                  {discounts.map(d => (
+                    <tr key={d.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="py-3.5 px-4 font-mono font-bold text-indigo-700 text-xs">
+                        {d.code}
+                      </td>
+                      <td className="py-3.5 px-4 font-bold text-slate-900 font-mono">
+                        {d.discountType === 'PERCENTAGE' ? `${d.value.toFixed(1)}% OFF` : `-$${d.value.toFixed(2)}`}
+                      </td>
+                      <td className="py-3.5 px-4 text-xs text-slate-600">
+                        {d.discountType}
+                      </td>
+                      <td className="py-3.5 px-4 text-xs text-slate-700">
+                        {d.minQuantity > 1 && (
+                          <div>Minimum {d.minQuantity} seats / units required</div>
+                        )}
+                        {d.minPurchaseAmount > 0 && (
+                          <div>Min purchase: ${d.minPurchaseAmount.toFixed(2)}</div>
+                        )}
+                        {d.minQuantity <= 1 && d.minPurchaseAmount <= 0 && (
+                          <div>All qualifying orders</div>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                          {d.appliesTo}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
 

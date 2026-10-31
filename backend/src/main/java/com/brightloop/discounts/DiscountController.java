@@ -1,6 +1,8 @@
 package com.brightloop.discounts;
 
 import com.brightloop.discounts.dto.DiscountDto;
+import com.brightloop.discounts.dto.DiscountValidationRequest;
+import com.brightloop.discounts.dto.DiscountValidationResult;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -12,6 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/discounts")
 @RequiredArgsConstructor
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"})
 public class DiscountController {
 
     private final DiscountService discountService;
@@ -31,6 +34,16 @@ public class DiscountController {
     @PostMapping
     public ResponseEntity<DiscountDto> create(@Valid @RequestBody DiscountDto dto) {
         return new ResponseEntity<>(discountService.createDiscount(dto), HttpStatus.CREATED);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<DiscountDto> update(@PathVariable Long id, @RequestBody DiscountDto dto) {
+        return ResponseEntity.ok(discountService.updateDiscount(id, dto));
+    }
+
+    @PostMapping("/validate")
+    public ResponseEntity<DiscountValidationResult> validateDiscount(@RequestBody DiscountValidationRequest request) {
+        return ResponseEntity.ok(discountService.validateDiscount(request));
     }
 
     @DeleteMapping("/{id}")

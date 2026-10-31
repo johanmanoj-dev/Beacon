@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -19,7 +20,7 @@ public class InvoiceService {
     private final InvoiceRepository invoiceRepository;
     private final AtomicInteger invoiceSeq = new AtomicInteger(1);
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<InvoiceResponse> getAllInvoices(InvoiceStatus status, Long customerId, String search) {
         List<Invoice> list;
         if (status != null && customerId != null) {
@@ -32,6 +33,21 @@ public class InvoiceService {
             list = invoiceRepository.findByCustomerId(customerId);
         } else {
             list = invoiceRepository.findAll();
+        }
+
+        LocalDate today = LocalDate.now();
+        // Dynamic overdue detection: if due_date is past, balance > 0, and not already PAID or CANCELLED
+        for (Invoice inv : list) {
+            if (inv.getStatus() != InvoiceStatus.PAID &&
+                inv.getStatus() != InvoiceStatus.CANCELLED &&
+                inv.getStatus() != InvoiceStatus.OVERDUE &&
+                inv.getBalanceDue() != null &&
+                inv.getBalanceDue().compareTo(BigDecimal.ZERO) > 0 &&
+                inv.getDueDate() != null &&
+                inv.getDueDate().isBefore(today)) {
+                inv.setStatus(InvoiceStatus.OVERDUE);
+                invoiceRepository.save(inv);
+            }
         }
 
         if (search != null && !search.trim().isEmpty()) {
@@ -50,7 +66,7 @@ public class InvoiceService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public List<InvoiceResponse> getAllInvoices() {
         return getAllInvoices(null, null, null);
     }
@@ -77,6 +93,9 @@ public class InvoiceService {
         if (invoice.getStatus() == InvoiceStatus.CANCELLED) {
             throw new IllegalStateException("Cannot confirm a cancelled invoice");
         }
+        if (invoice.getStatus() == InvoiceStatus.PAID) {
+            throw new IllegalStateException("Cannot confirm an already fully paid invoice");
+        }
         invoice.setStatus(InvoiceStatus.CONFIRMED);
         return InvoiceResponse.fromEntity(invoiceRepository.save(invoice));
     }
@@ -88,6 +107,9 @@ public class InvoiceService {
 
         if (invoice.getStatus() == InvoiceStatus.PAID) {
             throw new IllegalStateException("Cannot cancel an already fully paid invoice");
+        }
+        if (invoice.getAmountPaid() != null && invoice.getAmountPaid().compareTo(BigDecimal.ZERO) > 0) {
+            throw new IllegalStateException(String.format("Cannot cancel an invoice with recorded payments ($%s)", invoice.getAmountPaid()));
         }
         invoice.setStatus(InvoiceStatus.CANCELLED);
         return InvoiceResponse.fromEntity(invoiceRepository.save(invoice));
