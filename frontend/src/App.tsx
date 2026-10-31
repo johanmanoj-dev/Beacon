@@ -12,7 +12,7 @@ import api from './services/api';
 import { AuthProvider } from './context';
 import { LoginPage, RegisterPage, ForgotPasswordPage } from './features/auth';
 import { AppShell, ProtectedRoute } from './layout';
-import { CataloguePage, CustomerListPage } from './features/catalogue';
+import { CataloguePage, CustomerListPage, QuotationsPage, SubscriptionsPage } from './features/catalogue';
 import { CustomerPortalPage } from './features/portal';
 import { FinanceDashboardPage } from './features/analytics';
 import {
@@ -536,13 +536,7 @@ export default function App() {
             element={
               <ProtectedRoute allowedRoles={['ADMIN', 'STAFF']}>
                 <AppShell backendStatus={backendStatus}>
-                  <GenericModuleView
-                    title="Quotation Templates & Offers"
-                    description="Reusable quotation templates, line items with taxes, and one-click subscription conversion."
-                    track="Track 1"
-                    assignedTo="Johan"
-                    badgeText="Johan Workspace"
-                  />
+                  <QuotationsPage />
                 </AppShell>
               </ProtectedRoute>
             }
@@ -553,13 +547,7 @@ export default function App() {
             element={
               <ProtectedRoute allowedRoles={['ADMIN', 'STAFF']}>
                 <AppShell backendStatus={backendStatus}>
-                  <GenericModuleView
-                    title="Subscriptions Lifecycle Management"
-                    description="Subscription state machine (Draft, Active, Paused, Closed, Renewed)."
-                    track="Track 1"
-                    assignedTo="Johan"
-                    badgeText="Johan Workspace"
-                  />
+                  <SubscriptionsPage />
                 </AppShell>
               </ProtectedRoute>
             }
