@@ -4,3 +4,7 @@ export * from './BillingConfigPage';
 export * from './BillingRulesPage';
 export * from './InvoicesPage';
 export * from './PaymentsPage';
+export * from './RecordPaymentModal';
+export * from './SimulatedGatewayModal';
+export * from './InvoiceDetailModal';
+export * from './RunBillingModal';

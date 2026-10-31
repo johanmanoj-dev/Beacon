@@ -11,7 +11,9 @@ import java.util.Optional;
 public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
     Optional<Invoice> findByInvoiceNumber(String invoiceNumber);
     List<Invoice> findByCustomerId(Long customerId);
+    List<Invoice> findBySubscriptionId(Long subscriptionId);
     List<Invoice> findByStatus(InvoiceStatus status);
     boolean existsBySubscriptionIdAndBillingPeriodStartAndBillingPeriodEnd(Long subscriptionId, LocalDate start, LocalDate end);
+    boolean existsBySubscriptionIdAndBillingPeriodEnd(Long subscriptionId, LocalDate end);
     Optional<Invoice> findFirstByOrderByCreatedAtDesc();
 }

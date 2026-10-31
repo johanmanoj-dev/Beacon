@@ -12,12 +12,18 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/payments")
 @RequiredArgsConstructor
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"})
 public class PaymentController {
 
     private final PaymentService paymentService;
 
     @GetMapping
-    public ResponseEntity<List<PaymentResponse>> getAllPayments() {
+    public ResponseEntity<List<PaymentResponse>> getAllPayments(
+            @RequestParam(required = false) Long invoiceId
+    ) {
+        if (invoiceId != null) {
+            return ResponseEntity.ok(paymentService.getPaymentsByInvoiceId(invoiceId));
+        }
         return ResponseEntity.ok(paymentService.getAllPayments());
     }
 

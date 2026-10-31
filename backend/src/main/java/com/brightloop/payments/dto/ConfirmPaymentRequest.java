@@ -19,4 +19,6 @@ public class ConfirmPaymentRequest {
     private String simulatedOutcome = "SUCCESS"; // SUCCESS, FAILED
 
     private String paymentMethod;
+
+    private String failureReason;
 }

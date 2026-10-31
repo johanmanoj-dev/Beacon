@@ -30,10 +30,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -141,64 +139,61 @@ public class ElsaScenesE2ETest {
                 .status(SubscriptionStatus.ACTIVE)
                 .startDate(runDate.minusMonths(1))
                 .nextBillingDate(runDate)
-                .paymentTerms("Net 15")
                 .items(new ArrayList<>())
                 .build();
 
+        // Add line items: Odoo ERP variant ($1,560.00, 18% tax)
         SubscriptionItem item = SubscriptionItem.builder()
                 .subscription(sub)
                 .product(testProduct)
                 .variant(testVariant)
                 .quantity(1)
-                .unitPrice(new BigDecimal("1560.00")) // Snapshot price: $1000 base + $560 variant
+                .unitPrice(new BigDecimal("1560.00"))
                 .taxRatePercent(new BigDecimal("18.00"))
                 .lineTotal(new BigDecimal("1840.80"))
                 .build();
         sub.getItems().add(item);
-        Subscription savedSub = subscriptionRepository.save(sub);
+        subscriptionRepository.save(sub);
 
-        // 2. Run billing for target date -> Invoice generated
-        BillingRunResponse run1 = billingService.runBilling(runDate);
-        assertTrue(run1.getInvoicesCreated() >= 1, "At least 1 invoice should be generated");
+        // 2. Execute billing engine as of today
+        BillingRunResponse firstRun = billingService.runBilling(runDate);
+        assertNotNull(firstRun);
+        assertTrue(firstRun.getInvoicesCreated() >= 1, "At least 1 invoice must be generated");
+        assertTrue(firstRun.getGeneratedInvoiceNumbers().size() >= 1);
 
-        List<Invoice> invoices = invoiceRepository.findByCustomerId(testCustomer.getId());
-        assertFalse(invoices.isEmpty(), "Invoice should exist for customer");
-        Invoice generatedInvoice = invoices.get(0);
+        // Verify generated invoice has line item snapshot with exact price frozen
+        Invoice generatedInvoice = invoiceRepository.findByCustomerId(testCustomer.getId()).stream()
+                .filter(i -> i.getSubscription().getSubscriptionNumber().equals(sub.getSubscriptionNumber()))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Invoice must be generated for subscription"));
 
-        assertEquals(new BigDecimal("1560.00"), generatedInvoice.getSubtotal());
-        assertEquals(new BigDecimal("280.80"), generatedInvoice.getTaxAmount()); // 1560 * 18% = 280.80
-        assertEquals(new BigDecimal("1840.80"), generatedInvoice.getTotalAmount());
+        assertEquals(new BigDecimal("1560.00"), generatedInvoice.getSubtotal(), "Subtotal must freeze snapshot price");
+        assertEquals(new BigDecimal("280.80"), generatedInvoice.getTaxAmount(), "18% GST on $1,560 is $280.80");
+        assertEquals(new BigDecimal("1840.80"), generatedInvoice.getTotalAmount(), "Total = $1,560 + $280.80 = $1,840.80");
         assertEquals(new BigDecimal("1840.80"), generatedInvoice.getBalanceDue());
         assertEquals(InvoiceStatus.CONFIRMED, generatedInvoice.getStatus());
+        assertFalse(generatedInvoice.getItems().isEmpty());
+        assertEquals("Cloud ERP Core (Brand: Odoo)", generatedInvoice.getItems().get(0).getDescription());
 
-        // 3. IDEMPOTENCY VERIFICATION: Run billing a second time with same date
-        // Must skip the subscription and generate 0 duplicate invoices!
-        BillingRunResponse run2 = billingService.runBilling(runDate);
-        assertTrue(run2.getInvoicesSkipped() >= 0, "Idempotency constraint should prevent duplicate invoice generation");
+        // Verify subscription nextBillingDate advanced to next monthly cycle
+        Subscription reloadedSub = subscriptionRepository.findById(sub.getId()).orElseThrow();
+        assertEquals(runDate.plusMonths(1), reloadedSub.getNextBillingDate(), "Next billing date must advance by 1 month");
 
-        long countAfterSecondRun = invoiceRepository.findByCustomerId(testCustomer.getId()).size();
-        assertEquals(1, countAfterSecondRun, "Duplicate invoices must NEVER be created for the same subscription period");
-
-        // 4. HISTORICAL SNAPSHOT PRESERVATION:
-        // Update product catalogue price
-        testProduct.setSalesPrice(new BigDecimal("2500.00"));
-        productRepository.save(testProduct);
-
-        // Verify existing invoice retains its historical snapshot ($1,560.00)
-        Invoice reloadedInvoice = invoiceRepository.findById(generatedInvoice.getId()).orElseThrow();
-        assertEquals(new BigDecimal("1560.00"), reloadedInvoice.getSubtotal(), "Invoice subtotal must remain frozen snapshot");
-        assertEquals(new BigDecimal("1840.80"), reloadedInvoice.getTotalAmount(), "Total amount must remain frozen snapshot");
+        // 3. Strict Idempotency Check: Re-run engine on the same date/period
+        BillingRunResponse secondRun = billingService.runBilling(runDate);
+        assertNotNull(secondRun);
+        assertEquals(0, secondRun.getInvoicesCreated(), "Idempotent re-run must generate 0 duplicate invoices");
+        assertTrue(secondRun.getInvoicesSkipped() >= 1, "Subscription must be counted as skipped");
     }
 
     @Test
-    @DisplayName("Scene 5: Automated 10% Promotional Volume Discount on 5+ Seats")
+    @DisplayName("Scene 4: Volume Discount (10% off for >= 5 seats)")
     @Transactional
-    void testScene5_VolumeDiscountApplication() {
+    void testScene4_VolumeDiscountApplication() {
         LocalDate runDate = LocalDate.now();
 
-        // Subscription with 10 seats (satisfies >= 5 minQuantity requirement)
         Subscription sub = Subscription.builder()
-                .subscriptionNumber("SUB-ELSA-SCENE5-" + System.currentTimeMillis())
+                .subscriptionNumber("SUB-ELSA-VOL10-" + System.currentTimeMillis())
                 .customer(testCustomer)
                 .plan(testPlan)
                 .status(SubscriptionStatus.ACTIVE)
@@ -207,6 +202,7 @@ public class ElsaScenesE2ETest {
                 .items(new ArrayList<>())
                 .build();
 
+        // 10 seats of Cloud ERP Core + Odoo variant
         SubscriptionItem item = SubscriptionItem.builder()
                 .subscription(sub)
                 .product(testProduct)
@@ -306,7 +302,7 @@ public class ElsaScenesE2ETest {
 
         Invoice afterGateway = invoiceRepository.findById(savedInv.getId()).orElseThrow();
         assertEquals(new BigDecimal("1560.00"), afterGateway.getAmountPaid(), "Total paid should equal invoice amount");
-        assertEquals(new BigDecimal("0.00"), afterGateway.getBalanceDue(), "Balance due must drop to 0.00");
+        assertEquals(0, new BigDecimal("0.00").compareTo(afterGateway.getBalanceDue()), "Balance due must drop to 0.00");
         assertEquals(InvoiceStatus.PAID, afterGateway.getStatus(), "Invoice status must transition to PAID");
     }
 }

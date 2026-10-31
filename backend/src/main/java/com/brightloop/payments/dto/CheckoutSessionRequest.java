@@ -22,4 +22,6 @@ public class CheckoutSessionRequest {
     private BigDecimal amount;
 
     private String paymentMethod; // e.g. UPI, CREDIT_CARD, NET_BANKING
+
+    private String idempotencyKey;
 }

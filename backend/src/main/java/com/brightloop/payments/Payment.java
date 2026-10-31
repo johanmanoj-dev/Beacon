@@ -10,11 +10,10 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "payments")
-@Getter
-@Setter
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Payment {
 
     @Id
@@ -29,14 +28,15 @@ public class Payment {
     private BigDecimal amount;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "payment_method", nullable = false)
+    @Column(name = "payment_method", nullable = false, length = 50)
     private PaymentMethod paymentMethod;
 
     @Column(name = "reference_number", length = 100)
     private String referenceNumber;
 
-    @Column(name = "payment_date")
-    private LocalDateTime paymentDate;
+    @Column(name = "payment_date", nullable = false)
+    @Builder.Default
+    private LocalDateTime paymentDate = LocalDateTime.now();
 
     @Column(columnDefinition = "TEXT")
     private String notes;

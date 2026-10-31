@@ -9,11 +9,10 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "payment_attempts")
-@Getter
-@Setter
+@Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class PaymentAttempt {
 
     @Id
@@ -24,11 +23,11 @@ public class PaymentAttempt {
     @JoinColumn(name = "invoice_id", nullable = false)
     private Invoice invoice;
 
-    @Column(nullable = false, precision = 12, scale = 2)
-    private BigDecimal amount;
-
     @Column(name = "transaction_id", nullable = false, unique = true, length = 100)
     private String transactionId;
+
+    @Column(nullable = false, precision = 12, scale = 2)
+    private BigDecimal amount;
 
     @Column(name = "payment_method", nullable = false, length = 50)
     private String paymentMethod;
@@ -40,7 +39,7 @@ public class PaymentAttempt {
     @Column(name = "failure_reason")
     private String failureReason;
 
-    @Column(name = "idempotency_key", nullable = false, unique = true, length = 100)
+    @Column(name = "idempotency_key", length = 100)
     private String idempotencyKey;
 
     @Column(name = "created_at", insertable = false, updatable = false)
@@ -52,5 +51,13 @@ public class PaymentAttempt {
     @PrePersist
     protected void onCreate() {
         if (createdAt == null) createdAt = LocalDateTime.now();
+    }
+
+    public void setStatus(PaymentAttemptStatus attemptStatus) {
+        this.status = attemptStatus != null ? attemptStatus.name() : "PENDING";
+    }
+
+    public void setStatus(String statusStr) {
+        this.status = statusStr;
     }
 }

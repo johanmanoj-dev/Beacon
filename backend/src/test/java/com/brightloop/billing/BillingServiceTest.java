@@ -81,8 +81,11 @@ public class BillingServiceTest {
         var allInvoices = invoiceService.getAllInvoices();
         assertFalse(allInvoices.isEmpty(), "Invoices must exist in database");
 
-        var firstInvoice = allInvoices.get(0);
-        Long invId = firstInvoice.getId();
+        var targetInvoice = allInvoices.stream()
+                .filter(i -> i.getStatus() != InvoiceStatus.CANCELLED)
+                .findFirst()
+                .orElse(allInvoices.get(0));
+        Long invId = targetInvoice.getId();
 
         // Confirm invoice
         var confirmed = invoiceService.confirmInvoice(invId);

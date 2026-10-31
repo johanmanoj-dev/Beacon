@@ -20,10 +20,11 @@ public class BillingController {
 
     @PostMapping("/run")
     public ResponseEntity<BillingRunResponse> runBilling(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate asOfDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate targetDate,
             @RequestBody(required = false) BillingRunRequest request
     ) {
-        LocalDate date = targetDate;
+        LocalDate date = asOfDate != null ? asOfDate : targetDate;
         if (date == null && request != null) {
             date = request.getTargetDate();
         }
