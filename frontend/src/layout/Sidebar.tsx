@@ -14,6 +14,7 @@ import {
   CheckCircle2,
   AlertCircle,
   LogOut,
+  X,
 } from 'lucide-react';
 import { useAuth } from '../context';
 import type { Role } from '../types';
@@ -41,32 +42,69 @@ const navItems: NavItem[] = [
 
 export interface SidebarProps {
   backendStatus: { connected: boolean; message: string };
+  isMobileOpen?: boolean;
+  onCloseMobile?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ backendStatus }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ backendStatus, isMobileOpen = false, onCloseMobile }) => {
   const location = useLocation();
   const { user, role, logout } = useAuth();
 
   const filteredNavItems = navItems.filter((item) => item.role.includes(role));
 
   return (
-    <aside className="w-64 bg-[#0F172A] text-slate-300 flex flex-col border-r border-slate-800 shrink-0 select-none">
-      {/* Brand Header */}
-      <div className="h-16 flex items-center px-6 border-b border-slate-800/80">
-        <Link to={role === 'CUSTOMER' ? '/portal' : '/'} className="flex items-center gap-2.5">
-          <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-blue-700 to-blue-500 flex items-center justify-center font-black text-white shadow-md text-base">
-            B
-          </div>
-          <div>
-            <span className="font-bold text-white text-base tracking-tight block">
-              Brightloop
-            </span>
-            <span className="block text-[10px] uppercase font-semibold tracking-wider text-slate-400">
-              Subscription Engine
-            </span>
-          </div>
-        </Link>
-      </div>
+    <>
+      {/* Mobile Backdrop Overlay */}
+      {isMobileOpen && (
+        <div
+          role="button"
+          tabIndex={0}
+          aria-label="Close mobile navigation backdrop"
+          className="fixed inset-0 bg-slate-950/70 z-40 md:hidden backdrop-blur-xs transition-opacity"
+          onClick={onCloseMobile}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              onCloseMobile?.();
+            }
+          }}
+        />
+      )}
+
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#0F172A] text-slate-300 flex flex-col border-r border-slate-800 shrink-0 select-none transition-transform duration-200 md:static md:translate-x-0 ${
+          isMobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+        }`}
+      >
+        {/* Brand Header */}
+        <div className="h-16 flex items-center justify-between px-6 border-b border-slate-800/80">
+          <Link
+            to={role === 'CUSTOMER' ? '/portal' : '/'}
+            onClick={onCloseMobile}
+            className="flex items-center gap-2.5"
+          >
+            <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-blue-700 to-blue-500 flex items-center justify-center font-black text-white shadow-md text-base">
+              B
+            </div>
+            <div>
+              <span className="font-bold text-white text-base tracking-tight block">
+                Brightloop
+              </span>
+              <span className="block text-[10px] uppercase font-semibold tracking-wider text-slate-400">
+                Subscription Engine
+              </span>
+            </div>
+          </Link>
+          {onCloseMobile && (
+            <button
+              type="button"
+              onClick={onCloseMobile}
+              className="p-1 rounded-md text-slate-400 hover:text-white md:hidden"
+              title="Close menu"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          )}
+        </div>
 
       {/* Navigation Links */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
@@ -81,6 +119,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ backendStatus }) => {
             <Link
               key={item.path}
               to={item.path}
+              onClick={onCloseMobile}
               className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
                 isActive
                   ? 'bg-blue-600 text-white shadow-sm'
@@ -149,5 +188,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ backendStatus }) => {
         </span>
       </div>
     </aside>
+    </>
   );
 };

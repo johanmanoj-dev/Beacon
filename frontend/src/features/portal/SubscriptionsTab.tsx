@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { RefreshCw, Calendar, Tag, ShieldCheck, Eye, Sparkles } from 'lucide-react';
+import { RefreshCw, Calendar, Tag, ShieldCheck, Eye, Sparkles, Layers } from 'lucide-react';
 import api from '../../services/api';
-import { Button, Badge, Modal } from '../../components/ui';
+import { Button, Badge, Modal, EmptyState, useToast } from '../../components/ui';
 import { formatCurrency, formatDate } from '../../lib/utils';
 import type { Subscription } from '../../types';
 
@@ -75,11 +75,12 @@ export interface SubscriptionsTabProps {
 }
 
 export const SubscriptionsTab: React.FC<SubscriptionsTabProps> = ({ customerEmail }) => {
+  const { showToast } = useToast();
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedSub, setSelectedSub] = useState<Subscription | null>(null);
 
-  const fetchSubscriptions = async () => {
+  const fetchSubscriptions = async (isManual = false) => {
     setLoading(true);
     try {
       const res = await api.get<Subscription[]>('/subscriptions');
@@ -88,16 +89,21 @@ export const SubscriptionsTab: React.FC<SubscriptionsTabProps> = ({ customerEmai
       } else {
         setSubscriptions(FALLBACK_CUSTOMER_SUBSCRIPTIONS);
       }
+      if (isManual) {
+        showToast('Active subscriptions refreshed', 'success');
+      }
     } catch {
-      // Fallback demo data if backend subscriptions endpoint is under development by Johan
       setSubscriptions(FALLBACK_CUSTOMER_SUBSCRIPTIONS);
+      if (isManual) {
+        showToast('Loaded baseline subscriptions', 'info');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchSubscriptions();
+    fetchSubscriptions(false);
   }, [customerEmail]);
 
   return (
@@ -114,7 +120,7 @@ export const SubscriptionsTab: React.FC<SubscriptionsTabProps> = ({ customerEmai
           <Button
             variant="outline"
             size="sm"
-            onClick={fetchSubscriptions}
+            onClick={() => fetchSubscriptions(true)}
             isLoading={loading}
             leftIcon={<RefreshCw className="h-3.5 w-3.5" />}
           >
@@ -123,9 +129,19 @@ export const SubscriptionsTab: React.FC<SubscriptionsTabProps> = ({ customerEmai
         </div>
       </div>
 
-      {/* Subscriptions Grid Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {subscriptions.map((sub) => {
+      {/* Subscriptions Grid Cards or Empty State */}
+      {subscriptions.length === 0 ? (
+        <EmptyState
+          icon={Layers}
+          title="No active subscriptions found"
+          description="There are currently no active software subscriptions linked to your account. Reach out to Brightloop staff or request a customized quotation to get started."
+          actionText="Reload Subscriptions"
+          onAction={() => fetchSubscriptions(true)}
+          actionIcon={<RefreshCw className="h-3.5 w-3.5" />}
+        />
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {subscriptions.map((sub) => {
           const totalMonthly = sub.items.reduce((acc, curr) => acc + curr.lineTotal, 0);
 
           return (
@@ -232,6 +248,7 @@ export const SubscriptionsTab: React.FC<SubscriptionsTabProps> = ({ customerEmai
           );
         })}
       </div>
+      )}
 
       {/* Subscription Line Items Breakdown Modal */}
       {selectedSub && (

@@ -24,7 +24,7 @@ import {
   Legend,
 } from 'recharts';
 import api from '../../services/api';
-import { Button, Card } from '../../components/ui';
+import { Button, Card, EmptyState, useToast } from '../../components/ui';
 import { formatCurrency, formatDate } from '../../lib/utils';
 import { PrintableInvoiceModal } from './PrintableInvoiceModal';
 import type { Invoice, InvoiceStatus } from '../../types';
@@ -61,6 +61,7 @@ interface ReceivableAging {
 }
 
 export const FinanceDashboardPage: React.FC = () => {
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState('ALL');
   const [customerFilter, setCustomerFilter] = useState('ALL');
@@ -82,7 +83,7 @@ export const FinanceDashboardPage: React.FC = () => {
   // Printable Invoice Modal State
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
 
-  const fetchFinanceMetrics = async () => {
+  const fetchFinanceMetrics = async (isManual = false) => {
     setLoading(true);
     try {
       const [kpiRes, trendRes, statusRes, agingRes, custRes] = await Promise.allSettled([
@@ -165,13 +166,17 @@ export const FinanceDashboardPage: React.FC = () => {
       if (custRes.status === 'fulfilled' && custRes.value.data) {
         setCustomerList(custRes.value.data);
       }
+
+      if (isManual) {
+        showToast('Financial metrics refreshed', 'success');
+      }
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchFinanceMetrics();
+    fetchFinanceMetrics(false);
   }, []);
 
   const filteredReceivables = useMemo(() => {
@@ -203,6 +208,7 @@ export const FinanceDashboardPage: React.FC = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    showToast('Accounts receivable report exported to CSV', 'success');
   };
 
   const handleOpenInvoicePreview = (rec: ReceivableAging) => {
@@ -264,7 +270,7 @@ export const FinanceDashboardPage: React.FC = () => {
           <Button
             variant="outline"
             size="sm"
-            onClick={fetchFinanceMetrics}
+            onClick={() => fetchFinanceMetrics(true)}
             isLoading={loading}
             leftIcon={<RefreshCw className="h-3.5 w-3.5" />}
           >
@@ -513,7 +519,24 @@ export const FinanceDashboardPage: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
-              {filteredReceivables.map((rec, i) => (
+              {filteredReceivables.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="p-6">
+                    <EmptyState
+                      icon={CreditCard}
+                      title="No pending receivables found"
+                      description="All customer accounts have settled their invoices or no records match your filter criteria."
+                      actionText="Reset All Filters"
+                      onAction={() => {
+                        setCustomerFilter('ALL');
+                        setStatusFilter('ALL');
+                        setDateRange('ALL');
+                      }}
+                    />
+                  </td>
+                </tr>
+              ) : (
+                filteredReceivables.map((rec, i) => (
                 <tr key={i} className="hover:bg-slate-50/70 transition-colors">
                   <td className="py-3 px-4 font-mono font-bold text-blue-700">
                     {rec.invoiceNumber}
@@ -549,7 +572,8 @@ export const FinanceDashboardPage: React.FC = () => {
                     </Button>
                   </td>
                 </tr>
-              ))}
+              ))
+              )}
             </tbody>
           </table>
         </div>

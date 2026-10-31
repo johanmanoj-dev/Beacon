@@ -23,6 +23,7 @@ import {
   Card,
   Modal,
   DataTable,
+  ToastProvider,
   type Column,
 } from './components/ui';
 import { formatCurrency } from './lib/utils';
@@ -325,10 +326,10 @@ function DashboardOverview({
           <div className="p-4 rounded-xl bg-blue-50/60 border border-blue-200 space-y-2">
             <div className="flex items-center justify-between">
               <span className="font-bold text-blue-950">Track 3: Goutham</span>
-              <Badge variant="success" size="sm">Phase 4 Complete</Badge>
+              <Badge variant="success" size="sm">Phase 5 Complete</Badge>
             </div>
             <p className="text-xs text-blue-900/80 leading-relaxed">
-              Design System UI, Auth & Layout, Customer Portal, Finance Analytics, PDF Engine, and Database Seeding.
+              Design System UI, Mobile Responsive Shell, Customer Portal, Empty States & Toasts, Finance Analytics, PDF Invoice Engine, and Pitch Rehearsal Navigator.
             </p>
             <div className="pt-1 flex items-center gap-3">
               <Link to="/analytics" className="text-xs font-semibold text-blue-700 hover:underline">
@@ -493,7 +494,8 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
+        <ToastProvider>
+          <Routes>
           {/* Public Auth Routes */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
@@ -635,6 +637,7 @@ export default function App() {
           {/* Fallback route */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        </ToastProvider>
       </AuthProvider>
     </BrowserRouter>
   );
