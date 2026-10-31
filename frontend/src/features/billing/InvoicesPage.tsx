@@ -430,3 +430,5 @@ export const InvoicesPage: React.FC = () => {
     </div>
   );
 };
+
+export default InvoicesPage;

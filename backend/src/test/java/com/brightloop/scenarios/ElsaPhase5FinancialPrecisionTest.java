@@ -429,6 +429,6 @@ public class ElsaPhase5FinancialPrecisionTest {
         IllegalStateException ex = assertThrows(IllegalStateException.class, () ->
                 invoiceService.cancelInvoice(invoice.getId())
         );
-        assertTrue(ex.getMessage().contains("Cannot cancel an already fully paid invoice"));
+        assertTrue(ex.getMessage().contains("Cannot cancel an already paid invoice"));
     }
 }

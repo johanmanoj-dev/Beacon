@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -19,6 +20,11 @@ public class InvoiceService {
 
     private final InvoiceRepository invoiceRepository;
     private final AtomicInteger invoiceSeq = new AtomicInteger(1);
+
+    @Transactional
+    public List<InvoiceResponse> getAllInvoices() {
+        return getAllInvoices(null, null, null);
+    }
 
     @Transactional
     public List<InvoiceResponse> getAllInvoices(InvoiceStatus status, Long customerId, String search) {
@@ -66,11 +72,6 @@ public class InvoiceService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional
-    public List<InvoiceResponse> getAllInvoices() {
-        return getAllInvoices(null, null, null);
-    }
-
     @Transactional(readOnly = true)
     public InvoiceResponse getInvoiceById(Long id) {
         Invoice invoice = invoiceRepository.findById(id)
@@ -106,12 +107,13 @@ public class InvoiceService {
                 .orElseThrow(() -> new IllegalArgumentException("Invoice not found with id: " + id));
 
         if (invoice.getStatus() == InvoiceStatus.PAID) {
-            throw new IllegalStateException("Cannot cancel an already fully paid invoice");
+            throw new IllegalStateException("Cannot cancel an already paid invoice");
         }
         if (invoice.getAmountPaid() != null && invoice.getAmountPaid().compareTo(BigDecimal.ZERO) > 0) {
             throw new IllegalStateException(String.format("Cannot cancel an invoice with recorded payments ($%s)", invoice.getAmountPaid()));
         }
         invoice.setStatus(InvoiceStatus.CANCELLED);
+        invoice.setBalanceDue(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP));
         return InvoiceResponse.fromEntity(invoiceRepository.save(invoice));
     }
 
