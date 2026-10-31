@@ -31,6 +31,8 @@ public class PlanService {
 
     @Transactional
     public PlanResponse createPlan(PlanRequest request) {
+        validatePlanRequest(request);
+
         Plan plan = Plan.builder()
                 .name(request.getName().trim())
                 .billingInterval(request.getBillingInterval())
@@ -48,6 +50,8 @@ public class PlanService {
 
     @Transactional
     public PlanResponse updatePlan(Long id, PlanRequest request) {
+        validatePlanRequest(request);
+
         Plan plan = planRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Plan not found with id: " + id));
 
@@ -62,6 +66,18 @@ public class PlanService {
 
         Plan saved = planRepository.save(plan);
         return PlanResponse.fromEntity(saved);
+    }
+
+    private void validatePlanRequest(PlanRequest request) {
+        if (request.getBasePrice() != null && request.getBasePrice().compareTo(java.math.BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Plan base price cannot be negative");
+        }
+        if (request.getMinQuantity() != null && request.getMinQuantity() < 1) {
+            throw new IllegalArgumentException("Minimum quantity must be at least 1");
+        }
+        if (request.getStartDate() != null && request.getEndDate() != null && request.getStartDate().isAfter(request.getEndDate())) {
+            throw new IllegalArgumentException("Plan start date cannot be after end date");
+        }
     }
 
     @Transactional

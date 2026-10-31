@@ -67,6 +67,10 @@ public class QuotationService {
 
         long count = quotationRepository.count() + 1;
         String quotationNumber = String.format("QUO-%d-%04d", LocalDate.now().getYear(), count);
+        while (quotationRepository.findByQuotationNumber(quotationNumber).isPresent()) {
+            count++;
+            quotationNumber = String.format("QUO-%d-%04d", LocalDate.now().getYear(), count);
+        }
 
         Quotation quotation = Quotation.builder()
                 .quotationNumber(quotationNumber)
@@ -188,6 +192,10 @@ public class QuotationService {
 
         long count = subscriptionRepository.count() + 1;
         String subNumber = String.format("SUB-%d-%04d", now.getYear(), count);
+        while (subscriptionRepository.findBySubscriptionNumber(subNumber).isPresent()) {
+            count++;
+            subNumber = String.format("SUB-%d-%04d", now.getYear(), count);
+        }
 
         Subscription subscription = Subscription.builder()
                 .subscriptionNumber(subNumber)

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   Users, Plus, Building2, Mail, RefreshCw,
-  AlertCircle, CheckCircle2, UserCheck, Link as LinkIcon, Unlink, ShieldCheck
+  AlertCircle, CheckCircle2, UserCheck, Link as LinkIcon, Unlink, ShieldCheck, Check
 } from 'lucide-react';
 import api from '../../services/api';
 import type { Customer, User } from '../../types';
@@ -33,6 +33,13 @@ export function CustomerListPage() {
   const [staffName, setStaffName] = useState('');
   const [staffEmail, setStaffEmail] = useState('');
   const [staffPassword, setStaffPassword] = useState('');
+
+  // Password validation checks for staff modal
+  const hasMinLen = staffPassword.length > 8;
+  const hasUpper = /[A-Z]/.test(staffPassword);
+  const hasLower = /[a-z]/.test(staffPassword);
+  const hasSpecial = /[^a-zA-Z0-9]/.test(staffPassword);
+  const isStaffPasswordValid = hasMinLen && hasUpper && hasLower && hasSpecial;
 
   const fetchData = async () => {
     setLoading(true);
@@ -130,6 +137,11 @@ export function CustomerListPage() {
     e.preventDefault();
     if (!staffName.trim() || !staffEmail.trim() || !staffPassword) {
       setError('Full name, email, and password are required');
+      return;
+    }
+
+    if (!isStaffPasswordValid) {
+      setError('Password does not satisfy the security policy requirements (>8 chars, uppercase, lowercase, special symbol)');
       return;
     }
 
@@ -588,14 +600,48 @@ export function CustomerListPage() {
                 <input
                   type="password"
                   required
-                  placeholder="Min 8 chars, uppercase, lowercase, special"
+                  placeholder="Min 9 chars, uppercase, lowercase, special"
                   value={staffPassword}
                   onChange={(e) => setStaffPassword(e.target.value)}
                   className="w-full text-sm rounded-lg border border-slate-300 px-3 py-2 bg-white text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-slate-900"
                 />
-                <p className="text-[11px] text-slate-400 mt-1">
-                  Enforces strict password policy: &gt;8 characters, uppercase, lowercase, special symbol.
-                </p>
+
+                {/* Visual Password Policy Checklist */}
+                <div className="mt-2.5 p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-1.5 text-xs">
+                  <div className="text-[11px] font-semibold text-slate-700">Security Policy Checklist:</div>
+                  <div className={`flex items-center gap-2 ${hasMinLen ? 'text-emerald-700 font-medium' : 'text-slate-500'}`}>
+                    {hasMinLen ? (
+                      <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    ) : (
+                      <span className="w-1.5 h-1.5 rounded-full bg-slate-400 mx-1 shrink-0" />
+                    )}
+                    <span>Length &gt; 8 characters ({staffPassword.length}/9+ entered)</span>
+                  </div>
+                  <div className={`flex items-center gap-2 ${hasUpper ? 'text-emerald-700 font-medium' : 'text-slate-500'}`}>
+                    {hasUpper ? (
+                      <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    ) : (
+                      <span className="w-1.5 h-1.5 rounded-full bg-slate-400 mx-1 shrink-0" />
+                    )}
+                    <span>At least 1 uppercase letter (A-Z)</span>
+                  </div>
+                  <div className={`flex items-center gap-2 ${hasLower ? 'text-emerald-700 font-medium' : 'text-slate-500'}`}>
+                    {hasLower ? (
+                      <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    ) : (
+                      <span className="w-1.5 h-1.5 rounded-full bg-slate-400 mx-1 shrink-0" />
+                    )}
+                    <span>At least 1 lowercase letter (a-z)</span>
+                  </div>
+                  <div className={`flex items-center gap-2 ${hasSpecial ? 'text-emerald-700 font-medium' : 'text-slate-500'}`}>
+                    {hasSpecial ? (
+                      <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    ) : (
+                      <span className="w-1.5 h-1.5 rounded-full bg-slate-400 mx-1 shrink-0" />
+                    )}
+                    <span>At least 1 special character (!@#$%^&*...)</span>
+                  </div>
+                </div>
               </div>
 
               <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
@@ -608,8 +654,8 @@ export function CustomerListPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={loading}
-                  className="px-4 py-2 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-lg shadow-sm"
+                  disabled={loading || !isStaffPasswordValid || !staffName.trim() || !staffEmail.trim()}
+                  className="px-4 py-2 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg shadow-sm transition-opacity"
                 >
                   {loading ? 'Creating...' : 'Create Staff User'}
                 </button>

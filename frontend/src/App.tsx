@@ -15,6 +15,7 @@ import { AppShell, ProtectedRoute } from './layout';
 import { CataloguePage, CustomerListPage, QuotationsPage, SubscriptionsPage } from './features/catalogue';
 import { CustomerPortalPage } from './features/portal';
 import { FinanceDashboardPage, DemoScenarioModal } from './features/analytics';
+import { BillingConfigPage } from './features/billing';
 import {
   Button,
   Input,
@@ -610,13 +611,7 @@ export default function App() {
             element={
               <ProtectedRoute allowedRoles={['ADMIN']}>
                 <AppShell backendStatus={backendStatus}>
-                  <GenericModuleView
-                    title="Taxes & Promotional Discount Rules"
-                    description="Configure tax rates (e.g. 18% GST) and tiered percentage or fixed-amount discount rules."
-                    track="Track 2"
-                    assignedTo="Elsa"
-                    badgeText="Elsa Workspace"
-                  />
+                  <BillingConfigPage />
                 </AppShell>
               </ProtectedRoute>
             }
