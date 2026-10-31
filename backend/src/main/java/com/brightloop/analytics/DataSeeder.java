@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
-@Component
+@Component("analyticsDataSeeder")
 @RequiredArgsConstructor
 public class DataSeeder implements CommandLineRunner {
 
@@ -57,9 +57,10 @@ public class DataSeeder implements CommandLineRunner {
             // 3. Products
             jdbcTemplate.update(
                 "INSERT INTO products (id, name, product_type, sales_price, cost_price, notes) VALUES " +
-                "(1, 'Cloud ERP Software Suite', 'SOFTWARE', 1000.00, 400.00, 'Enterprise ERP core subscription software'), " +
-                "(2, 'Priority 24/7 SLA Support Add-on', 'ADDON', 350.00, 120.00, 'Dedicated 1-hour SLA phone & email support'), " +
-                "(3, 'API Connector & Webhooks Engine', 'ADDON', 200.00, 50.00, 'High-volume external API synchronization endpoints') " +
+                "(1, 'Cloud ERP Software', 'SOFTWARE', 1000.00, 400.00, 'Complete cloud-native enterprise resource planning suite'), " +
+                "(2, 'Priority 24/7 Support Add-on', 'ADDON', 250.00, 50.00, 'Dedicated enterprise TAM with 1-hour SLA response'), " +
+                "(3, 'Custom Implementation Service', 'SERVICE', 1200.00, 600.00, 'Hands-on architecture setup and data migration sprint'), " +
+                "(4, 'API Connector & Webhooks Engine', 'ADDON', 200.00, 50.00, 'High-volume external API synchronization endpoints') " +
                 "ON DUPLICATE KEY UPDATE sales_price = VALUES(sales_price)"
             );
 
@@ -67,16 +68,17 @@ public class DataSeeder implements CommandLineRunner {
             jdbcTemplate.update(
                 "INSERT INTO product_variants (id, product_id, variant_name, price_adjustment) VALUES " +
                 "(1, 1, 'Brand: Odoo', 560.00), " +
-                "(2, 1, 'Brand: Standard', 0.00) " +
+                "(2, 1, 'Brand: SAP Integration', 850.00), " +
+                "(3, 1, 'Brand: Standard', 0.00) " +
                 "ON DUPLICATE KEY UPDATE price_adjustment = VALUES(price_adjustment)"
             );
 
             // 5. Plans
             jdbcTemplate.update(
                 "INSERT INTO plans (id, name, billing_interval, base_price, min_quantity, start_date, can_pause) VALUES " +
-                "(1, 'Monthly Pro Business Plan', 'MONTHLY', 1500.00, 1, '2026-01-01', true), " +
-                "(2, 'Enterprise Yearly Plan', 'YEARLY', 15000.00, 5, '2026-01-01', true), " +
-                "(3, 'Weekly Sprint Trial Plan', 'WEEKLY', 400.00, 1, '2026-01-01', true) " +
+                "(1, 'Monthly Business Plan', 'MONTHLY', 1500.00, 1, '2026-01-01', true), " +
+                "(2, 'Yearly Enterprise Plan', 'YEARLY', 14400.00, 5, '2026-01-01', true), " +
+                "(3, '90-Day Seasonal Pilot', 'MONTHLY', 1200.00, 1, '2026-01-01', true) " +
                 "ON DUPLICATE KEY UPDATE base_price = VALUES(base_price)"
             );
 
@@ -99,15 +101,16 @@ public class DataSeeder implements CommandLineRunner {
             // 8. Quotation Templates
             jdbcTemplate.update(
                 "INSERT INTO quotation_templates (id, name, plan_id, validity_days, notes) VALUES " +
-                "(1, 'Enterprise Quotation Template', 1, 30, 'Standard enterprise deployment with support options') " +
+                "(1, 'Enterprise ERP Bundle', 1, 30, 'Pre-configured quote with core Cloud ERP and Net 15 terms'), " +
+                "(2, 'Annual Volume License', 2, 45, 'Tier-1 volume enterprise quote') " +
                 "ON DUPLICATE KEY UPDATE name = VALUES(name)"
             );
 
             // 9. Quotations
             jdbcTemplate.update(
                 "INSERT INTO quotations (id, quotation_number, customer_id, plan_id, valid_until, status, subtotal, tax_amount, total_amount) VALUES " +
-                "(1, 'QT-2026-0001', 1, 1, '2026-11-15', 'CONVERTED', 8150.00, 1467.00, 9617.00), " +
-                "(2, 'QT-2026-0002', 2, 1, '2026-11-30', 'CONFIRMED', 1322.03, 237.97, 1560.00) " +
+                "(1, 'QUO-2026-0001', 2, 1, '2026-11-30', 'CONFIRMED', 3120.00, 561.60, 3681.60), " +
+                "(2, 'QUO-2026-0002', 1, 1, '2026-11-25', 'DRAFT', 750.00, 135.00, 885.00) " +
                 "ON DUPLICATE KEY UPDATE status = VALUES(status)"
             );
 
