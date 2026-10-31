@@ -91,7 +91,7 @@ export function DataTable<T extends Record<string, any>>({
     <div className={cn('space-y-4', className)}>
       {/* Top Search Toolbar */}
       {searchable && (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center justify-end">
           <div className="max-w-xs w-full">
             <Input
               type="text"
@@ -103,9 +103,6 @@ export function DataTable<T extends Record<string, any>>({
               }}
               leftIcon={<Search className="h-4 w-4" />}
             />
-          </div>
-          <div className="text-xs text-[#5A6D80] font-medium">
-            Showing <span className="font-semibold text-[#101E2B]">{totalItems}</span> total entries
           </div>
         </div>
       )}
