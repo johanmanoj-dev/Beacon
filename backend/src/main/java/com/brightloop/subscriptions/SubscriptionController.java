@@ -20,8 +20,9 @@ public class SubscriptionController {
     @GetMapping
     public ResponseEntity<List<SubscriptionResponse>> getAllSubscriptions(
             @RequestParam(required = false) String status,
-            @RequestParam(required = false) Long customerId) {
-        return ResponseEntity.ok(subscriptionService.getAllSubscriptions(status, customerId));
+            @RequestParam(required = false) Long customerId,
+            @RequestParam(required = false) Long planId) {
+        return ResponseEntity.ok(subscriptionService.getAllSubscriptions(status, customerId, planId));
     }
 
     @GetMapping("/{id}")
@@ -71,14 +72,21 @@ public class SubscriptionController {
     }
 
     @PostMapping("/{id}/close")
-    public ResponseEntity<?> closeSubscription(@PathVariable Long id) {
+    public ResponseEntity<?> closeSubscription(
+            @PathVariable Long id,
+            @RequestParam(required = false) String reason) {
         try {
-            return ResponseEntity.ok(subscriptionService.closeSubscription(id));
+            return ResponseEntity.ok(subscriptionService.closeSubscription(id, reason));
         } catch (IllegalArgumentException e) {
             Map<String, String> err = new HashMap<>();
             err.put("error", "Not Found");
             err.put("message", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(err);
+        } catch (IllegalStateException e) {
+            Map<String, String> err = new HashMap<>();
+            err.put("error", "Conflict");
+            err.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(err);
         }
     }
 
@@ -92,5 +100,10 @@ public class SubscriptionController {
             err.put("message", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(err);
         }
+    }
+
+    @PostMapping("/auto-close-check")
+    public ResponseEntity<Map<String, Object>> runAutoCloseCheck() {
+        return ResponseEntity.ok(subscriptionService.autoCloseExpiredSubscriptions());
     }
 }

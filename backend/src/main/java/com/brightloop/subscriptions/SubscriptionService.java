@@ -4,13 +4,18 @@ import com.brightloop.catalogue.BillingInterval;
 import com.brightloop.catalogue.Plan;
 import com.brightloop.subscriptions.dto.SubscriptionResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class SubscriptionService {
@@ -18,7 +23,7 @@ public class SubscriptionService {
     private final SubscriptionRepository subscriptionRepository;
 
     @Transactional(readOnly = true)
-    public List<SubscriptionResponse> getAllSubscriptions(String statusStr, Long customerId) {
+    public List<SubscriptionResponse> getAllSubscriptions(String statusStr, Long customerId, Long planId) {
         List<Subscription> list;
         if (customerId != null) {
             list = subscriptionRepository.findByCustomerIdOrderByCreatedAtDesc(customerId);
@@ -26,7 +31,13 @@ public class SubscriptionService {
             list = subscriptionRepository.findAllByOrderByCreatedAtDesc();
         }
 
-        if (statusStr != null && !statusStr.isBlank()) {
+        if (planId != null) {
+            list = list.stream()
+                    .filter(s -> s.getPlan() != null && planId.equals(s.getPlan().getId()))
+                    .collect(Collectors.toList());
+        }
+
+        if (statusStr != null && !statusStr.isBlank() && !"ALL".equalsIgnoreCase(statusStr.trim())) {
             try {
                 SubscriptionStatus status = SubscriptionStatus.valueOf(statusStr.trim().toUpperCase());
                 list = list.stream().filter(s -> s.getStatus() == status).collect(Collectors.toList());
@@ -76,10 +87,15 @@ public class SubscriptionService {
     }
 
     @Transactional
-    public SubscriptionResponse closeSubscription(Long id) {
+    public SubscriptionResponse closeSubscription(Long id, String reason) {
         Subscription s = subscriptionRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Subscription not found with id: " + id));
 
+        if (s.getStatus() == SubscriptionStatus.CLOSED) {
+            throw new IllegalStateException("Subscription is already closed");
+        }
+
+        log.info("Closing subscription {} early. Reason: {}", s.getSubscriptionNumber(), reason != null ? reason : "Customer/Admin request");
         s.setStatus(SubscriptionStatus.CLOSED);
         s.setExpiryDate(LocalDate.now());
         Subscription saved = subscriptionRepository.save(s);
@@ -110,5 +126,45 @@ public class SubscriptionService {
         s.setStatus(SubscriptionStatus.ACTIVE);
         Subscription saved = subscriptionRepository.save(s);
         return SubscriptionResponse.fromEntity(saved);
+    }
+
+    @Transactional
+    public Map<String, Object> autoCloseExpiredSubscriptions() {
+        LocalDate today = LocalDate.now();
+        List<Subscription> activeSubs = subscriptionRepository.findByStatus(SubscriptionStatus.ACTIVE);
+        List<String> closedSubNumbers = new ArrayList<>();
+
+        for (Subscription sub : activeSubs) {
+            boolean shouldClose = false;
+
+            // 1. Check if contract explicit expiry date reached
+            if (sub.getExpiryDate() != null && !sub.getExpiryDate().isAfter(today)) {
+                shouldClose = true;
+            }
+
+            // 2. Check if plan autoCloseOnEnd is enabled and plan end date reached
+            Plan plan = sub.getPlan();
+            if (plan != null && Boolean.TRUE.equals(plan.getAutoCloseOnEnd()) && plan.getEndDate() != null) {
+                if (!plan.getEndDate().isAfter(today)) {
+                    shouldClose = true;
+                }
+            }
+
+            if (shouldClose) {
+                sub.setStatus(SubscriptionStatus.CLOSED);
+                sub.setExpiryDate(today);
+                subscriptionRepository.save(sub);
+                closedSubNumbers.add(sub.getSubscriptionNumber());
+                log.info("Auto-closed expired subscription {} based on lifecycle rule", sub.getSubscriptionNumber());
+            }
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("checkedCount", activeSubs.size());
+        result.put("closedCount", closedSubNumbers.size());
+        result.put("closedSubscriptions", closedSubNumbers);
+        result.put("message", String.format("Auto-close sweep completed. %d of %d active subscriptions closed.",
+                closedSubNumbers.size(), activeSubs.size()));
+        return result;
     }
 }

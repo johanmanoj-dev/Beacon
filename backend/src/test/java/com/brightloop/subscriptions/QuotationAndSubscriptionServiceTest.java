@@ -229,4 +229,58 @@ class QuotationAndSubscriptionServiceTest {
 
         assertTrue(ex.getMessage().contains("does not permit pausing"));
     }
+
+    @Test
+    void testEarlyCloseSubscriptionWithReason() {
+        Subscription sub = Subscription.builder()
+                .id(72L)
+                .subscriptionNumber("SUB-2026-0005")
+                .customer(mockCustomer)
+                .plan(mockPlan)
+                .status(SubscriptionStatus.ACTIVE)
+                .build();
+
+        when(subscriptionRepository.findById(72L)).thenReturn(Optional.of(sub));
+        when(subscriptionRepository.save(any(Subscription.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        SubscriptionResponse closed = subscriptionService.closeSubscription(72L, "Customer requested early termination");
+        assertEquals(SubscriptionStatus.CLOSED, closed.getStatus());
+        assertEquals(LocalDate.now(), closed.getExpiryDate());
+    }
+
+    @Test
+    void testAutoCloseExpiredSubscriptionsSweep() {
+        Plan expiredAutoClosePlan = Plan.builder()
+                .id(15L)
+                .name("Limited Promo Plan")
+                .autoCloseOnEnd(true)
+                .endDate(LocalDate.now().minusDays(1))
+                .build();
+
+        Subscription expiredSub = Subscription.builder()
+                .id(80L)
+                .subscriptionNumber("SUB-2026-EXPIRED")
+                .plan(expiredAutoClosePlan)
+                .status(SubscriptionStatus.ACTIVE)
+                .expiryDate(LocalDate.now().minusDays(1))
+                .build();
+
+        Subscription stillActiveSub = Subscription.builder()
+                .id(81L)
+                .subscriptionNumber("SUB-2026-ACTIVE")
+                .plan(mockPlan)
+                .status(SubscriptionStatus.ACTIVE)
+                .expiryDate(LocalDate.now().plusMonths(3))
+                .build();
+
+        when(subscriptionRepository.findByStatus(SubscriptionStatus.ACTIVE))
+                .thenReturn(List.of(expiredSub, stillActiveSub));
+        when(subscriptionRepository.save(any(Subscription.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var result = subscriptionService.autoCloseExpiredSubscriptions();
+
+        assertEquals(1, result.get("closedCount"));
+        assertEquals(SubscriptionStatus.CLOSED, expiredSub.getStatus());
+        assertEquals(SubscriptionStatus.ACTIVE, stillActiveSub.getStatus());
+    }
 }

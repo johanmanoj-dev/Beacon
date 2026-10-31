@@ -56,4 +56,28 @@ public class CustomerController {
             return ResponseEntity.badRequest().body(err);
         }
     }
+
+    @PostMapping("/{id}/link-user")
+    public ResponseEntity<?> linkUser(@PathVariable Long id, @RequestParam Long userId) {
+        try {
+            return ResponseEntity.ok(customerService.linkUser(id, userId));
+        } catch (IllegalArgumentException e) {
+            Map<String, String> err = new HashMap<>();
+            err.put("error", "Bad Request");
+            err.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(err);
+        }
+    }
+
+    @PostMapping("/{id}/unlink-user")
+    public ResponseEntity<?> unlinkUser(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(customerService.unlinkUser(id));
+        } catch (IllegalArgumentException e) {
+            Map<String, String> err = new HashMap<>();
+            err.put("error", "Bad Request");
+            err.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(err);
+        }
+    }
 }

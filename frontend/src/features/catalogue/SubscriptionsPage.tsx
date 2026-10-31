@@ -1,30 +1,53 @@
 import React, { useState, useEffect } from 'react';
 import {
   Layers, RefreshCw, AlertCircle, CheckCircle2, Pause, Play,
-  XCircle, RotateCw, ChevronDown, ChevronRight, Search
+  XCircle, RotateCw, ChevronDown, ChevronRight, Search, Clock
 } from 'lucide-react';
 import api from '../../services/api';
-import type { Subscription, SubscriptionStatus } from '../../types';
+import type { Subscription, SubscriptionStatus, Customer, Plan } from '../../types';
 
 export function SubscriptionsPage() {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [plans, setPlans] = useState<Plan[]>([]);
+
   const [loading, setLoading] = useState(false);
   const [actionLoadingId, setActionLoadingId] = useState<number | null>(null);
+  const [isSweeping, setIsSweeping] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   // Filters
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [customerFilter, setCustomerFilter] = useState<number | ''>('');
+  const [planFilter, setPlanFilter] = useState<number | ''>('');
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedSubId, setExpandedSubId] = useState<number | null>(null);
+
+  // Early Close Modal
+  const [showCloseModal, setShowCloseModal] = useState(false);
+  const [closingSub, setClosingSub] = useState<Subscription | null>(null);
+  const [closeReason, setCloseReason] = useState('Customer requested early termination');
 
   const fetchSubscriptions = async () => {
     setLoading(true);
     setError(null);
     try {
-      const url = statusFilter !== 'ALL' ? `/subscriptions?status=${statusFilter}` : '/subscriptions';
-      const res = await api.get<Subscription[]>(url);
-      setSubscriptions(res.data);
+      const params = new URLSearchParams();
+      if (statusFilter !== 'ALL') params.append('status', statusFilter);
+      if (customerFilter) params.append('customerId', String(customerFilter));
+      if (planFilter) params.append('planId', String(planFilter));
+
+      const query = params.toString() ? `?${params.toString()}` : '';
+      const [subsRes, custRes, planRes] = await Promise.all([
+        api.get<Subscription[]>(`/subscriptions${query}`),
+        api.get<Customer[]>('/customers'),
+        api.get<Plan[]>('/plans')
+      ]);
+
+      setSubscriptions(subsRes.data);
+      setCustomers(custRes.data);
+      setPlans(planRes.data);
     } catch (err: any) {
       setError(err.response?.data?.message || err.message || 'Failed to load subscriptions');
     } finally {
@@ -34,9 +57,9 @@ export function SubscriptionsPage() {
 
   useEffect(() => {
     fetchSubscriptions();
-  }, [statusFilter]);
+  }, [statusFilter, customerFilter, planFilter]);
 
-  const handleAction = async (subId: number, action: 'pause' | 'resume' | 'close' | 'renew') => {
+  const handleAction = async (subId: number, action: 'pause' | 'resume' | 'renew') => {
     setActionLoadingId(subId);
     setError(null);
     try {
@@ -44,7 +67,6 @@ export function SubscriptionsPage() {
       const actionText = {
         pause: 'paused',
         resume: 'resumed to active',
-        close: 'closed',
         renew: 'renewed and advanced to next billing cycle'
       }[action];
       setSuccessMsg(`Subscription ${res.data.subscriptionNumber} ${actionText}!`);
@@ -53,6 +75,46 @@ export function SubscriptionsPage() {
       setError(err.response?.data?.message || err.message || `Failed to ${action} subscription`);
     } finally {
       setActionLoadingId(null);
+    }
+  };
+
+  const openCloseModal = (sub: Subscription) => {
+    setClosingSub(sub);
+    setCloseReason('Customer requested early termination');
+    setShowCloseModal(true);
+  };
+
+  const handleConfirmClose = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!closingSub) return;
+
+    setActionLoadingId(closingSub.id);
+    setError(null);
+    try {
+      const params = closeReason.trim() ? `?reason=${encodeURIComponent(closeReason.trim())}` : '';
+      const res = await api.post<Subscription>(`/subscriptions/${closingSub.id}/close${params}`);
+      setSuccessMsg(`Subscription ${res.data.subscriptionNumber} closed successfully (Reason: ${closeReason})!`);
+      setShowCloseModal(false);
+      setClosingSub(null);
+      fetchSubscriptions();
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message || 'Failed to close subscription');
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const handleAutoCloseSweep = async () => {
+    setIsSweeping(true);
+    setError(null);
+    try {
+      const res = await api.post<{ checkedCount: number; closedCount: number; message: string }>('/subscriptions/auto-close-check');
+      setSuccessMsg(res.data.message || `Checked ${res.data.checkedCount} contracts. ${res.data.closedCount} expired subscriptions auto-closed.`);
+      fetchSubscriptions();
+    } catch (err: any) {
+      setError(err.response?.data?.message || err.message || 'Auto-close sweep check failed');
+    } finally {
+      setIsSweeping(false);
     }
   };
 
@@ -98,18 +160,29 @@ export function SubscriptionsPage() {
             <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">Track 1 • Johan</span>
           </div>
           <p className="text-sm text-slate-500 mt-1">
-            Complete lifecycle state machine for recurring customer subscriptions: manage active contracts, pauses, and renewals.
+            Complete lifecycle state machine for recurring customer subscriptions: manage active contracts, early closures, and auto-close sweeps.
           </p>
         </div>
 
-        <button
-          onClick={fetchSubscriptions}
-          disabled={loading}
-          className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors shadow-2xs self-start sm:self-auto"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-          Refresh Data
-        </button>
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <button
+            onClick={handleAutoCloseSweep}
+            disabled={isSweeping}
+            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition-colors shadow-2xs"
+            title="Scan active subscriptions and auto-close contracts reaching end dates"
+          >
+            <Clock className={`w-3.5 h-3.5 ${isSweeping ? 'animate-spin' : ''}`} />
+            {isSweeping ? 'Checking...' : 'Run Auto-Close Check'}
+          </button>
+          <button
+            onClick={fetchSubscriptions}
+            disabled={loading}
+            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors shadow-2xs"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
+        </div>
       </div>
 
       {/* KPI Cards */}
@@ -164,10 +237,11 @@ export function SubscriptionsPage() {
         </div>
       )}
 
-      {/* Filters Bar */}
-      <div className="bg-white border border-slate-200 rounded-xl p-3 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <div className="relative flex-1 sm:w-72">
+      {/* Multi-Filter Bar */}
+      <div className="bg-white border border-slate-200 rounded-xl p-3 shadow-2xs space-y-3">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-3">
+          {/* Search */}
+          <div className="relative flex-1 w-full lg:w-72">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
@@ -177,23 +251,50 @@ export function SubscriptionsPage() {
               className="w-full pl-9 pr-3 py-1.5 text-xs rounded-lg border border-slate-300 bg-white text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-slate-900"
             />
           </div>
-        </div>
 
-        <div className="flex items-center gap-1.5 self-end sm:self-auto text-xs">
-          <span className="text-slate-500 font-medium">Status:</span>
-          {(['ALL', 'ACTIVE', 'PAUSED', 'CLOSED'] as const).map(st => (
-            <button
-              key={st}
-              onClick={() => setStatusFilter(st)}
-              className={`px-3 py-1 rounded-md font-medium transition-colors ${
-                statusFilter === st
-                  ? 'bg-slate-900 text-white shadow-2xs'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-              }`}
+          {/* Customer Dropdown Filter */}
+          <div className="flex items-center gap-2 w-full lg:w-auto">
+            <select
+              value={customerFilter}
+              onChange={e => setCustomerFilter(e.target.value ? Number(e.target.value) : '')}
+              className="text-xs rounded-lg border border-slate-300 px-3 py-1.5 bg-white text-slate-700 focus:ring-2 focus:ring-slate-900 w-full sm:w-48"
             >
-              {st}
-            </button>
-          ))}
+              <option value="">All Customers</option>
+              {customers.map(c => (
+                <option key={c.id} value={c.id}>{c.companyName}</option>
+              ))}
+            </select>
+
+            {/* Plan Dropdown Filter */}
+            <select
+              value={planFilter}
+              onChange={e => setPlanFilter(e.target.value ? Number(e.target.value) : '')}
+              className="text-xs rounded-lg border border-slate-300 px-3 py-1.5 bg-white text-slate-700 focus:ring-2 focus:ring-slate-900 w-full sm:w-44"
+            >
+              <option value="">All Plans</option>
+              {plans.map(p => (
+                <option key={p.id} value={p.id}>{p.name} ({p.billingInterval})</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Status Tabs */}
+          <div className="flex items-center gap-1.5 self-end sm:self-auto text-xs">
+            <span className="text-slate-500 font-medium">Status:</span>
+            {(['ALL', 'ACTIVE', 'PAUSED', 'CLOSED'] as const).map(st => (
+              <button
+                key={st}
+                onClick={() => setStatusFilter(st)}
+                className={`px-3 py-1 rounded-md font-medium transition-colors ${
+                  statusFilter === st
+                    ? 'bg-slate-900 text-white shadow-2xs'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                {st}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -211,7 +312,7 @@ export function SubscriptionsPage() {
             <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1">
               {subscriptions.length === 0
                 ? 'Create a quotation and convert it into an active subscription to see it here.'
-                : 'No subscriptions match the selected filter.'}
+                : 'No subscriptions match the selected customer, plan, or status filters.'}
             </p>
           </div>
         ) : (
@@ -282,7 +383,7 @@ export function SubscriptionsPage() {
                                   <Pause className="w-3 h-3" /> Pause
                                 </button>
                                 <button
-                                  onClick={() => handleAction(sub.id, 'close')}
+                                  onClick={() => openCloseModal(sub)}
                                   disabled={isProcessing}
                                   className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-rose-700 bg-rose-50 border border-rose-200 rounded hover:bg-rose-100 transition-colors"
                                   title="Close subscription contract"
@@ -304,7 +405,7 @@ export function SubscriptionsPage() {
                                   <Play className="w-3 h-3" /> Resume
                                 </button>
                                 <button
-                                  onClick={() => handleAction(sub.id, 'close')}
+                                  onClick={() => openCloseModal(sub)}
                                   disabled={isProcessing}
                                   className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-rose-700 bg-rose-50 border border-rose-200 rounded hover:bg-rose-100 transition-colors"
                                   title="Close subscription contract"
@@ -375,6 +476,69 @@ export function SubscriptionsPage() {
           </div>
         )}
       </div>
+
+      {/* EARLY CLOSURE CONFIRMATION MODAL */}
+      {showCloseModal && closingSub && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-2xs">
+          <div className="bg-white rounded-xl shadow-xl border border-slate-200 w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <div className="flex items-center gap-2 text-rose-600">
+                <XCircle className="w-5 h-5" />
+                <h3 className="text-base font-semibold text-slate-900">Early Subscription Closure</h3>
+              </div>
+              <button onClick={() => setShowCloseModal(false)} className="text-slate-400 hover:text-slate-600">✕</button>
+            </div>
+
+            <form onSubmit={handleConfirmClose} className="p-6 space-y-4">
+              <p className="text-xs text-slate-600">
+                You are about to terminate subscription <strong className="text-slate-900 font-mono">{closingSub.subscriptionNumber}</strong> for <strong className="text-slate-900">{closingSub.customerName}</strong> early.
+              </p>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Reason for Early Closure *
+                </label>
+                <select
+                  value={closeReason}
+                  onChange={e => setCloseReason(e.target.value)}
+                  className="w-full text-sm rounded-lg border border-slate-300 px-3 py-2 bg-white text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-slate-900 mb-2"
+                >
+                  <option value="Customer requested early termination">Customer requested early termination</option>
+                  <option value="Upgraded to another enterprise tier">Upgraded to another enterprise tier</option>
+                  <option value="Non-payment or overdue default">Non-payment or overdue default</option>
+                  <option value="Contract agreement ended">Contract agreement ended</option>
+                  <option value="Custom">Other (type custom reason below)</option>
+                </select>
+
+                <textarea
+                  rows={2}
+                  value={closeReason}
+                  onChange={e => setCloseReason(e.target.value)}
+                  placeholder="Specify early closure notes..."
+                  className="w-full text-xs rounded-lg border border-slate-300 p-2 text-slate-800"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setShowCloseModal(false)}
+                  className="px-4 py-2 text-xs font-medium text-slate-600 hover:text-slate-800"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={actionLoadingId === closingSub.id}
+                  className="px-4 py-2 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-lg shadow-sm"
+                >
+                  {actionLoadingId === closingSub.id ? 'Closing...' : 'Confirm Early Closure'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
