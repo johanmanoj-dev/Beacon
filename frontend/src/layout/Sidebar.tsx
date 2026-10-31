@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -17,6 +17,7 @@ import {
   X,
 } from 'lucide-react';
 import { useAuth } from '../context';
+import { Modal, Button } from '../components/ui';
 import type { Role } from '../types';
 
 interface NavItem {
@@ -49,6 +50,7 @@ export interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({ backendStatus, isMobileOpen = false, onCloseMobile }) => {
   const location = useLocation();
   const { user, role, logout } = useAuth();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const filteredNavItems = navItems.filter((item) => item.role.includes(role));
 
@@ -158,7 +160,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ backendStatus, isMobileOpen = 
             </div>
             <button
               type="button"
-              onClick={logout}
+              onClick={() => setShowLogoutConfirm(true)}
               className="p-1.5 rounded text-[#97ABBD] hover:text-rose-400 hover:bg-[#182635] transition-colors cursor-pointer"
               title="Log Out"
             >
@@ -188,6 +190,41 @@ export const Sidebar: React.FC<SidebarProps> = ({ backendStatus, isMobileOpen = 
           </span>
         </div>
       </aside>
+
+      {/* Logout Confirmation Modal */}
+      <Modal
+        isOpen={showLogoutConfirm}
+        onClose={() => setShowLogoutConfirm(false)}
+        title="Confirm Sign Out"
+        description="Are you sure you want to end your current session?"
+        size="sm"
+        footer={
+          <div className="flex items-center justify-end gap-2.5 w-full">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowLogoutConfirm(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={() => {
+                setShowLogoutConfirm(false);
+                logout();
+              }}
+              leftIcon={<LogOut className="h-3.5 w-3.5" />}
+            >
+              Log Out
+            </Button>
+          </div>
+        }
+      >
+        <div className="py-2 text-sm text-[#5A6D80]">
+          You are currently signed in as <strong className="text-[#101E2B]">{user?.fullName || user?.email || 'User'}</strong>. Any unsaved changes in progress may be lost upon logging out.
+        </div>
+      </Modal>
     </>
   );
 };
