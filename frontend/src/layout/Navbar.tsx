@@ -61,27 +61,16 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleMobileMenu }) => {
 
       {/* Right Controls */}
       <div className="flex items-center gap-4">
-        {/* User Info & Logout Button */}
-        <div className="flex items-center gap-3">
-          <div className="hidden sm:block text-right">
-            <span className="text-xs font-bold text-[#101E2B] block leading-tight">
-              {user?.fullName || 'User'}
-            </span>
-            <div className="mt-0.5">
-              <Badge variant={activeBadge.variant} size="sm" withDot>
-                {activeBadge.label}
-              </Badge>
-            </div>
+        {/* User Info */}
+        <div className="hidden sm:block text-right">
+          <span className="text-xs font-bold text-[#101E2B] block leading-tight">
+            {user?.fullName || 'User'}
+          </span>
+          <div className="mt-0.5">
+            <Badge variant={activeBadge.variant} size="sm" withDot>
+              {activeBadge.label}
+            </Badge>
           </div>
-
-          <button
-            type="button"
-            onClick={logout}
-            className="p-1.5 rounded-lg text-[#7189A0] hover:text-rose-600 hover:bg-[#F5F0E6] transition-colors cursor-pointer"
-            title="Log out"
-          >
-            <LogOut className="h-4 w-4" />
-          </button>
         </div>
       </div>
     </header>
