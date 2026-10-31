@@ -6,6 +6,7 @@ export interface AuthUser {
   fullName: string;
   role: Role;
   companyName?: string;
+  customerId?: number;
 }
 
 export interface AuthContextType {
@@ -47,5 +48,6 @@ export const DEMO_USERS: Record<Role, AuthUser> = {
     fullName: 'Alice Walker',
     role: 'CUSTOMER',
     companyName: 'Acme Software Labs',
+    customerId: 1,
   },
 };

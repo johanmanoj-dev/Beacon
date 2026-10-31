@@ -14,82 +14,6 @@ import { Button, Badge, Modal, Input, EmptyState, useToast } from '../../compone
 import { formatCurrency, formatDate } from '../../lib/utils';
 import type { Invoice, InvoiceStatus } from '../../types';
 
-const FALLBACK_CUSTOMER_INVOICES: Invoice[] = [
-  {
-    id: 1,
-    invoiceNumber: 'INV-2026-0001',
-    subscriptionId: 1,
-    subscriptionNumber: 'SUB-2026-0001',
-    customerId: 3,
-    customerName: 'Acme Software Labs',
-    billingPeriodStart: '2026-10-01',
-    billingPeriodEnd: '2026-10-31',
-    issueDate: '2026-10-01',
-    dueDate: '2026-10-16',
-    subtotal: 8150.0,
-    taxAmount: 1467.0,
-    discountAmount: 0.0,
-    totalAmount: 9617.0,
-    amountPaid: 0.0,
-    balanceDue: 9617.0,
-    status: 'CONFIRMED',
-    createdAt: '2026-10-01T10:00:00Z',
-    items: [
-      {
-        id: 1,
-        description: 'Cloud ERP Software Suite with Brand: Odoo (5 seats)',
-        quantity: 5,
-        unitPrice: 1560.0,
-        taxRatePercent: 18.0,
-        taxAmount: 1404.0,
-        discountAmount: 0.0,
-        lineTotal: 9204.0,
-      },
-      {
-        id: 2,
-        description: 'Priority 24/7 SLA Support Add-on',
-        quantity: 1,
-        unitPrice: 350.0,
-        taxRatePercent: 18.0,
-        taxAmount: 63.0,
-        discountAmount: 0.0,
-        lineTotal: 413.0,
-      },
-    ],
-  },
-  {
-    id: 2,
-    invoiceNumber: 'INV-2026-0002',
-    subscriptionId: 2,
-    subscriptionNumber: 'SUB-2026-0002',
-    customerId: 3,
-    customerName: 'Acme Software Labs',
-    billingPeriodStart: '2026-09-15',
-    billingPeriodEnd: '2026-10-14',
-    issueDate: '2026-09-15',
-    dueDate: '2026-09-30',
-    subtotal: 400.0,
-    taxAmount: 72.0,
-    discountAmount: 0.0,
-    totalAmount: 472.0,
-    amountPaid: 472.0,
-    balanceDue: 0.0,
-    status: 'PAID',
-    createdAt: '2026-09-15T09:30:00Z',
-    items: [
-      {
-        id: 3,
-        description: 'API Connector & Webhooks Engine (2 endpoints)',
-        quantity: 2,
-        unitPrice: 200.0,
-        taxRatePercent: 18.0,
-        taxAmount: 72.0,
-        discountAmount: 0.0,
-        lineTotal: 472.0,
-      },
-    ],
-  },
-];
 
 export interface InvoicesTabProps {
   customerEmail?: string;
@@ -117,19 +41,26 @@ export const InvoicesTab: React.FC<InvoicesTabProps> = ({ customerEmail }) => {
     setLoading(true);
     try {
       const res = await api.get<Invoice[]>('/invoices');
-      if (res.data && res.data.length > 0) {
-        setInvoices(res.data);
-      } else {
-        setInvoices(FALLBACK_CUSTOMER_INVOICES);
+      if (res.data) {
+        const userInvoices = customerEmail
+          ? res.data.filter((inv) => {
+              const lower = customerEmail.toLowerCase();
+              if (lower.includes('acme')) {
+                return inv.customerId === 1 || inv.customerName?.toLowerCase().includes('acme');
+              }
+              if (lower.includes('retail') || lower.includes('alice')) {
+                return inv.customerId === 2 || inv.customerName?.toLowerCase().includes('retail');
+              }
+              return true;
+            })
+          : res.data;
+        setInvoices(userInvoices);
       }
       if (isManual) {
         showToast('Billing statements refreshed', 'success');
       }
     } catch {
-      setInvoices(FALLBACK_CUSTOMER_INVOICES);
-      if (isManual) {
-        showToast('Loaded billing statements', 'info');
-      }
+      showToast('Could not load billing statements from server', 'error');
     } finally {
       setLoading(false);
     }
@@ -160,35 +91,46 @@ export const InvoicesTab: React.FC<InvoicesTabProps> = ({ customerEmail }) => {
     }
   };
 
-  const handleSimulatePayment = () => {
+  const handleSimulatePayment = async () => {
     if (!paymentInvoice) return;
     setIsProcessingPayment(true);
+    setPaymentSuccess(null);
 
-    setTimeout(() => {
-      setIsProcessingPayment(false);
-      const paidMsg = `Payment of ${formatCurrency(paymentInvoice.balanceDue)} confirmed via ${payMethod}!`;
+    try {
+      // 1. Initiate checkout session via real backend API
+      const checkoutRes = await api.post('/payments/gateway/checkout', {
+        invoiceId: paymentInvoice.id,
+        amount: paymentInvoice.balanceDue,
+        paymentMethod: payMethod,
+        idempotencyKey: `sim-checkout-${paymentInvoice.id}-${Date.now()}`,
+      });
+
+      const txnId = checkoutRes.data.transactionId;
+
+      // 2. Confirm payment on the backend gateway
+      await api.post('/payments/gateway/confirm', {
+        transactionId: txnId,
+        simulatedOutcome: 'SUCCESS',
+        paymentMethod: payMethod,
+      });
+
+      const paidMsg = `Payment of ${formatCurrency(paymentInvoice.balanceDue)} confirmed via ${payMethod} (Ref: ${txnId})!`;
       setPaymentSuccess(paidMsg);
       showToast(paidMsg, 'success');
 
-      // Update local invoice state to PAID
-      setInvoices((prev) =>
-        prev.map((item) =>
-          item.id === paymentInvoice.id
-            ? {
-                ...item,
-                amountPaid: item.totalAmount,
-                balanceDue: 0,
-                status: 'PAID' as InvoiceStatus,
-              }
-            : item
-        )
-      );
+      // 3. Immediately re-fetch verified invoice state from database
+      await fetchInvoices(false);
 
       setTimeout(() => {
         setPaymentInvoice(null);
         setPaymentSuccess(null);
       }, 1500);
-    }, 1000);
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.message || 'Payment processing failed';
+      showToast(msg, 'error');
+    } finally {
+      setIsProcessingPayment(false);
+    }
   };
 
   return (

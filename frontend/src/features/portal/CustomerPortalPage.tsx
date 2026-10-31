@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import api from '../../services/api';
 import {
   Shield,
   Layers,
@@ -22,6 +23,57 @@ export const CustomerPortalPage: React.FC = () => {
 
   const customerCompany = user?.companyName || 'Acme Software Labs';
   const customerEmail = user?.email || 'customer@acme.com';
+
+  const [metrics, setMetrics] = useState({
+    pendingBalance: 0,
+    activeSubsCount: 0,
+    pendingInvoicesCount: 0,
+    nextRenewalDate: 'Nov 15, 2026',
+    topSubName: 'Enterprise Cloud ERP',
+    firstPendingInvNumber: 'None',
+  });
+
+  const loadPortalMetrics = async () => {
+    try {
+      const [invRes, subRes] = await Promise.all([
+        api.get('/invoices'),
+        api.get('/subscriptions'),
+      ]);
+
+      const lower = customerEmail.toLowerCase();
+      const userInvoices = (invRes.data || []).filter((inv: any) => {
+        if (lower.includes('acme')) return inv.customerId === 1 || inv.customerName?.toLowerCase().includes('acme');
+        if (lower.includes('retail') || lower.includes('alice')) return inv.customerId === 2 || inv.customerName?.toLowerCase().includes('retail');
+        return true;
+      });
+
+      const userSubs = (subRes.data || []).filter((s: any) => {
+        if (lower.includes('acme')) return s.customerId === 1 || s.customerName?.toLowerCase().includes('acme');
+        if (lower.includes('retail') || lower.includes('alice')) return s.customerId === 2 || s.customerName?.toLowerCase().includes('retail');
+        return true;
+      });
+
+      const pendingInvs = userInvoices.filter((i: any) => Number(i.balanceDue) > 0);
+      const totalPending = pendingInvs.reduce((acc: number, curr: any) => acc + Number(curr.balanceDue), 0);
+      const activeSubs = userSubs.filter((s: any) => s.status === 'ACTIVE');
+      const nextDate = activeSubs[0]?.nextBillingDate || 'Nov 15, 2026';
+
+      setMetrics({
+        pendingBalance: totalPending,
+        activeSubsCount: activeSubs.length,
+        pendingInvoicesCount: pendingInvs.length,
+        nextRenewalDate: nextDate,
+        topSubName: activeSubs[0]?.planName || 'Enterprise Cloud ERP',
+        firstPendingInvNumber: pendingInvs[0]?.invoiceNumber || 'None',
+      });
+    } catch {
+      // Graceful fallback
+    }
+  };
+
+  useEffect(() => {
+    loadPortalMetrics();
+  }, [customerEmail, activeTab]);
 
   return (
     <div className="space-y-6">
@@ -57,7 +109,7 @@ export const CustomerPortalPage: React.FC = () => {
                 Pending Balance Due
               </span>
               <span className="text-2xl font-black text-amber-300 mt-0.5 block">
-                {formatCurrency(9617.0)}
+                {formatCurrency(metrics.pendingBalance)}
               </span>
               <span className="text-[10px] text-slate-400 block mt-0.5">Due in 15 days</span>
             </div>
@@ -70,22 +122,22 @@ export const CustomerPortalPage: React.FC = () => {
         {[
           {
             label: 'Active Subscriptions',
-            value: '2 Plans',
-            sub: 'Enterprise Pro + API Engine',
+            value: `${metrics.activeSubsCount} Plans`,
+            sub: metrics.topSubName,
             icon: Layers,
             color: 'text-blue-600 bg-blue-50',
           },
           {
             label: 'Next Renewal Date',
-            value: 'Nov 01, 2026',
+            value: metrics.nextRenewalDate,
             sub: 'Auto-renews (Net 15 terms)',
             icon: Calendar,
             color: 'text-emerald-600 bg-emerald-50',
           },
           {
             label: 'Outstanding Invoices',
-            value: '1 Pending',
-            sub: 'INV-2026-0001 ($9,617.00)',
+            value: `${metrics.pendingInvoicesCount} Pending`,
+            sub: metrics.firstPendingInvNumber !== 'None' ? `${metrics.firstPendingInvNumber} (${formatCurrency(metrics.pendingBalance)})` : 'All invoices settled',
             icon: CreditCard,
             color: 'text-amber-600 bg-amber-50',
           },
@@ -130,7 +182,7 @@ export const CustomerPortalPage: React.FC = () => {
             <Layers className="h-4 w-4" />
             <span>My Subscriptions</span>
             <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-bold">
-              2
+              {metrics.activeSubsCount}
             </span>
           </button>
 
@@ -146,7 +198,7 @@ export const CustomerPortalPage: React.FC = () => {
             <Receipt className="h-4 w-4" />
             <span>My Invoices & Receipts</span>
             <span className="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold">
-              1 Due
+              {metrics.pendingInvoicesCount} Due
             </span>
           </button>
 

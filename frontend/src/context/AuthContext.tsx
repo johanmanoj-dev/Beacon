@@ -40,12 +40,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const res = await api.post('/auth/login', { email, password });
         if (res.data && res.data.token) {
+          const u = res.data.user || {};
           const authUser: AuthUser = {
-            id: res.data.userId || res.data.id || 1,
-            email: res.data.email || email,
-            fullName: res.data.fullName || res.data.name || email.split('@')[0],
-            role: res.data.role || 'ADMIN',
-            companyName: res.data.companyName,
+            id: u.id || res.data.userId || res.data.id || 1,
+            email: u.email || res.data.email || email,
+            fullName: u.fullName || u.name || res.data.fullName || email.split('@')[0],
+            role: (u.role || res.data.role || (email.toLowerCase().includes('admin') ? 'ADMIN' : email.toLowerCase().includes('staff') ? 'STAFF' : 'CUSTOMER')) as Role,
+            companyName: u.companyName || res.data.companyName,
+            customerId: u.customerId,
           };
           saveSession(res.data.token, authUser);
           return authUser;
@@ -90,12 +92,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       try {
         const res = await api.post('/auth/register', data);
         if (res.data && res.data.token) {
+          const u = res.data.user || {};
           const authUser: AuthUser = {
-            id: res.data.userId || res.data.id,
-            email: res.data.email || data.email,
-            fullName: res.data.fullName || data.fullName,
-            role: res.data.role || data.role || 'CUSTOMER',
-            companyName: res.data.companyName || data.companyName,
+            id: u.id || res.data.userId || res.data.id || Date.now(),
+            email: u.email || res.data.email || data.email,
+            fullName: u.fullName || u.name || res.data.fullName || data.fullName,
+            role: (u.role || res.data.role || data.role || 'CUSTOMER') as Role,
+            companyName: u.companyName || res.data.companyName || data.companyName,
+            customerId: u.customerId,
           };
           saveSession(res.data.token, authUser);
           return authUser;
