@@ -55,4 +55,26 @@ public class InvoiceService {
                 .map(InvoiceResponse::fromEntity)
                 .collect(Collectors.toList());
     }
+
+    @Transactional
+    public InvoiceResponse confirmInvoice(Long id) {
+        Invoice invoice = invoiceRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invoice not found with id: " + id));
+        if (invoice.getStatus() != InvoiceStatus.DRAFT) {
+            throw new IllegalStateException("Only DRAFT invoices can be confirmed. Current status: " + invoice.getStatus());
+        }
+        invoice.setStatus(InvoiceStatus.CONFIRMED);
+        return InvoiceResponse.fromEntity(invoiceRepository.save(invoice));
+    }
+
+    @Transactional
+    public InvoiceResponse cancelInvoice(Long id) {
+        Invoice invoice = invoiceRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invoice not found with id: " + id));
+        if (invoice.getStatus() == InvoiceStatus.PAID) {
+            throw new IllegalStateException("Cannot cancel a fully PAID invoice");
+        }
+        invoice.setStatus(InvoiceStatus.CANCELLED);
+        return InvoiceResponse.fromEntity(invoiceRepository.save(invoice));
+    }
 }

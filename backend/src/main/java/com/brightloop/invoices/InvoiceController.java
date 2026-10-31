@@ -13,6 +13,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/invoices")
 @RequiredArgsConstructor
+@CrossOrigin(origins = {"http://localhost:5173", "http://localhost:3000"})
 public class InvoiceController {
 
     private final InvoiceService invoiceService;
@@ -56,6 +57,40 @@ public class InvoiceController {
             err.put("error", "Not Found");
             err.put("message", e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(err);
+        }
+    }
+
+    @PostMapping("/{id}/confirm")
+    public ResponseEntity<?> confirmInvoice(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(invoiceService.confirmInvoice(id));
+        } catch (IllegalArgumentException e) {
+            Map<String, String> err = new HashMap<>();
+            err.put("error", "Not Found");
+            err.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(err);
+        } catch (IllegalStateException e) {
+            Map<String, String> err = new HashMap<>();
+            err.put("error", "Invalid State");
+            err.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(err);
+        }
+    }
+
+    @PostMapping("/{id}/cancel")
+    public ResponseEntity<?> cancelInvoice(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(invoiceService.cancelInvoice(id));
+        } catch (IllegalArgumentException e) {
+            Map<String, String> err = new HashMap<>();
+            err.put("error", "Not Found");
+            err.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(err);
+        } catch (IllegalStateException e) {
+            Map<String, String> err = new HashMap<>();
+            err.put("error", "Invalid State");
+            err.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(err);
         }
     }
 }

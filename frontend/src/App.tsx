@@ -15,7 +15,7 @@ import { AppShell, ProtectedRoute } from './layout';
 import { CataloguePage, CustomerListPage, QuotationsPage, SubscriptionsPage } from './features/catalogue';
 import { CustomerPortalPage } from './features/portal';
 import { FinanceDashboardPage, DemoScenarioModal } from './features/analytics';
-import { BillingConfigPage } from './features/billing';
+import { BillingConfigPage, InvoicesPage, PaymentsPage } from './features/billing';
 import {
   Button,
   Input,
@@ -419,7 +419,7 @@ function DashboardOverview({
 }
 
 // Module View Placeholder for remaining Phase 2/3 tracks
-function GenericModuleView({
+export function GenericModuleView({
   title,
   description,
   track,
@@ -577,13 +577,7 @@ export default function App() {
             element={
               <ProtectedRoute allowedRoles={['ADMIN', 'STAFF']}>
                 <AppShell backendStatus={backendStatus}>
-                  <GenericModuleView
-                    title="Invoices & Recurring Billing Engine"
-                    description="Automated billing runs, idempotent line snapshots, and invoice status transitions."
-                    track="Track 2"
-                    assignedTo="Elsa"
-                    badgeText="Elsa Workspace"
-                  />
+                  <InvoicesPage />
                 </AppShell>
               </ProtectedRoute>
             }
@@ -594,13 +588,7 @@ export default function App() {
             element={
               <ProtectedRoute allowedRoles={['ADMIN', 'STAFF']}>
                 <AppShell backendStatus={backendStatus}>
-                  <GenericModuleView
-                    title="Payments Engine & Gateway Simulator"
-                    description="Record manual staff payments, balance calculation, and simulated gateway checkout."
-                    track="Track 2"
-                    assignedTo="Elsa"
-                    badgeText="Elsa Workspace"
-                  />
+                  <PaymentsPage />
                 </AppShell>
               </ProtectedRoute>
             }
