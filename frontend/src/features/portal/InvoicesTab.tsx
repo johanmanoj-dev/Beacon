@@ -95,6 +95,8 @@ export interface InvoicesTabProps {
   customerEmail?: string;
 }
 
+const TODAY = new Date();
+
 export const InvoicesTab: React.FC<InvoicesTabProps> = ({ customerEmail }) => {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(false);
@@ -180,8 +182,6 @@ export const InvoicesTab: React.FC<InvoicesTabProps> = ({ customerEmail }) => {
     }, 1000);
   };
 
-  const today = new Date();
-
   return (
     <div className="space-y-6">
       {/* Header and Filter Controls */}
@@ -263,7 +263,7 @@ export const InvoicesTab: React.FC<InvoicesTabProps> = ({ customerEmail }) => {
                     </td>
                     <td className="py-3.5 px-4">
                       <span className="font-semibold text-slate-800">{formatDate(inv.dueDate)}</span>
-                      {inv.balanceDue > 0 && new Date(inv.dueDate) < today && (
+                      {inv.balanceDue > 0 && new Date(inv.dueDate) < TODAY && (
                         <span className="block text-[10px] text-rose-600 font-bold">Past Due</span>
                       )}
                     </td>

@@ -14,6 +14,7 @@ import { LoginPage, RegisterPage, ForgotPasswordPage } from './features/auth';
 import { AppShell, ProtectedRoute } from './layout';
 import { CataloguePage, CustomerListPage } from './features/catalogue';
 import { CustomerPortalPage } from './features/portal';
+import { FinanceDashboardPage } from './features/analytics';
 import {
   Button,
   Input,
@@ -188,6 +189,15 @@ function DashboardOverview({
           >
             {backendStatus.connected ? 'MySQL Active' : 'Connecting DB...'}
           </Badge>
+          <Link to="/analytics">
+            <Button
+              variant="primary"
+              size="sm"
+              leftIcon={<TrendingUp className="h-3.5 w-3.5" />}
+            >
+              Finance Dashboard
+            </Button>
+          </Link>
           <Button
             variant="outline"
             size="sm"
@@ -306,14 +316,17 @@ function DashboardOverview({
           <div className="p-4 rounded-xl bg-blue-50/60 border border-blue-200 space-y-2">
             <div className="flex items-center justify-between">
               <span className="font-bold text-blue-950">Track 3: Goutham</span>
-              <Badge variant="success" size="sm">Phase 1 Complete</Badge>
+              <Badge variant="success" size="sm">Phase 3 Complete</Badge>
             </div>
             <p className="text-xs text-blue-900/80 leading-relaxed">
-              Design System UI kit, Live password validation checklist, Global Auth & RBAC redirect, App Shell, Layout.
+              Design System UI, Auth & Layout, Customer Portal, Finance Lead Analytics, and Printable PDF Invoice Engine.
             </p>
-            <div className="pt-1">
+            <div className="pt-1 flex items-center gap-3">
+              <Link to="/analytics" className="text-xs font-semibold text-blue-700 hover:underline">
+                Finance Analytics →
+              </Link>
               <Link to="/portal" className="text-xs font-semibold text-blue-700 hover:underline">
-                View Customer Portal Module →
+                Customer Portal →
               </Link>
             </div>
           </div>
@@ -478,6 +491,18 @@ export default function App() {
               <ProtectedRoute allowedRoles={['ADMIN', 'STAFF']}>
                 <AppShell backendStatus={backendStatus}>
                   <DashboardOverview backendStatus={backendStatus} />
+                </AppShell>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Goutham's Phase 3: Finance Lead Executive Analytics */}
+          <Route
+            path="/analytics"
+            element={
+              <ProtectedRoute allowedRoles={['ADMIN', 'STAFF']}>
+                <AppShell backendStatus={backendStatus}>
+                  <FinanceDashboardPage />
                 </AppShell>
               </ProtectedRoute>
             }

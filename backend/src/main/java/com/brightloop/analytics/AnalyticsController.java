@@ -1,7 +1,9 @@
 package com.brightloop.analytics;
 
 import com.brightloop.analytics.dto.KpiResponse;
+import com.brightloop.analytics.dto.ReceivableAgingDto;
 import com.brightloop.analytics.dto.RevenueTrendDto;
+import com.brightloop.analytics.dto.StatusDistributionDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -27,5 +29,15 @@ public class AnalyticsController {
     @GetMapping("/revenue-trend")
     public ResponseEntity<List<RevenueTrendDto>> getRevenueTrend() {
         return ResponseEntity.ok(analyticsService.getRevenueTrend());
+    }
+
+    @GetMapping("/status-distribution")
+    public ResponseEntity<List<StatusDistributionDto>> getStatusDistribution() {
+        return ResponseEntity.ok(analyticsService.getStatusDistribution());
+    }
+
+    @GetMapping("/receivables-aging")
+    public ResponseEntity<List<ReceivableAgingDto>> getReceivablesAging() {
+        return ResponseEntity.ok(analyticsService.getReceivablesAging());
     }
 }

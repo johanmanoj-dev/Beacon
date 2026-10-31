@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
+  TrendingUp,
   Layers,
   Users,
   Package,
@@ -27,6 +28,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { name: 'Dashboard', path: '/', icon: LayoutDashboard, role: ['ADMIN', 'STAFF'] },
+  { name: 'Finance Analytics', path: '/analytics', icon: TrendingUp, role: ['ADMIN', 'STAFF'], badge: 'Finance Lead' },
   { name: 'Subscriptions', path: '/subscriptions', icon: Layers, role: ['ADMIN', 'STAFF'] },
   { name: 'Customers', path: '/customers', icon: Users, role: ['ADMIN', 'STAFF'] },
   { name: 'Products & Plans', path: '/catalogue', icon: Package, role: ['ADMIN'] },

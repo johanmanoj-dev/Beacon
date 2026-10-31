@@ -22,6 +22,7 @@ export const Navbar: React.FC = () => {
   const getPageTitle = () => {
     const path = location.pathname;
     if (path === '/') return 'Executive Dashboard';
+    if (path === '/analytics') return 'Finance Lead Analytics';
     if (path === '/subscriptions') return 'Subscriptions';
     if (path === '/customers') return 'Customer Accounts';
     if (path === '/catalogue') return 'Products & Plans';
