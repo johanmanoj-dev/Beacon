@@ -81,6 +81,16 @@ export interface Discount {
 
 export type QuotationStatus = 'DRAFT' | 'QUOTATION' | 'CONFIRMED' | 'CONVERTED';
 
+export interface QuotationTemplate {
+  id: number;
+  name: string;
+  planId: number;
+  planName?: string;
+  billingInterval?: string;
+  validityDays: number;
+  notes?: string;
+}
+
 export interface QuotationItem {
   id?: number;
   productId: number;
@@ -98,8 +108,10 @@ export interface Quotation {
   quotationNumber: string;
   customerId: number;
   customerName?: string;
+  customerEmail?: string;
   planId: number;
   planName?: string;
+  billingInterval?: string;
   validUntil: string;
   status: QuotationStatus;
   subtotal: number;
@@ -128,13 +140,19 @@ export interface Subscription {
   subscriptionNumber: string;
   customerId: number;
   customerName?: string;
+  customerEmail?: string;
   planId: number;
   planName?: string;
+  billingInterval?: string;
+  canPause?: boolean;
   status: SubscriptionStatus;
   startDate: string;
   expiryDate?: string;
   nextBillingDate: string;
   paymentTerms: string;
+  subtotal?: number;
+  taxAmount?: number;
+  totalAmount?: number;
   items: SubscriptionItem[];
   createdAt: string;
 }
