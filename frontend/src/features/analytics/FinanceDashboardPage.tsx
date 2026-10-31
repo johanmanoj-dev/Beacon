@@ -8,7 +8,6 @@ import {
   Download,
   Filter,
   Eye,
-  ShieldCheck,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -252,11 +251,6 @@ export const FinanceDashboardPage: React.FC = () => {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-[#E5DFD3]">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#F5F0E6] text-[#2B4257] border border-[#E5DFD3]">
-              <ShieldCheck className="h-3 w-3" /> Finance Control Room
-            </span>
-          </div>
           <h1 className="text-2xl font-black tracking-tight text-[#101E2B]">
             Finance & Revenue Analytics
           </h1>
@@ -329,10 +323,6 @@ export const FinanceDashboardPage: React.FC = () => {
                 <option value="OVERDUE_ONLY">Overdue Only</option>
               </select>
             </div>
-          </div>
-
-          <div className="text-xs text-[#5A6D80] font-medium">
-            Live database metrics
           </div>
         </div>
       </Card>
@@ -409,9 +399,6 @@ export const FinanceDashboardPage: React.FC = () => {
                 Dynamic monthly invoice settlement volume.
               </p>
             </div>
-            <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-              Steady Growth
-            </span>
           </div>
 
           <div className="h-72 w-full pt-4">

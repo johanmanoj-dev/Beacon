@@ -134,7 +134,7 @@ export function BillingRulesPage() {
             <h1 className="text-2xl font-bold text-[#101E2B] tracking-tight">Taxes & Promotional Discount Rules</h1>
           </div>
           <p className="text-sm text-[#5A6D80] mt-1">
-            Configure statutory taxes (GST 18%) and automated tiered promotional rules (e.g. 10% volume discount for 5+ seats).
+            Configure statutory taxes (GST 18%) and automated tiered promotional rules.
           </p>
         </div>
 
@@ -220,7 +220,6 @@ export function BillingRulesPage() {
         <div className="bg-white border border-[#E5DFD3] rounded-xl shadow-xs overflow-hidden">
           <div className="p-4 border-b border-[#E5DFD3] flex items-center justify-between">
             <h3 className="font-semibold text-[#101E2B] text-sm">Active Tax Configurations</h3>
-            <span className="text-xs text-[#889AA9]">Applied automatically during recurring billing runs</span>
           </div>
 
           {taxes.length === 0 ? (
