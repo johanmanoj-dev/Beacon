@@ -25,6 +25,15 @@ export const StatCard: React.FC<StatCardProps> = ({
   className,
   ...props
 }) => {
+  const renderIcon = () => {
+    if (!Icon) return null;
+    if (React.isValidElement(Icon)) {
+      return Icon;
+    }
+    const IconComponent = Icon as React.ComponentType<{ className?: string }>;
+    return <IconComponent className="h-4 w-4" />;
+  };
+
   return (
     <div
       className={cn(
@@ -43,11 +52,7 @@ export const StatCard: React.FC<StatCardProps> = ({
         </span>
         {Icon && (
           <div className={cn('p-2.5 rounded-xl shrink-0 flex items-center justify-center', iconColor)}>
-            {typeof Icon === 'function' ? (
-              <Icon className="h-4 w-4" />
-            ) : (
-              (Icon as React.ReactNode)
-            )}
+            {renderIcon()}
           </div>
         )}
       </div>
