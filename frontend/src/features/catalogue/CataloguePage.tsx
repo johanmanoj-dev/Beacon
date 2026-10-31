@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Package, Plus, Trash2, Pencil, CheckCircle2, AlertCircle, Layers, Tag, Calendar, RefreshCw, Database } from 'lucide-react';
+import { Package, Plus, Trash2, Pencil, CheckCircle2, AlertCircle, Layers, Tag, Calendar, RefreshCw } from 'lucide-react';
 import api from '../../services/api';
 import type { Product, Plan, ProductType, BillingInterval } from '../../types';
 
@@ -66,21 +66,6 @@ export function CataloguePage() {
   useEffect(() => {
     fetchCatalogue();
   }, []);
-
-  const handleSeedDemoData = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await api.post('/seed?force=true');
-      setSuccessMsg(res.data.message || 'Demo data successfully seeded!');
-      fetchCatalogue();
-      setTimeout(() => setSuccessMsg(null), 4000);
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.message || 'Failed to seed demo data');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleAddVariant = () => {
     setVariants([...variants, { variantName: '', priceAdjustment: '0.00' }]);
@@ -274,15 +259,6 @@ export function CataloguePage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            onClick={handleSeedDemoData}
-            disabled={loading}
-            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition shadow-2xs"
-            title="Seed baseline demo data (Users, Customers, Products with Odoo Variants, Plans, Subscriptions)"
-          >
-            <Database className="w-3.5 h-3.5 text-emerald-600" />
-            Seed Demo Baseline
-          </button>
           <button
             onClick={fetchCatalogue}
             className="p-2 border border-slate-200 bg-white hover:bg-slate-50 rounded-lg text-slate-600 transition"

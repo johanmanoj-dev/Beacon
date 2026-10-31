@@ -309,7 +309,6 @@ export function QuotationsPage() {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Quotations & Offers</h1>
-            <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">Track 1 • Johan</span>
           </div>
           <p className="text-sm text-slate-500 mt-1">
             Build bespoke customer quotes with variant pricing, manage reusable templates, and convert directly into recurring subscriptions.

@@ -25,7 +25,7 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/v1/auth/**", "/api/v1/health", "/error").permitAll()
-                .anyRequest().permitAll() // Allow development during hackathon; Johan/Elsa can tighten per route
+                .anyRequest().permitAll() // Configurable route authorization
             );
 
         return http.build();

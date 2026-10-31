@@ -31,7 +31,7 @@ public class DataSeeder implements CommandLineRunner {
         Map<String, Object> result = new HashMap<>();
         String hash = passwordEncoder.encode("Compliant@Pass123");
 
-        log.info("Executing Brightloop Phase 4 Data Seeder...");
+        log.info("Executing Brightloop Data Seeder...");
 
         try {
             // 1. Users

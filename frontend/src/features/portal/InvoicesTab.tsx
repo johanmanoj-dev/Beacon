@@ -10,6 +10,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import api from '../../services/api';
+import { useAuth } from '../../context';
 import { Button, Badge, Modal, Input, EmptyState, useToast } from '../../components/ui';
 import { formatCurrency, formatDate } from '../../lib/utils';
 import type { Invoice, InvoiceStatus } from '../../types';
@@ -22,6 +23,7 @@ export interface InvoicesTabProps {
 const TODAY = new Date();
 
 export const InvoicesTab: React.FC<InvoicesTabProps> = ({ customerEmail }) => {
+  const { user } = useAuth();
   const { showToast } = useToast();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(false);
@@ -42,18 +44,24 @@ export const InvoicesTab: React.FC<InvoicesTabProps> = ({ customerEmail }) => {
     try {
       const res = await api.get<Invoice[]>('/invoices');
       if (res.data) {
-        const userInvoices = customerEmail
-          ? res.data.filter((inv) => {
-              const lower = customerEmail.toLowerCase();
-              if (lower.includes('acme')) {
-                return inv.customerId === 1 || inv.customerName?.toLowerCase().includes('acme');
-              }
-              if (lower.includes('retail') || lower.includes('alice')) {
-                return inv.customerId === 2 || inv.customerName?.toLowerCase().includes('retail');
-              }
-              return true;
-            })
-          : res.data;
+        const lower = (customerEmail || user?.email || '').toLowerCase();
+        const currentCustomerId = user?.customerId;
+
+        const userInvoices = res.data.filter((inv) => {
+          // Demo customer Acme
+          if (lower.includes('acme') || currentCustomerId === 1) {
+            return inv.customerId === 1 || inv.customerName?.toLowerCase().includes('acme');
+          }
+          // Demo customer RetailCorp
+          if (lower.includes('retail') || lower.includes('alice@retailcorp') || currentCustomerId === 2) {
+            return inv.customerId === 2 || inv.customerName?.toLowerCase().includes('retail');
+          }
+          // Any other customer / new account: strictly their own customerId
+          if (currentCustomerId) {
+            return inv.customerId === currentCustomerId;
+          }
+          return false;
+        });
         setInvoices(userInvoices);
       }
       if (isManual) {

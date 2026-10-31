@@ -97,6 +97,17 @@ public class AuthService {
             if (customerOpt.isPresent()) {
                 customerId = customerOpt.get().getId();
                 companyName = customerOpt.get().getCompanyName();
+            } else {
+                var emailOpt = customerRepository.findByContactEmail(user.getEmail());
+                if (emailOpt.isPresent()) {
+                    Customer c = emailOpt.get();
+                    customerId = c.getId();
+                    companyName = c.getCompanyName();
+                    if (c.getUser() == null) {
+                        c.setUser(user);
+                        customerRepository.save(c);
+                    }
+                }
             }
         }
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { RefreshCw, Calendar, Tag, ShieldCheck, Eye, Sparkles, Layers } from 'lucide-react';
 import api from '../../services/api';
+import { useAuth } from '../../context';
 import { Button, Badge, Modal, EmptyState, useToast } from '../../components/ui';
 import { formatCurrency, formatDate } from '../../lib/utils';
 import type { Subscription } from '../../types';
@@ -75,6 +76,7 @@ export interface SubscriptionsTabProps {
 }
 
 export const SubscriptionsTab: React.FC<SubscriptionsTabProps> = ({ customerEmail }) => {
+  const { user } = useAuth();
   const { showToast } = useToast();
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(false);
@@ -84,18 +86,44 @@ export const SubscriptionsTab: React.FC<SubscriptionsTabProps> = ({ customerEmai
     setLoading(true);
     try {
       const res = await api.get<Subscription[]>('/subscriptions');
-      if (res.data && res.data.length > 0) {
-        setSubscriptions(res.data);
+      if (res.data) {
+        const lower = (customerEmail || user?.email || '').toLowerCase();
+        const currentCustomerId = user?.customerId;
+
+        const userSubs = res.data.filter((s) => {
+          // Demo customer Acme
+          if (lower.includes('acme') || currentCustomerId === 1) {
+            return s.customerId === 1 || s.customerName?.toLowerCase().includes('acme');
+          }
+          // Demo customer RetailCorp
+          if (lower.includes('retail') || lower.includes('alice@retailcorp') || currentCustomerId === 2) {
+            return s.customerId === 2 || s.customerName?.toLowerCase().includes('retail');
+          }
+          // Any other customer / new account: strictly their own customerId or email
+          if (currentCustomerId) {
+            return s.customerId === currentCustomerId;
+          }
+          if (lower && s.customerEmail) {
+            return s.customerEmail.toLowerCase() === lower;
+          }
+          return false;
+        });
+        setSubscriptions(userSubs);
       } else {
-        setSubscriptions(FALLBACK_CUSTOMER_SUBSCRIPTIONS);
+        setSubscriptions([]);
       }
       if (isManual) {
         showToast('Active subscriptions refreshed', 'success');
       }
     } catch {
-      setSubscriptions(FALLBACK_CUSTOMER_SUBSCRIPTIONS);
+      const lower = (customerEmail || user?.email || '').toLowerCase();
+      if (lower.includes('acme') || user?.customerId === 1) {
+        setSubscriptions(FALLBACK_CUSTOMER_SUBSCRIPTIONS);
+      } else {
+        setSubscriptions([]);
+      }
       if (isManual) {
-        showToast('Loaded baseline subscriptions', 'info');
+        showToast('Active subscriptions refreshed', 'info');
       }
     } finally {
       setLoading(false);

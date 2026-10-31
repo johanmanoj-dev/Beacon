@@ -188,7 +188,6 @@ export function CustomerListPage() {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">User & Customer Directory</h1>
-            <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">Track 1 • Johan</span>
           </div>
           <p className="text-sm text-slate-500 mt-1">
             Manage customer business profiles, link login credentials for self-service portal, and administer internal staff accounts.

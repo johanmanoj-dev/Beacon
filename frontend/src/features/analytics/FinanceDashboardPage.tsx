@@ -254,9 +254,8 @@ export const FinanceDashboardPage: React.FC = () => {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-              <ShieldCheck className="h-3 w-3" /> Finance Lead Control Room
+              <ShieldCheck className="h-3 w-3" /> Finance Control Room
             </span>
-            <span className="text-xs text-slate-400">Sub-2-second verified load</span>
           </div>
           <h1 className="text-2xl font-black tracking-tight text-slate-900">
             Finance & Revenue Analytics
@@ -333,7 +332,7 @@ export const FinanceDashboardPage: React.FC = () => {
           </div>
 
           <div className="text-xs text-slate-500 font-medium">
-            Dynamic database aggregation from <strong className="text-slate-800">localhost:3306</strong>
+            Live database metrics
           </div>
         </div>
       </Card>
@@ -407,7 +406,7 @@ export const FinanceDashboardPage: React.FC = () => {
                 Monthly Recurring Revenue Trajectory
               </h3>
               <p className="text-xs text-slate-500">
-                Dynamic monthly invoice settlement volume (sub-2-second aggregation query).
+                Dynamic monthly invoice settlement volume.
               </p>
             </div>
             <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">

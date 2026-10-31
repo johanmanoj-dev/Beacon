@@ -1,5 +1,5 @@
--- Brightloop Subscription Management System — Master Baseline Demo Seed
--- Merged Phase 4 Dataset (Johan's Core Subs + Goutham's Analytics & Invoicing)
+-- Brightloop Subscription Management System — Master Baseline Seed
+-- Master Dataset
 -- Compatible with MySQL 8.0+ / MariaDB 10.4+
 
 USE brightloop_db;
@@ -7,7 +7,7 @@ USE brightloop_db;
 -- 1. Users & Authentication
 -- Passwords: All accounts set to 'Compliant@Pass123' / 'Admin123!' (BCrypt hash)
 INSERT INTO users (id, email, password_hash, full_name, role, is_active, created_at) VALUES
-(1, 'admin@brightloop.com', '$2a$10$b2PwlxlP60AhynsBzWRbZOC1hBI0yq8T..Q9IwUM7Fv0BR2sdggk6', 'Johan (System Admin)', 'ADMIN', true, '2026-01-01 00:00:00'),
+(1, 'admin@brightloop.com', '$2a$10$b2PwlxlP60AhynsBzWRbZOC1hBI0yq8T..Q9IwUM7Fv0BR2sdggk6', 'System Administrator', 'ADMIN', true, '2026-01-01 00:00:00'),
 (2, 'staff@brightloop.com', '$2a$10$b2PwlxlP60AhynsBzWRbZOC1hBI0yq8T..Q9IwUM7Fv0BR2sdggk6', 'Bob Jenkins (Billing Lead)', 'STAFF', true, '2026-01-01 00:00:00'),
 (3, 'customer@acme.com', '$2a$10$b2PwlxlP60AhynsBzWRbZOC1hBI0yq8T..Q9IwUM7Fv0BR2sdggk6', 'Acme Buyer', 'CUSTOMER', true, '2026-01-01 00:00:00'),
 (4, 'alice@retailcorp.com', '$2a$10$b2PwlxlP60AhynsBzWRbZOC1hBI0yq8T..Q9IwUM7Fv0BR2sdggk6', 'Alice Retailer', 'CUSTOMER', true, '2026-01-01 00:00:00')

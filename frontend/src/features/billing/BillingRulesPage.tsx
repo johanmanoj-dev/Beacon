@@ -132,7 +132,6 @@ export function BillingRulesPage() {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Taxes & Promotional Discount Rules</h1>
-            <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-indigo-100 text-indigo-800">Track 2 • Elsa</span>
           </div>
           <p className="text-sm text-slate-500 mt-1">
             Configure statutory taxes (GST 18%) and automated tiered promotional rules (e.g. 10% volume discount for 5+ seats).

@@ -157,7 +157,6 @@ export function SubscriptionsPage() {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Subscriptions Management</h1>
-            <span className="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">Track 1 • Johan</span>
           </div>
           <p className="text-sm text-slate-500 mt-1">
             Complete lifecycle state machine for recurring customer subscriptions: manage active contracts, early closures, and auto-close sweeps.

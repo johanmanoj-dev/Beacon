@@ -177,15 +177,15 @@ export const DemoScenarioModal: React.FC<DemoScenarioModalProps> = ({ isOpen, on
       title={
         <div className="flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-amber-500" />
-          <span>Hackathon Demo Master Navigator & Pitch Rehearsal</span>
+          <span>System Scenario Navigator & Guided Walkthrough</span>
         </div>
       }
-      description="Interactive scenario guide covering all 7 Problem Statement demonstration requirements and judge pitch script."
+      description="Interactive scenario guide covering all system capabilities and workflows."
       size="xl"
       footer={
         <div className="flex flex-col sm:flex-row items-center justify-between w-full gap-3">
           <div className="text-xs text-slate-500">
-            Phase 5 Final Polish • Goutham Lead Presenter
+            Enterprise Scenario Overview
           </div>
           <div className="flex items-center gap-2">
             <Button
@@ -260,8 +260,8 @@ export const DemoScenarioModal: React.FC<DemoScenarioModalProps> = ({ isOpen, on
                 End-to-End Scenario Testing Environment
               </span>
               <p className="text-blue-900/80 leading-relaxed text-[11px]">
-                Click <strong>"Seed Local MySQL DB"</strong> below to execute <code>seed.sql</code> against <code>localhost:3306</code>.
-                Use the shortcuts below to step through all 7 evaluation scenes from the problem statement.
+                Click <strong>"Seed Local MySQL DB"</strong> below to populate scenario data.
+                Use the shortcuts below to step through all platform capabilities.
               </p>
             </div>
 
@@ -316,7 +316,7 @@ export const DemoScenarioModal: React.FC<DemoScenarioModalProps> = ({ isOpen, on
             <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-950 flex items-center gap-2">
               <Clock className="h-4 w-4 text-amber-600 shrink-0" />
               <span>
-                <strong>5-Minute Delivery Target:</strong> Keep demonstrations crisp, emphasize technical requirements, and highlight zero BaaS dependencies.
+                <strong>System Overview:</strong> Highlighting core technical requirements, recurring billing engine, and dynamic local database processing.
               </span>
             </div>
 

@@ -7,13 +7,42 @@ import type { Role } from '../../types';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const { login, demoLogin, isLoading } = useAuth();
+  const { login, isLoading } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [demoNotice, setDemoNotice] = useState<string | null>(null);
+
+  const TEST_CREDENTIALS: Record<Role, { email: string; pass: string; title: string; subtitle: string }> = {
+    ADMIN: {
+      email: 'admin@brightloop.com',
+      pass: 'Compliant@Pass123',
+      title: 'Admin',
+      subtitle: 'Full Control',
+    },
+    STAFF: {
+      email: 'staff@brightloop.com',
+      pass: 'Compliant@Pass123',
+      title: 'Staff',
+      subtitle: 'Operations',
+    },
+    CUSTOMER: {
+      email: 'customer@acme.com',
+      pass: 'Compliant@Pass123',
+      title: 'Customer',
+      subtitle: 'Portal View',
+    },
+  };
+
+  const handleFillTestCreds = (role: Role) => {
+    setError(null);
+    const creds = TEST_CREDENTIALS[role];
+    setEmail(creds.email);
+    setPassword(creds.pass);
+    setDemoNotice(`${creds.title} test credentials loaded into form. Click "Sign In" to proceed.`);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,23 +62,6 @@ export const LoginPage: React.FC = () => {
       }
     } catch (err: any) {
       setError(err?.message || 'Invalid email or password. Please try again.');
-    }
-  };
-
-  const handleQuickDemo = async (role: Role) => {
-    setError(null);
-    try {
-      const u = await demoLogin(role);
-      setDemoNotice(`Logged in as ${u.fullName} (${role})`);
-      setTimeout(() => {
-        if (u.role === 'CUSTOMER') {
-          navigate('/portal');
-        } else {
-          navigate('/');
-        }
-      }, 300);
-    } catch (err: any) {
-      setError(err?.message || 'Demo login failed');
     }
   };
 
@@ -151,41 +163,53 @@ export const LoginPage: React.FC = () => {
               </Button>
             </form>
 
-            {/* Quick Demo Role Picker for Judges */}
+            {/* Fill Test Credentials Buttons */}
             <div className="pt-4 border-t border-slate-100">
               <div className="flex items-center justify-between mb-2.5">
-                <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
-                  <Sparkles className="h-3.5 w-3.5 text-amber-500" />
-                  Instant Hackathon Demo Login:
+                <span className="text-xs font-semibold text-slate-600 flex items-center gap-1.5">
+                  <Sparkles className="h-3.5 w-3.5 text-blue-600" />
+                  Fill Test Credentials:
                 </span>
-                <span className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded font-mono">
-                  1-Click
+                <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded font-mono">
+                  Click to prefill
                 </span>
               </div>
               <div className="grid grid-cols-3 gap-2">
                 <button
                   type="button"
-                  onClick={() => handleQuickDemo('ADMIN')}
-                  className="px-2.5 py-2 text-xs font-semibold rounded-lg border border-slate-200 bg-white hover:bg-slate-50 hover:border-blue-400 text-slate-700 transition-all text-center"
+                  onClick={() => handleFillTestCreds('ADMIN')}
+                  className={`px-2.5 py-2.5 text-xs font-semibold rounded-lg border transition-all text-center flex flex-col items-center justify-center gap-0.5 ${
+                    email === TEST_CREDENTIALS.ADMIN.email
+                      ? 'border-blue-500 bg-blue-50/70 text-blue-900 ring-1 ring-blue-500 shadow-xs'
+                      : 'border-slate-200 bg-white hover:bg-slate-50 hover:border-blue-300 text-slate-700'
+                  }`}
                 >
-                  <span className="block font-bold text-blue-600">Admin</span>
-                  <span className="text-[10px] text-slate-400 block truncate">Full Control</span>
+                  <span className="font-bold text-blue-600">Admin</span>
+                  <span className="text-[10px] text-slate-400 font-normal">Full Control</span>
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleQuickDemo('STAFF')}
-                  className="px-2.5 py-2 text-xs font-semibold rounded-lg border border-slate-200 bg-white hover:bg-slate-50 hover:border-blue-400 text-slate-700 transition-all text-center"
+                  onClick={() => handleFillTestCreds('STAFF')}
+                  className={`px-2.5 py-2.5 text-xs font-semibold rounded-lg border transition-all text-center flex flex-col items-center justify-center gap-0.5 ${
+                    email === TEST_CREDENTIALS.STAFF.email
+                      ? 'border-blue-500 bg-blue-50/70 text-blue-900 ring-1 ring-blue-500 shadow-xs'
+                      : 'border-slate-200 bg-white hover:bg-slate-50 hover:border-blue-300 text-slate-700'
+                  }`}
                 >
-                  <span className="block font-bold text-slate-800">Staff</span>
-                  <span className="text-[10px] text-slate-400 block truncate">Operations</span>
+                  <span className="font-bold text-slate-800">Staff</span>
+                  <span className="text-[10px] text-slate-400 font-normal">Operations</span>
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleQuickDemo('CUSTOMER')}
-                  className="px-2.5 py-2 text-xs font-semibold rounded-lg border border-slate-200 bg-white hover:bg-slate-50 hover:border-blue-400 text-slate-700 transition-all text-center"
+                  onClick={() => handleFillTestCreds('CUSTOMER')}
+                  className={`px-2.5 py-2.5 text-xs font-semibold rounded-lg border transition-all text-center flex flex-col items-center justify-center gap-0.5 ${
+                    email === TEST_CREDENTIALS.CUSTOMER.email
+                      ? 'border-emerald-500 bg-emerald-50/70 text-emerald-900 ring-1 ring-emerald-500 shadow-xs'
+                      : 'border-slate-200 bg-white hover:bg-slate-50 hover:border-emerald-300 text-slate-700'
+                  }`}
                 >
-                  <span className="block font-bold text-emerald-600">Customer</span>
-                  <span className="text-[10px] text-slate-400 block truncate">Portal View</span>
+                  <span className="font-bold text-emerald-600">Customer</span>
+                  <span className="text-[10px] text-slate-400 font-normal">Portal View</span>
                 </button>
               </div>
             </div>

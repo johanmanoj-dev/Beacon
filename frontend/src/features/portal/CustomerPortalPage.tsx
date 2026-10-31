@@ -15,21 +15,21 @@ import { useAuth } from '../../context';
 import { Card } from '../../components/ui';
 import { SubscriptionsTab } from './SubscriptionsTab';
 import { InvoicesTab } from './InvoicesTab';
-import { formatCurrency } from '../../lib/utils';
+import { formatCurrency, formatDate } from '../../lib/utils';
 
 export const CustomerPortalPage: React.FC = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'subscriptions' | 'invoices' | 'profile'>('subscriptions');
 
-  const customerCompany = user?.companyName || 'Acme Software Labs';
-  const customerEmail = user?.email || 'customer@acme.com';
+  const customerCompany = user?.companyName || user?.fullName || 'My Organization';
+  const customerEmail = user?.email || '';
 
   const [metrics, setMetrics] = useState({
     pendingBalance: 0,
     activeSubsCount: 0,
     pendingInvoicesCount: 0,
-    nextRenewalDate: 'Nov 15, 2026',
-    topSubName: 'Enterprise Cloud ERP',
+    nextRenewalDate: 'No renewals due',
+    topSubName: 'None',
     firstPendingInvNumber: 'None',
   });
 
@@ -41,29 +41,48 @@ export const CustomerPortalPage: React.FC = () => {
       ]);
 
       const lower = customerEmail.toLowerCase();
+      const currentCustomerId = user?.customerId;
+
       const userInvoices = (invRes.data || []).filter((inv: any) => {
-        if (lower.includes('acme')) return inv.customerId === 1 || inv.customerName?.toLowerCase().includes('acme');
-        if (lower.includes('retail') || lower.includes('alice')) return inv.customerId === 2 || inv.customerName?.toLowerCase().includes('retail');
-        return true;
+        if (lower.includes('acme') || currentCustomerId === 1) {
+          return inv.customerId === 1 || inv.customerName?.toLowerCase().includes('acme');
+        }
+        if (lower.includes('retail') || lower.includes('alice@retailcorp') || currentCustomerId === 2) {
+          return inv.customerId === 2 || inv.customerName?.toLowerCase().includes('retail');
+        }
+        if (currentCustomerId) {
+          return inv.customerId === currentCustomerId;
+        }
+        return false;
       });
 
       const userSubs = (subRes.data || []).filter((s: any) => {
-        if (lower.includes('acme')) return s.customerId === 1 || s.customerName?.toLowerCase().includes('acme');
-        if (lower.includes('retail') || lower.includes('alice')) return s.customerId === 2 || s.customerName?.toLowerCase().includes('retail');
-        return true;
+        if (lower.includes('acme') || currentCustomerId === 1) {
+          return s.customerId === 1 || s.customerName?.toLowerCase().includes('acme');
+        }
+        if (lower.includes('retail') || lower.includes('alice@retailcorp') || currentCustomerId === 2) {
+          return s.customerId === 2 || s.customerName?.toLowerCase().includes('retail');
+        }
+        if (currentCustomerId) {
+          return s.customerId === currentCustomerId;
+        }
+        if (lower && s.customerEmail) {
+          return s.customerEmail.toLowerCase() === lower;
+        }
+        return false;
       });
 
       const pendingInvs = userInvoices.filter((i: any) => Number(i.balanceDue) > 0);
       const totalPending = pendingInvs.reduce((acc: number, curr: any) => acc + Number(curr.balanceDue), 0);
       const activeSubs = userSubs.filter((s: any) => s.status === 'ACTIVE');
-      const nextDate = activeSubs[0]?.nextBillingDate || 'Nov 15, 2026';
+      const nextDate = activeSubs[0]?.nextBillingDate ? formatDate(activeSubs[0].nextBillingDate) : 'No renewals due';
 
       setMetrics({
         pendingBalance: totalPending,
         activeSubsCount: activeSubs.length,
         pendingInvoicesCount: pendingInvs.length,
         nextRenewalDate: nextDate,
-        topSubName: activeSubs[0]?.planName || 'Enterprise Cloud ERP',
+        topSubName: activeSubs[0]?.planName || 'None',
         firstPendingInvNumber: pendingInvs[0]?.invoiceNumber || 'None',
       });
     } catch {
@@ -111,7 +130,7 @@ export const CustomerPortalPage: React.FC = () => {
               <span className="text-2xl font-black text-amber-300 mt-0.5 block">
                 {formatCurrency(metrics.pendingBalance)}
               </span>
-              <span className="text-[10px] text-slate-400 block mt-0.5">Due in 15 days</span>
+              <span className="text-[10px] text-slate-400 block mt-0.5">{metrics.pendingBalance > 0 ? "Due in 15 days" : "No balance due"}</span>
             </div>
           </div>
         </div>
@@ -123,14 +142,14 @@ export const CustomerPortalPage: React.FC = () => {
           {
             label: 'Active Subscriptions',
             value: `${metrics.activeSubsCount} Plans`,
-            sub: metrics.topSubName,
+            sub: metrics.activeSubsCount > 0 ? metrics.topSubName : 'No active plans',
             icon: Layers,
             color: 'text-blue-600 bg-blue-50',
           },
           {
             label: 'Next Renewal Date',
             value: metrics.nextRenewalDate,
-            sub: 'Auto-renews (Net 15 terms)',
+            sub: metrics.activeSubsCount > 0 ? 'Auto-renews (Net 15 terms)' : 'No renewals scheduled',
             icon: Calendar,
             color: 'text-emerald-600 bg-emerald-50',
           },
@@ -241,16 +260,13 @@ export const CustomerPortalPage: React.FC = () => {
                   <strong>Company:</strong> {customerCompany}
                 </p>
                 <p>
-                  <strong>Primary Contact:</strong> {user?.fullName || 'Alice Walker'}
+                  <strong>Primary Contact:</strong> {user?.fullName || 'Account Owner'}
                 </p>
                 <p>
-                  <strong>Billing Email:</strong> {customerEmail}
+                  <strong>Billing Email:</strong> {customerEmail || 'Not configured'}
                 </p>
                 <p>
-                  <strong>Phone:</strong> +1 (555) 019-2834
-                </p>
-                <p>
-                  <strong>Registered Address:</strong> 42 Innovation Way, Suite 300, San Francisco, CA
+                  <strong>Tenant Status:</strong> Active Isolated Account
                 </p>
               </div>
             </div>

@@ -38,7 +38,7 @@ public class DataSeeder implements CommandLineRunner {
     @Override
     public void run(String... args) {
         if (userRepository.count() == 0) {
-            log.info("Database is empty. Automatically executing initial seed for Johan's core catalogue & subscriptions...");
+            log.info("Database is empty. Automatically executing initial seed for core catalogue & subscriptions...");
             seedData(false);
         } else {
             log.info("Database already contains data ({} users). Automatic seeding skipped.", userRepository.count());
@@ -60,7 +60,7 @@ public class DataSeeder implements CommandLineRunner {
         User admin = userRepository.findByEmail("admin@brightloop.com").orElseGet(() ->
                 userRepository.save(User.builder()
                         .email("admin@brightloop.com")
-                        .fullName("Johan (System Admin)")
+                        .fullName("System Administrator")
                         .passwordHash(passwordEncoder.encode("Admin123!"))
                         .role(Role.ADMIN)
                         .isActive(true)
@@ -301,7 +301,7 @@ public class DataSeeder implements CommandLineRunner {
                     .findFirst()
                     .orElse(null);
 
-            // Subscription 1: Due for billing today! (Critical for Elsa's recurring billing demo!)
+            // Subscription 1: Due for recurring billing cycle
             Subscription sub1 = Subscription.builder()
                     .subscriptionNumber("SUB-2026-0001")
                     .customer(acme)

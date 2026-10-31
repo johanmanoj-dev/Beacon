@@ -281,7 +281,6 @@ export const InvoicesPage: React.FC = () => {
               <h1 className="text-2xl font-black text-slate-900 tracking-tight">
                 Invoices & Recurring Billing
               </h1>
-              <Badge variant="purple" size="sm">Track 2 • Elsa</Badge>
             </div>
             <p className="text-sm text-slate-500 mt-0.5">
               Automated recurring billing cycles, idempotent snapshot creation, and dual-track settlement engine.
